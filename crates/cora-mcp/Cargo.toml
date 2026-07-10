@@ -1,0 +1,27 @@
+[package]
+name = "cora-mcp"
+description = "MCP (Model Context Protocol) client implementation for corars"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+cora-types.workspace    = true
+cora-protocol.workspace = true
+cora-tools.workspace    = true
+cora-config.workspace   = true
+
+tracing.workspace     = true
+tokio.workspace       = true
+serde.workspace       = true
+serde_json.workspace  = true
+async-trait.workspace = true
+thiserror.workspace   = true
+anyhow.workspace      = true
+reqwest.workspace     = true
+futures.workspace     = true
+workspace-hack.workspace = true
+
+[features]
+test-utils = []
