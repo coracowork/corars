@@ -164,7 +164,7 @@ mod tests {
 
     // --- build_system_prompt Phase 9 tests ---
 
-    use CORA_skills::types::{ExecutionContext, LoadedFrom, SkillMetadata, SkillSource};
+    use cora_skills::types::{ExecutionContext, LoadedFrom, SkillMetadata, SkillSource};
 
     fn make_test_skill(name: &str, description: &str, bundled: bool, hidden: bool) -> SkillMetadata {
         SkillMetadata {
@@ -391,8 +391,8 @@ mod tests {
 
     #[test]
     fn test_build_system_prompt_includes_shell_info() {
-        let shell = CORA_config::shell::ResolvedShell::new(
-            CORA_config::shell::ShellKind::PowerShell,
+        let shell = cora_config::shell::ResolvedShell::new(
+            cora_config::shell::ShellKind::PowerShell,
             std::path::PathBuf::from(r"C:\Program Files\PowerShell\7\pwsh.exe"),
         );
         let result = build_system_prompt_with_shell(

@@ -1,15 +1,15 @@
 use std::sync::Arc;
 
-use CORA_agent::engine::AgentEngine;
-use CORA_agent::output::OutputSink;
-use CORA_agent::output::terminal::TerminalSink;
-use CORA_config::compat::ProviderCompat;
-use CORA_config::config::{Config, ProviderType, SessionConfig, ToolsConfig};
-use CORA_config::hooks::HooksConfig;
-use CORA_mcp::config::McpConfig;
-use CORA_providers::create_provider;
-use CORA_tools::read::ReadTool;
-use CORA_tools::registry::ToolRegistry;
+use cora_agent::engine::AgentEngine;
+use cora_agent::output::OutputSink;
+use cora_agent::output::terminal::TerminalSink;
+use cora_config::compat::ProviderCompat;
+use cora_config::config::{Config, ProviderType, SessionConfig, ToolsConfig};
+use cora_config::hooks::HooksConfig;
+use cora_mcp::config::McpConfig;
+use cora_providers::create_provider;
+use cora_tools::read::ReadTool;
+use cora_tools::registry::ToolRegistry;
 
 /// Skip the test if ANTHROPIC_API_KEY is not set.
 fn anthropic_api_key() -> Option<String> {
@@ -34,22 +34,22 @@ fn anthropic_config(api_key: &str) -> Config {
         tools: ToolsConfig {
             auto_approve: true,
             allow_list: vec![],
-            skills: CORA_config::config::SkillsPermissionConfig::default(),
+            skills: cora_config::config::SkillsPermissionConfig::default(),
         },
         session: SessionConfig {
             enabled: false,
             directory: "/tmp".to_string(),
             max_sessions: 1,
         },
-        compact: CORA_config::compact::CompactConfig::default(),
-        plan: CORA_config::plan::PlanConfig::default(),
-        shell: CORA_config::shell::ShellConfig::default(),
-        file_cache: CORA_config::file_cache::FileCacheConfig::default(),
+        compact: cora_config::compact::CompactConfig::default(),
+        plan: cora_config::plan::PlanConfig::default(),
+        shell: cora_config::shell::ShellConfig::default(),
+        file_cache: cora_config::file_cache::FileCacheConfig::default(),
         hooks: HooksConfig::default(),
         bedrock: None,
         vertex: None,
         mcp: McpConfig::default(),
-        logging: CORA_config::logging::LoggingConfig::default(),
+        logging: cora_config::logging::LoggingConfig::default(),
     }
 }
 

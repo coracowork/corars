@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 use std::path::Path;
 
-use CORA_config::shell::{ResolvedShell, default_shell, render_shell_prompt};
-use CORA_memory::prompt::build_memory_prompt_minimal;
-use CORA_skills::prompt::format_skills_within_budget;
-use CORA_skills::types::SkillMetadata;
-use CORA_types::message::{ContentBlock, Message, Role};
+use cora_config::shell::{ResolvedShell, default_shell, render_shell_prompt};
+use cora_memory::prompt::build_memory_prompt_minimal;
+use cora_skills::prompt::format_skills_within_budget;
+use cora_skills::types::SkillMetadata;
+use cora_types::message::{ContentBlock, Message, Role};
 
 use crate::agents_md;
 use crate::plan::prompt as plan_prompt;
@@ -214,7 +214,7 @@ pub fn build_system_prompt_with_shell(
         let toon_section = cache
             .sections
             .entry("toon")
-            .or_insert_with(|| CORA_compact::toon_format_instructions().to_string());
+            .or_insert_with(|| cora_compact::toon_format_instructions().to_string());
         parts.push(toon_section.clone());
     }
 

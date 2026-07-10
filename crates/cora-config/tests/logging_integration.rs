@@ -1,4 +1,4 @@
-use CORA_config::logging::{ResolvedLogging, create_file_layer};
+use cora_config::logging::{ResolvedLogging, create_file_layer};
 use tracing::info;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
@@ -16,7 +16,7 @@ fn create_file_layer_writes_json_to_file() {
 
     tracing_subscriber::registry().with(layer).init();
 
-    info!(target: "CORA_test", key = "value", "test message");
+    info!(target: "cora_test", key = "value", "test message");
 
     drop(_guard);
 
@@ -29,7 +29,7 @@ fn create_file_layer_writes_json_to_file() {
 
     let content = std::fs::read_to_string(entries[0].path()).unwrap();
     assert!(content.contains("test message"), "log should contain message");
-    assert!(content.contains("CORA_test"), "log should contain target");
+    assert!(content.contains("cora_test"), "log should contain target");
 }
 
 #[test]

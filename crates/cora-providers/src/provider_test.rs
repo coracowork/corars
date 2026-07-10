@@ -4,16 +4,16 @@ use super::*;
 mod tests {
     use std::sync::Arc;
 
-    use CORA_config::compact::CompactConfig;
-    use CORA_config::compat::ProviderCompat;
-    use CORA_config::config::{
+    use cora_config::compact::CompactConfig;
+    use cora_config::compat::ProviderCompat;
+    use cora_config::config::{
         BedrockConfig, Config, McpConfig, ProviderType, SessionConfig, ToolsConfig, VertexConfig,
     };
-    use CORA_config::file_cache::FileCacheConfig;
-    use CORA_config::hooks::HooksConfig;
-    use CORA_config::logging::LoggingConfig;
-    use CORA_config::plan::PlanConfig;
-    use CORA_config::shell::ShellConfig;
+    use cora_config::file_cache::FileCacheConfig;
+    use cora_config::hooks::HooksConfig;
+    use cora_config::logging::LoggingConfig;
+    use cora_config::plan::PlanConfig;
+    use cora_config::shell::ShellConfig;
 
     use super::create_provider;
 

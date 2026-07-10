@@ -7,10 +7,10 @@
 
 use std::sync::Arc;
 
-use CORA_agent::output::OutputSink;
-use CORA_agent::output::protocol_sink::ProtocolSink;
-use CORA_protocol::ToolApprovalManager;
-use CORA_protocol::writer::ProtocolWriter;
+use cora_agent::output::OutputSink;
+use cora_agent::output::protocol_sink::ProtocolSink;
+use cora_protocol::ToolApprovalManager;
+use cora_protocol::writer::ProtocolWriter;
 
 /// Protocol I/O handles shared across top-level command dispatch and
 /// in-flight message handling.

@@ -4,8 +4,8 @@ use super::*;
 mod tests {
     use super::*;
     use crate::Tool;
-    use CORA_protocol::events::ToolCategory;
-    use CORA_types::tool::ToolResult;
+    use cora_protocol::events::ToolCategory;
+    use cora_types::tool::ToolResult;
     use async_trait::async_trait;
 
     /// A minimal Tool implementation used only in tests

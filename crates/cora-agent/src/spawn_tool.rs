@@ -4,10 +4,10 @@ use async_trait::async_trait;
 use serde_json::{Value, json};
 
 use crate::spawner::{AgentSpawner, SubAgentConfig};
-use CORA_protocol::events::ToolCategory;
-use CORA_types::tool::{JsonSchema, ToolResult};
+use cora_protocol::events::ToolCategory;
+use cora_types::tool::{JsonSchema, ToolResult};
 
-use CORA_tools::Tool;
+use cora_tools::Tool;
 
 const DEFAULT_SUB_AGENT_MAX_TURNS: usize = 200;
 const DEFAULT_SUB_AGENT_MAX_TOKENS: u32 = 4096;
@@ -126,7 +126,7 @@ impl Tool for SpawnTool {
 
     fn describe(&self, input: &Value) -> String {
         let task = input.get("task").and_then(|v| v.as_str()).unwrap_or("sub-agent");
-        format!("Spawn: {}", CORA_tools::truncate_utf8(task, 80))
+        format!("Spawn: {}", cora_tools::truncate_utf8(task, 80))
     }
 }
 

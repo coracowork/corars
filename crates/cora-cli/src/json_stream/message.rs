@@ -6,11 +6,11 @@
 //! that command stream and applies queued config/mode changes once the
 //! response finishes.
 
-use CORA_agent::engine::AgentEngine;
-use CORA_protocol::ToolApprovalResult;
-use CORA_protocol::commands::ProtocolCommand;
-use CORA_protocol::events::ProtocolEvent;
-use CORA_protocol::writer::ProtocolEmitter;
+use cora_agent::engine::AgentEngine;
+use cora_protocol::ToolApprovalResult;
+use cora_protocol::commands::ProtocolCommand;
+use cora_protocol::events::ProtocolEvent;
+use cora_protocol::writer::ProtocolEmitter;
 use tokio::sync::mpsc::UnboundedReceiver;
 
 use super::context::StreamContext;
@@ -95,7 +95,7 @@ pub(super) async fn handle(
                             let _ = ctx.writer.emit(&ProtocolEvent::Pong);
                         }
                         _ => {
-                            tracing::debug!(target: "CORA_protocol", "ignoring command during active message processing");
+                            tracing::debug!(target: "cora_protocol", "ignoring command during active message processing");
                         }
                     }
                 }

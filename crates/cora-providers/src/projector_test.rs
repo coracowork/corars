@@ -3,9 +3,9 @@ use super::*;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use CORA_config::schema::legalize_json_schema;
-    use CORA_types::message::{ContentBlock, Message, Role};
-    use CORA_types::tool::ToolDef;
+    use cora_config::schema::legalize_json_schema;
+    use cora_types::message::{ContentBlock, Message, Role};
+    use cora_types::tool::ToolDef;
 
     fn test_request(tools: Vec<ToolDef>, thinking: Option<ThinkingConfig>) -> LlmRequest {
         LlmRequest {

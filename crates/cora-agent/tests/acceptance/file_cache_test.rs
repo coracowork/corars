@@ -6,12 +6,12 @@ use std::sync::{Arc, RwLock};
 
 use serde_json::json;
 
-use CORA_config::file_cache::FileCacheConfig;
-use CORA_tools::Tool;
-use CORA_tools::edit::EditTool;
-use CORA_tools::file_cache::FileStateCache;
-use CORA_tools::read::ReadTool;
-use CORA_tools::write::WriteTool;
+use cora_config::file_cache::FileCacheConfig;
+use cora_tools::Tool;
+use cora_tools::edit::EditTool;
+use cora_tools::file_cache::FileStateCache;
+use cora_tools::read::ReadTool;
+use cora_tools::write::WriteTool;
 
 fn make_cache() -> Arc<RwLock<FileStateCache>> {
     let config = FileCacheConfig::default();

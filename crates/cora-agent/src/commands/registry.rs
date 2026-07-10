@@ -5,9 +5,9 @@ use async_trait::async_trait;
 use super::{clear, compact, help, quit};
 use crate::compact::state::CompactState;
 use crate::output::OutputSink;
-use CORA_config::compact::CompactConfig;
-use CORA_providers::LlmProvider;
-use CORA_types::message::Message;
+use cora_config::compact::CompactConfig;
+use cora_providers::LlmProvider;
+use cora_types::message::Message;
 
 /// Result of executing a slash command.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

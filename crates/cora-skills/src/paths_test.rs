@@ -19,7 +19,7 @@ mod tests {
     // --- user_skills_dir ---
 
     #[test]
-    fn test_user_skills_dir_contains_CORArs_skills() {
+    fn test_user_skills_dir_contains_cora_skills() {
         if let Some(dir) = user_skills_dir() {
             let s = dir.to_string_lossy();
             assert!(s.contains("CORArs"), "expected 'CORArs' in path: {s}");
@@ -29,7 +29,7 @@ mod tests {
     }
 
     #[test]
-    fn test_user_commands_dir_contains_CORArs_commands() {
+    fn test_user_commands_dir_contains_cora_commands() {
         if let Some(dir) = user_commands_dir() {
             let s = dir.to_string_lossy();
             assert!(s.contains("CORArs"));

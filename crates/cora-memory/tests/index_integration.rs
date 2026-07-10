@@ -6,7 +6,7 @@
 use std::fs;
 use std::path::Path;
 
-use CORA_memory::index;
+use cora_memory::index;
 
 // ===========================================================================
 // TC-5.1: Truncation — under limits, no truncation

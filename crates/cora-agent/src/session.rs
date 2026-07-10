@@ -9,7 +9,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use CORA_types::message::{ContentBlock, Message, Role, TokenUsage};
+use cora_types::message::{ContentBlock, Message, Role, TokenUsage};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Session {
@@ -222,7 +222,7 @@ impl SessionManager {
                 Ok(index) => Ok(Some(index)),
                 Err(error) => {
                     tracing::warn!(
-                        target: "CORA_agent",
+                        target: "cora_agent",
                         path = %index_path.display(),
                         error = %error,
                         "skipping invalid legacy session index"
@@ -376,7 +376,7 @@ fn read_session_file_if_valid(path: &Path) -> anyhow::Result<Option<Session>> {
         Ok(session) => Ok(Some(session)),
         Err(error) => {
             tracing::warn!(
-                target: "CORA_agent",
+                target: "cora_agent",
                 path = %path.display(),
                 error = %error,
                 "skipping invalid session file"

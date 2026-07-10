@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 // Re-export EffortLevel from CORA-types (single source of truth)
-pub use CORA_types::skill_types::EffortLevel;
+pub use cora_types::skill_types::EffortLevel;
 
 /// Raw fields from skill frontmatter (YAML deserialization target).
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]

@@ -3,12 +3,12 @@
 // TC-A2-01 and TC-A2-03 are purely local (no LLM call).
 // TC-A2-02 makes a real LLM call and is skipped when OPENAI_API_KEY is absent.
 
-use CORA_agent::compact::auto::{BOUNDARY_PREFIX, autocompact, should_autocompact};
-use CORA_agent::compact::emergency::is_at_emergency_limit;
-use CORA_agent::compact::micro::{CLEARED_TOOL_RESULT, microcompact};
-use CORA_agent::compact::state::CompactState;
-use CORA_config::compact::CompactConfig;
-use CORA_types::message::{ContentBlock, Message, Role};
+use cora_agent::compact::auto::{BOUNDARY_PREFIX, autocompact, should_autocompact};
+use cora_agent::compact::emergency::is_at_emergency_limit;
+use cora_agent::compact::micro::{CLEARED_TOOL_RESULT, microcompact};
+use cora_agent::compact::state::CompactState;
+use cora_config::compact::CompactConfig;
+use cora_types::message::{ContentBlock, Message, Role};
 use serde_json::json;
 
 use crate::helpers;
@@ -127,7 +127,7 @@ async fn autocompact_triggers_llm_summary() {
     // which exceeds gpt-4o-mini's 16384 limit.
     let config = {
         let base = helpers::openai_config(&api_key);
-        CORA_config::config::Config {
+        cora_config::config::Config {
             model: "gpt-4.1-mini".to_string(),
             ..base
         }
@@ -175,7 +175,7 @@ async fn autocompact_triggers_llm_summary() {
     ];
 
     // Create a real provider and run autocompact
-    let provider = CORA_providers::create_provider(&config);
+    let provider = cora_providers::create_provider(&config);
 
     let state = CompactState {
         last_input_tokens: 900, // above the threshold of 800

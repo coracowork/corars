@@ -2,9 +2,9 @@ mod common;
 
 use std::sync::Arc;
 
-use CORA_agent::spawner::{AgentSpawner, SubAgentConfig};
-use CORA_types::llm::LlmEvent;
-use CORA_types::message::{StopReason, TokenUsage};
+use cora_agent::spawner::{AgentSpawner, SubAgentConfig};
+use cora_types::llm::LlmEvent;
+use cora_types::message::{StopReason, TokenUsage};
 use common::{MockLlmProvider, test_config};
 
 // ---------------------------------------------------------------------------
@@ -124,7 +124,7 @@ async fn test_spawn_shares_provider() {
     ]));
 
     // Both sub-agents share the same underlying provider via Arc.
-    let provider_dyn: Arc<dyn CORA_providers::LlmProvider> = provider;
+    let provider_dyn: Arc<dyn cora_providers::LlmProvider> = provider;
     let spawner = AgentSpawner::new(Arc::clone(&provider_dyn), test_config(), std::env::temp_dir());
 
     let result1 = spawner.spawn_one(make_sub_config("seq-1")).await;

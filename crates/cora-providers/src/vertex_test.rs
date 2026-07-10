@@ -3,9 +3,9 @@ use super::*;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use CORA_config::compat::ProviderCompat;
-    use CORA_types::message::{ContentBlock, Message, Role};
-    use CORA_types::tool::ToolDef;
+    use cora_config::compat::ProviderCompat;
+    use cora_types::message::{ContentBlock, Message, Role};
+    use cora_types::tool::ToolDef;
     use serde_json::json;
     use wiremock::matchers::{header, method, path};
     use wiremock::{Mock, MockServer, ResponseTemplate};
@@ -41,7 +41,7 @@ mod tests {
         ($name:literal, $value:expr) => {
             insta::with_settings!({ prepend_module_to_snapshot => false }, {
                 insta::assert_json_snapshot!(
-                    concat!("CORA_providers__vertex__tests__", $name),
+                    concat!("cora_providers__vertex__tests__", $name),
                     $value
                 );
             });

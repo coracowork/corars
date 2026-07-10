@@ -22,5 +22,5 @@ mod turn;
 pub mod vcr;
 
 // Re-export the skills crate so existing callers (CORA-cli, tests) can use
-// `CORA_agent::skills::` without changing their import paths.
-pub use CORA_skills as skills;
+// `cora_agent::skills::` without changing their import paths.
+pub use cora_skills as skills;

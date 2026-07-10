@@ -124,8 +124,8 @@ mod tests {
 
     // -- execute_single integration tests (deferred tool hint) ----------------
 
-    use CORA_tools::Tool;
-    use CORA_tools::registry::ToolRegistry;
+    use cora_tools::Tool;
+    use cora_tools::registry::ToolRegistry;
 
     struct MockDeferredTool {
         schema: serde_json::Value,
@@ -148,20 +148,20 @@ mod tests {
         fn is_deferred(&self) -> bool {
             true
         }
-        async fn execute(&self, input: serde_json::Value) -> CORA_types::tool::ToolResult {
+        async fn execute(&self, input: serde_json::Value) -> cora_types::tool::ToolResult {
             if input.get("tasks").is_none() {
-                return CORA_types::tool::ToolResult {
+                return cora_types::tool::ToolResult {
                     content: "Missing or invalid 'tasks' array".to_string(),
                     is_error: true,
                 };
             }
-            CORA_types::tool::ToolResult {
+            cora_types::tool::ToolResult {
                 content: "ok".to_string(),
                 is_error: false,
             }
         }
-        fn category(&self) -> CORA_protocol::events::ToolCategory {
-            CORA_protocol::events::ToolCategory::Exec
+        fn category(&self) -> cora_protocol::events::ToolCategory {
+            cora_protocol::events::ToolCategory::Exec
         }
     }
 
@@ -185,20 +185,20 @@ mod tests {
         fn is_concurrency_safe(&self, _input: &serde_json::Value) -> bool {
             true
         }
-        async fn execute(&self, input: serde_json::Value) -> CORA_types::tool::ToolResult {
+        async fn execute(&self, input: serde_json::Value) -> cora_types::tool::ToolResult {
             if input.get("cmd").is_none() {
-                return CORA_types::tool::ToolResult {
+                return cora_types::tool::ToolResult {
                     content: "Missing cmd".to_string(),
                     is_error: true,
                 };
             }
-            CORA_types::tool::ToolResult {
+            cora_types::tool::ToolResult {
                 content: "ok".to_string(),
                 is_error: false,
             }
         }
-        fn category(&self) -> CORA_protocol::events::ToolCategory {
-            CORA_protocol::events::ToolCategory::Exec
+        fn category(&self) -> cora_protocol::events::ToolCategory {
+            cora_protocol::events::ToolCategory::Exec
         }
     }
 
@@ -224,7 +224,7 @@ mod tests {
             input: json!({}),
             extra: None,
         };
-        let (result, _) = execute_single(&registry, &call, None, CORA_compact::CompactLevel::Off, false).await;
+        let (result, _) = execute_single(&registry, &call, None, cora_compact::CompactLevel::Off, false).await;
         if let ContentBlock::ToolResult { content, is_error, .. } = &result {
             assert!(is_error);
             assert!(content.contains("Missing or invalid 'tasks' array"));
@@ -244,7 +244,7 @@ mod tests {
             input: json!({"tasks": "not_an_array"}),
             extra: None,
         };
-        let (result, _) = execute_single(&registry, &call, None, CORA_compact::CompactLevel::Off, false).await;
+        let (result, _) = execute_single(&registry, &call, None, cora_compact::CompactLevel::Off, false).await;
         if let ContentBlock::ToolResult { content, is_error, .. } = &result {
             // Tool succeeds because input.get("tasks") is Some
             assert!(!is_error);
@@ -263,7 +263,7 @@ mod tests {
             input: json!({"tasks": [{"name": "t1", "prompt": "do x"}]}),
             extra: None,
         };
-        let (result, _) = execute_single(&registry, &call, None, CORA_compact::CompactLevel::Off, false).await;
+        let (result, _) = execute_single(&registry, &call, None, cora_compact::CompactLevel::Off, false).await;
         if let ContentBlock::ToolResult { content, is_error, .. } = &result {
             assert!(!is_error);
             assert_eq!(content, "ok");
@@ -281,7 +281,7 @@ mod tests {
             input: json!({}),
             extra: None,
         };
-        let (result, _) = execute_single(&registry, &call, None, CORA_compact::CompactLevel::Off, false).await;
+        let (result, _) = execute_single(&registry, &call, None, cora_compact::CompactLevel::Off, false).await;
         if let ContentBlock::ToolResult { content, is_error, .. } = &result {
             assert!(is_error);
             assert!(content.contains("Missing cmd"));

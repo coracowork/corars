@@ -4,8 +4,8 @@ use super::*;
 mod tests {
     use super::{AnthropicParser, OpenAiParser, ResponseParser};
     use crate::framing::{Frame, FrameKind};
-    use CORA_types::llm::LlmEvent;
-    use CORA_types::message::StopReason;
+    use cora_types::llm::LlmEvent;
+    use cora_types::message::StopReason;
 
     #[test]
     fn openai_done_frame_flushes_empty_state_to_no_events() {

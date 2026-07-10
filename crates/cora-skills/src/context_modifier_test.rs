@@ -4,7 +4,7 @@ use super::*;
 mod tests {
     use super::*;
     use crate::types::{ExecutionContext, LoadedFrom, SkillSource};
-    use CORA_types::skill_types::EffortLevel;
+    use cora_types::skill_types::EffortLevel;
 
     fn make_skill(model: Option<&str>, effort: Option<EffortLevel>, allowed_tools: Vec<String>) -> SkillMetadata {
         SkillMetadata {

@@ -1,10 +1,10 @@
 mod common;
 
-use CORA_agent::orchestration::execute_tool_calls;
-use CORA_compact::CompactLevel;
-use CORA_config::hooks::{HookDef, HookEngine, HooksConfig};
-use CORA_tools::registry::ToolRegistry;
-use CORA_types::message::ContentBlock;
+use cora_agent::orchestration::execute_tool_calls;
+use cora_compact::CompactLevel;
+use cora_config::hooks::{HookDef, HookEngine, HooksConfig};
+use cora_tools::registry::ToolRegistry;
+use cora_types::message::ContentBlock;
 use common::{MockTool, auto_approve_confirmer};
 use serde_json::json;
 

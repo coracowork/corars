@@ -1,4 +1,4 @@
-use CORA_types::message::{ContentBlock, StopReason, TokenUsage};
+use cora_types::message::{ContentBlock, StopReason, TokenUsage};
 
 /// Everything a single provider stream produces in one model turn.
 ///

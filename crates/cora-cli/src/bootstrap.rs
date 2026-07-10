@@ -5,19 +5,19 @@
 //! `AgentEngine` (optionally resuming a saved session). This module holds
 //! that shared logic so the two call sites don't duplicate it.
 //!
-//! Note: `CORA_agent` also exposes a module named `bootstrap`
-//! (`CORA_agent::bootstrap::AgentBootstrap`). Call sites should keep using
+//! Note: `cora_agent` also exposes a module named `bootstrap`
+//! (`cora_agent::bootstrap::AgentBootstrap`). Call sites should keep using
 //! that fully-qualified path for the engine builder itself; this module is
 //! `crate::bootstrap` and only wraps it.
 
 use std::sync::Arc;
 
-use CORA_agent::bootstrap::{AgentBootstrap, BootstrapResult};
-use CORA_agent::output::OutputSink;
-use CORA_agent::session::{Session, SessionManager};
-use CORA_compact::CompactLevel;
-use CORA_config::config::{CliArgs, Config};
-use CORA_config::logging::{LoggingGuard, create_file_layer};
+use cora_agent::bootstrap::{AgentBootstrap, BootstrapResult};
+use cora_agent::output::OutputSink;
+use cora_agent::session::{Session, SessionManager};
+use cora_compact::CompactLevel;
+use cora_config::config::{CliArgs, Config};
+use cora_config::logging::{LoggingGuard, create_file_layer};
 
 use crate::cli::Cli;
 

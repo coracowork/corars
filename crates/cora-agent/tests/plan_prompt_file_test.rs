@@ -5,9 +5,9 @@
 use std::fs;
 use std::path::Path;
 
-use CORA_agent::context::{SystemPromptCache, build_system_prompt};
-use CORA_agent::plan::file::{plan_file_path, read_plan, write_plan};
-use CORA_agent::plan::prompt::plan_mode_instructions;
+use cora_agent::context::{SystemPromptCache, build_system_prompt};
+use cora_agent::plan::file::{plan_file_path, read_plan, write_plan};
+use cora_agent::plan::prompt::plan_mode_instructions;
 
 // ---------------------------------------------------------------------------
 // TC-3.4-01  plan_mode_instructions content

@@ -11,14 +11,14 @@ use std::sync::{Arc, Mutex};
 use std::time::{SystemTime, UNIX_EPOCH};
 use tokio::sync::mpsc;
 
-use CORA_config::config::VertexConfig;
-use CORA_types::llm::{LlmEvent, LlmRequest};
+use cora_config::config::VertexConfig;
+use cora_types::llm::{LlmEvent, LlmRequest};
 
 use crate::composed::ComposedProvider;
 use crate::projector::{ResolvedToolWireShape, WireParams, WireProvider, classify_tools_wire_shape_mismatch};
 use crate::transport::{ProjectedHttpRequest, ProviderTransport, VertexTransport};
 use crate::{LlmProvider, ProviderError};
-use CORA_config::compat::ProviderCompat;
+use cora_config::compat::ProviderCompat;
 
 #[derive(Clone)]
 pub struct VertexProvider {

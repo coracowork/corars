@@ -56,7 +56,7 @@ mod discovery_supplemental_tests {
 
     // TC-22: discovers `.CORArs/skills/` inside a direct subdirectory of cwd.
     #[tokio::test]
-    async fn tc22_discover_dirs_finds_CORArs_skills_in_subdir() {
+    async fn tc22_discover_dirs_finds_cora_skills_in_subdir() {
         let tmp = TempDir::new().unwrap();
         let cwd = tmp.path().to_str().unwrap().to_string();
 

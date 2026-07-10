@@ -3,7 +3,7 @@ use std::time::Duration;
 
 use tokio::sync::mpsc;
 
-use CORA_types::llm::LlmEvent;
+use cora_types::llm::LlmEvent;
 
 use crate::ProviderError;
 

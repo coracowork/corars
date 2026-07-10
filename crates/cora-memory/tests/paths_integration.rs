@@ -6,7 +6,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use CORA_memory::paths;
+use cora_memory::paths;
 use serial_test::serial;
 
 // -- TC-2.1: Default memory base directory ------------------------------------
@@ -290,7 +290,7 @@ fn entrypoint_name_constant_is_memory_md() {
 // -- Helpers ------------------------------------------------------------------
 
 fn env_key() -> &'static str {
-    "CORARS_MEMORY_DIR"
+    "cora_MEMORY_DIR"
 }
 
 fn restore_env(saved: Option<String>) {

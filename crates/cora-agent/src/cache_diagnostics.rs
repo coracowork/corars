@@ -5,7 +5,7 @@
 
 use std::hash::{DefaultHasher, Hash, Hasher};
 
-use CORA_types::tool::ToolDef;
+use cora_types::tool::ToolDef;
 
 /// Snapshot of prompt state taken before each API call.
 #[derive(Debug, Clone)]

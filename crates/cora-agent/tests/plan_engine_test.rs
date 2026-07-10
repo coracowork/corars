@@ -5,10 +5,10 @@
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
-use CORA_agent::plan::tools::{EnterPlanModeTool, ExitPlanModeTool};
-use CORA_protocol::events::ToolCategory;
-use CORA_tools::Tool;
-use CORA_tools::registry::ToolRegistry;
+use cora_agent::plan::tools::{EnterPlanModeTool, ExitPlanModeTool};
+use cora_protocol::events::ToolCategory;
+use cora_tools::Tool;
+use cora_tools::registry::ToolRegistry;
 use async_trait::async_trait;
 use serde_json::json;
 
@@ -39,8 +39,8 @@ impl Tool for MockTool {
         true
     }
 
-    async fn execute(&self, _input: serde_json::Value) -> CORA_types::tool::ToolResult {
-        CORA_types::tool::ToolResult {
+    async fn execute(&self, _input: serde_json::Value) -> cora_types::tool::ToolResult {
+        cora_types::tool::ToolResult {
             content: "ok".to_string(),
             is_error: false,
         }
@@ -181,7 +181,7 @@ fn tc_3_5_07_to_tool_defs_filtered_mixed_categories() {
 
 #[test]
 fn tc_3_5_08_system_prompt_includes_plan_mode_when_active() {
-    use CORA_agent::plan::prompt::plan_mode_instructions;
+    use cora_agent::plan::prompt::plan_mode_instructions;
 
     let base_prompt = "You are an AI assistant.";
     let instructions = plan_mode_instructions();

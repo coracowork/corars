@@ -2,7 +2,7 @@ use async_trait::async_trait;
 
 use super::{CommandContext, CommandResult, SlashCommand};
 use crate::compact::auto;
-use CORA_types::compact::CompactTrigger;
+use cora_types::compact::CompactTrigger;
 
 pub struct CompactCommand;
 
@@ -42,10 +42,10 @@ impl SlashCommand for CompactCommand {
 
                 if let Some(boundary) = ctx.messages.first_mut() {
                     for block in &mut boundary.content {
-                        if let CORA_types::message::ContentBlock::Text { text } = block
+                        if let cora_types::message::ContentBlock::Text { text } = block
                             && text.starts_with(auto::BOUNDARY_PREFIX)
                         {
-                            let metadata = CORA_types::compact::CompactMetadata {
+                            let metadata = cora_types::compact::CompactMetadata {
                                 trigger: CompactTrigger::Manual,
                                 pre_compact_tokens: pre_tokens,
                                 messages_summarized: msgs_summarized,

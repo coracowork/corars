@@ -2,15 +2,15 @@ mod common;
 
 use std::sync::{Arc, Mutex};
 
-use CORA_agent::engine::AgentEngine;
-use CORA_agent::error::AgentError;
-use CORA_agent::output::OutputSink;
-use CORA_agent::output::terminal::TerminalSink;
-use CORA_agent::session::SessionManager;
-use CORA_providers::{LlmProvider, ProviderError};
-use CORA_tools::registry::ToolRegistry;
-use CORA_types::llm::{LlmEvent, LlmRequest};
-use CORA_types::message::{ContentBlock, Message, Role, StopReason, TokenUsage};
+use cora_agent::engine::AgentEngine;
+use cora_agent::error::AgentError;
+use cora_agent::output::OutputSink;
+use cora_agent::output::terminal::TerminalSink;
+use cora_agent::session::SessionManager;
+use cora_providers::{LlmProvider, ProviderError};
+use cora_tools::registry::ToolRegistry;
+use cora_types::llm::{LlmEvent, LlmRequest};
+use cora_types::message::{ContentBlock, Message, Role, StopReason, TokenUsage};
 use async_trait::async_trait;
 use serde_json::{Value, json};
 use tempfile::tempdir;

@@ -1,5 +1,5 @@
-use CORA_agent::session::SessionManager;
-use CORA_config::config::{CliArgs, Config};
+use cora_agent::session::SessionManager;
+use cora_config::config::{CliArgs, Config};
 
 use crate::cli::SessionAction;
 

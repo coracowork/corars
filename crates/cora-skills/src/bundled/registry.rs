@@ -142,7 +142,7 @@ pub async fn extract_bundled_skill_files(skill_name: &str, files: &[(&str, &str)
         Ok(()) => Some(dir),
         Err(e) => {
             // Non-fatal: log and degrade gracefully (skill runs without skill_root)
-            tracing::warn!(target: "CORA_skills", skill = %skill_name, path = %dir.display(), error = %e, "failed to extract bundled skill");
+            tracing::warn!(target: "cora_skills", skill = %skill_name, path = %dir.display(), error = %e, "failed to extract bundled skill");
             None
         }
     }

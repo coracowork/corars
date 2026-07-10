@@ -86,14 +86,14 @@ mod tests {
     }
 
     #[test]
-    fn test_CORArs_skill_dir_substitution() {
-        let result = substitute_arguments("dir=${CORARS_SKILL_DIR}", None, &[], Some("/my/skill"), None);
+    fn test_cora_skill_dir_substitution() {
+        let result = substitute_arguments("dir=${cora_SKILL_DIR}", None, &[], Some("/my/skill"), None);
         assert_eq!(result, "dir=/my/skill");
     }
 
     #[test]
-    fn test_CORArs_session_id_substitution() {
-        let result = substitute_arguments("sid=${CORARS_SESSION_ID}", None, &[], None, Some("sess-123"));
+    fn test_cora_session_id_substitution() {
+        let result = substitute_arguments("sid=${cora_SESSION_ID}", None, &[], None, Some("sess-123"));
         assert_eq!(result, "sid=sess-123");
     }
 
@@ -286,13 +286,13 @@ mod supplemental_tests {
     }
 
     // -----------------------------------------------------------------------
-    // TC-6.x: ${CORARS_SKILL_DIR} substitution
+    // TC-6.x: ${cora_SKILL_DIR} substitution
     // -----------------------------------------------------------------------
 
     #[test]
     fn tc_6_1_skill_dir_replaced() {
         let r = substitute_arguments(
-            "cd ${CORARS_SKILL_DIR}",
+            "cd ${cora_SKILL_DIR}",
             None,
             &[],
             Some("/home/user/.CORArs/skills/my-skill"),
@@ -303,15 +303,15 @@ mod supplemental_tests {
 
     #[test]
     fn tc_6_2_skill_dir_none_not_replaced() {
-        // skill_root = None → ${CORARS_SKILL_DIR} stays unreplaced
-        let r = substitute_arguments("cd ${CORARS_SKILL_DIR}", None, &[], None, None);
-        assert_eq!(r, "cd ${CORARS_SKILL_DIR}");
+        // skill_root = None → ${cora_SKILL_DIR} stays unreplaced
+        let r = substitute_arguments("cd ${cora_SKILL_DIR}", None, &[], None, None);
+        assert_eq!(r, "cd ${cora_SKILL_DIR}");
     }
 
     #[test]
     fn tc_6_3_skill_dir_multiple_occurrences() {
         let r = substitute_arguments(
-            "${CORARS_SKILL_DIR}/a and ${CORARS_SKILL_DIR}/b",
+            "${cora_SKILL_DIR}/a and ${cora_SKILL_DIR}/b",
             None,
             &[],
             Some("/skills/foo"),
@@ -321,19 +321,19 @@ mod supplemental_tests {
     }
 
     // -----------------------------------------------------------------------
-    // TC-7.x: ${CORARS_SESSION_ID} substitution
+    // TC-7.x: ${cora_SESSION_ID} substitution
     // -----------------------------------------------------------------------
 
     #[test]
     fn tc_7_1_session_id_replaced() {
-        let r = substitute_arguments("Session: ${CORARS_SESSION_ID}", None, &[], None, Some("abc-123"));
+        let r = substitute_arguments("Session: ${cora_SESSION_ID}", None, &[], None, Some("abc-123"));
         assert_eq!(r, "Session: abc-123");
     }
 
     #[test]
     fn tc_7_2_session_id_none_not_replaced() {
-        let r = substitute_arguments("Session: ${CORARS_SESSION_ID}", None, &[], None, None);
-        assert_eq!(r, "Session: ${CORARS_SESSION_ID}");
+        let r = substitute_arguments("Session: ${cora_SESSION_ID}", None, &[], None, None);
+        assert_eq!(r, "Session: ${cora_SESSION_ID}");
     }
 
     // -----------------------------------------------------------------------
@@ -373,7 +373,7 @@ mod supplemental_tests {
     #[test]
     fn tc_9_1_multiple_placeholder_types() {
         let r = substitute_arguments(
-            "cd ${CORARS_SKILL_DIR} && run $ARGUMENTS[0] with $ARGUMENTS",
+            "cd ${cora_SKILL_DIR} && run $ARGUMENTS[0] with $ARGUMENTS",
             Some("alpha beta"),
             &[],
             Some("/skills/foo"),
@@ -408,7 +408,7 @@ mod supplemental_tests {
     #[test]
     fn tc_15_2_skill_dir_and_arguments_same_line() {
         let r = substitute_arguments(
-            "${CORARS_SKILL_DIR}: $ARGUMENTS",
+            "${cora_SKILL_DIR}: $ARGUMENTS",
             Some("test"),
             &[],
             Some("/root"),

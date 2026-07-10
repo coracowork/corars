@@ -1,10 +1,10 @@
 use std::env;
 use std::sync::Arc;
 
-use CORA_agent::engine::AgentEngine;
-use CORA_agent::error::AgentError;
-use CORA_agent::output::OutputSink;
-use CORA_agent::output::terminal::TerminalSink;
+use cora_agent::engine::AgentEngine;
+use cora_agent::error::AgentError;
+use cora_agent::output::OutputSink;
+use cora_agent::output::terminal::TerminalSink;
 
 use crate::bootstrap::{build_engine, init_logging, resolve_config};
 use crate::cli::Cli;

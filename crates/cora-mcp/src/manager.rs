@@ -68,12 +68,12 @@ impl McpManager {
         while let Some((name, result)) = pending.next().await {
             match result {
                 Ok(server) => {
-                    tracing::info!(target: "CORA_mcp", server = %name, tools = server.tools.len(), resources = server.supports_resources, "mcp server connected");
+                    tracing::info!(target: "cora_mcp", server = %name, tools = server.tools.len(), resources = server.supports_resources, "mcp server connected");
                     servers.insert(name, server);
                 }
                 Err(e) => {
                     // Non-fatal: continue with other servers
-                    tracing::warn!(target: "CORA_mcp", server = %name, error = %e, "mcp server connection failed");
+                    tracing::warn!(target: "cora_mcp", server = %name, error = %e, "mcp server connection failed");
                 }
             }
         }
@@ -111,7 +111,7 @@ impl McpManager {
     pub async fn connect_one(&mut self, name: String, config: &McpServerConfig) -> Result<Vec<String>, McpError> {
         let server = Self::with_startup_timeout(&name, config, Self::connect_server(&name, config)).await?;
         let tool_names: Vec<String> = server.tools.iter().map(|t| t.name.clone()).collect();
-        tracing::info!(target: "CORA_mcp", server = %name, tools = server.tools.len(), resources = server.supports_resources, "mcp server connected");
+        tracing::info!(target: "cora_mcp", server = %name, tools = server.tools.len(), resources = server.supports_resources, "mcp server connected");
         self.servers.insert(name, server);
         Ok(tool_names)
     }
@@ -340,7 +340,7 @@ impl McpManager {
     pub async fn shutdown(&self) {
         for (name, server) in &self.servers {
             if let Err(e) = server.transport.close().await {
-                tracing::warn!(target: "CORA_mcp", server = %name, error = %e, "error closing mcp server");
+                tracing::warn!(target: "cora_mcp", server = %name, error = %e, "error closing mcp server");
             }
         }
     }

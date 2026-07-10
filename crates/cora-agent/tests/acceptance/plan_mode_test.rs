@@ -7,12 +7,12 @@
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
-use CORA_agent::context::{SystemPromptCache, build_system_prompt};
-use CORA_agent::plan::tools::{EnterPlanModeTool, ExitPlanModeTool};
-use CORA_protocol::events::ToolCategory;
-use CORA_tools::Tool;
-use CORA_tools::registry::ToolRegistry;
-use CORA_types::tool::ToolResult;
+use cora_agent::context::{SystemPromptCache, build_system_prompt};
+use cora_agent::plan::tools::{EnterPlanModeTool, ExitPlanModeTool};
+use cora_protocol::events::ToolCategory;
+use cora_tools::Tool;
+use cora_tools::registry::ToolRegistry;
+use cora_types::tool::ToolResult;
 use async_trait::async_trait;
 use serde_json::{Value, json};
 

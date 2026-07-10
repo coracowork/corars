@@ -1,7 +1,7 @@
 use std::env;
 use std::path::Path;
 
-use CORA_skills::paths::{project_commands_dirs, project_skills_dirs, user_commands_dir, user_skills_dir};
+use cora_skills::paths::{project_commands_dirs, project_skills_dirs, user_commands_dir, user_skills_dir};
 
 use crate::cli::SkillsAction;
 

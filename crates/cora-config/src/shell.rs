@@ -94,7 +94,7 @@ pub fn resolve_shell_config(config: &ShellConfig) -> Result<ResolvedShell, Shell
     let shell = resolve_shell(Some(config.default.as_str()));
     if let Ok(shell) = &shell {
         tracing::info!(
-            target: "CORA_config::shell",
+            target: "cora_config::shell",
             shell_kind = shell.kind.name(),
             shell_path = %shell.path.display(),
             "resolved configured shell"
@@ -113,7 +113,7 @@ pub fn resolve_shell(requested: Option<&str>) -> Result<ResolvedShell, ShellErro
     if let Some(kind) = shell_kind_from_alias(requested) {
         return resolve_kind(kind, Some(requested)).ok_or_else(|| {
             tracing::warn!(
-                target: "CORA_config::shell",
+                target: "cora_config::shell",
                 requested_shell = requested,
                 shell_kind = kind.name(),
                 "configured shell executable was not found"
@@ -137,7 +137,7 @@ pub fn resolve_shell(requested: Option<&str>) -> Result<ResolvedShell, ShellErro
 pub fn default_shell() -> ResolvedShell {
     let shell = default_shell_from_user_shell(user_shell_path());
     tracing::debug!(
-        target: "CORA_config::shell",
+        target: "cora_config::shell",
         shell_kind = shell.kind.name(),
         shell_path = %shell.path.display(),
         "resolved default shell"

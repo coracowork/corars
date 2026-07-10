@@ -1,15 +1,15 @@
 use std::sync::{Arc, Mutex};
 
 use crate::confirm::{ConfirmResult, ToolConfirmer};
-use CORA_config::hooks::HookEngine;
-use CORA_protocol::events::{OutputType, ProtocolEvent, ToolCategory, ToolInfo, ToolStatus};
-use CORA_protocol::writer::ProtocolEmitter;
-use CORA_protocol::{ToolApprovalManager, ToolApprovalResult};
-use CORA_types::message::ContentBlock;
-use CORA_types::skill_types::ContextModifier;
-use CORA_types::tool::ToolResult;
+use cora_config::hooks::HookEngine;
+use cora_protocol::events::{OutputType, ProtocolEvent, ToolCategory, ToolInfo, ToolStatus};
+use cora_protocol::writer::ProtocolEmitter;
+use cora_protocol::{ToolApprovalManager, ToolApprovalResult};
+use cora_types::message::ContentBlock;
+use cora_types::skill_types::ContextModifier;
+use cora_types::tool::ToolResult;
 
-use CORA_tools::registry::ToolRegistry;
+use cora_tools::registry::ToolRegistry;
 
 /// The combined output of a tool execution batch: protocol content blocks
 /// paired with per-call context modifiers (None for non-skill tools).
@@ -37,7 +37,7 @@ pub async fn execute_tool_calls(
     tool_calls: &[ContentBlock],
     confirmer: &Arc<Mutex<ToolConfirmer>>,
     mut hooks: Option<&mut HookEngine>,
-    compaction_level: CORA_compact::CompactLevel,
+    compaction_level: cora_compact::CompactLevel,
     toon_enabled: bool,
 ) -> Result<ToolCallOutcome, ExecutionControl> {
     let mut results = Vec::new();
@@ -136,7 +136,7 @@ async fn execute_single(
     registry: &ToolRegistry,
     call: &ContentBlock,
     hooks: Option<&HookEngine>,
-    compaction_level: CORA_compact::CompactLevel,
+    compaction_level: cora_compact::CompactLevel,
     toon_enabled: bool,
 ) -> (ContentBlock, Option<ContextModifier>) {
     let ContentBlock::ToolUse { id, name, input, .. } = call else {
@@ -144,7 +144,7 @@ async fn execute_single(
     };
 
     let start = std::time::Instant::now();
-    tracing::info!(target: "CORA_agent", tool = %name, call_id = %id, "tool execution started");
+    tracing::info!(target: "cora_agent", tool = %name, call_id = %id, "tool execution started");
 
     // Run pre-tool-use hooks
     if let Some(hook_engine) = hooks
@@ -175,9 +175,9 @@ async fn execute_single(
                 r.content.clone()
             };
             let content = truncate_result(&error_content, max_size);
-            let content = CORA_compact::compact_output(&content, compaction_level);
+            let content = cora_compact::compact_output(&content, compaction_level);
             let content = if toon_enabled {
-                CORA_compact::compact_output_toon(&content)
+                cora_compact::compact_output_toon(&content)
             } else {
                 content
             };
@@ -202,12 +202,12 @@ async fn execute_single(
     if let Some(hook_engine) = hooks {
         let messages = hook_engine.run_post_tool_use(name, input, &result.content).await;
         for msg in messages {
-            tracing::info!(target: "CORA_agent", hook_message = %msg, "post-tool-use hook output");
+            tracing::info!(target: "cora_agent", hook_message = %msg, "post-tool-use hook output");
         }
     }
 
     let duration_ms = start.elapsed().as_millis() as u64;
-    tracing::info!(target: "CORA_agent", duration_ms, success = !result.is_error, "tool execution completed");
+    tracing::info!(target: "cora_agent", duration_ms, success = !result.is_error, "tool execution completed");
 
     (
         ContentBlock::ToolResult {
@@ -230,7 +230,7 @@ pub async fn execute_tool_calls_with_approval(
     auto_approve: bool,
     allow_list: &[String],
     mut hooks: Option<&mut HookEngine>,
-    compaction_level: CORA_compact::CompactLevel,
+    compaction_level: cora_compact::CompactLevel,
     toon_enabled: bool,
 ) -> Result<ToolCallOutcome, ExecutionControl> {
     let mut results = Vec::new();

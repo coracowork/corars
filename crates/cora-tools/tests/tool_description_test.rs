@@ -5,14 +5,14 @@
 
 use std::path::PathBuf;
 
-use CORA_tools::Tool;
-use CORA_tools::edit::EditTool;
-use CORA_tools::exec_command::ExecCommandTool;
-use CORA_tools::glob::GlobTool;
-use CORA_tools::grep::GrepTool;
-use CORA_tools::read::ReadTool;
-use CORA_tools::registry::ToolRegistry;
-use CORA_tools::write::WriteTool;
+use cora_tools::Tool;
+use cora_tools::edit::EditTool;
+use cora_tools::exec_command::ExecCommandTool;
+use cora_tools::glob::GlobTool;
+use cora_tools::grep::GrepTool;
+use cora_tools::read::ReadTool;
+use cora_tools::registry::ToolRegistry;
+use cora_tools::write::WriteTool;
 
 fn test_cwd() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))

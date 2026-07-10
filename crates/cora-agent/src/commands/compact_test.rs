@@ -4,9 +4,9 @@ use super::*;
 mod tests {
     use std::sync::Arc;
 
-    use CORA_providers::{LlmProvider, ProviderError};
-    use CORA_types::llm::{LlmEvent, LlmRequest};
-    use CORA_types::message::{ContentBlock, Message, Role};
+    use cora_providers::{LlmProvider, ProviderError};
+    use cora_types::llm::{LlmEvent, LlmRequest};
+    use cora_types::message::{ContentBlock, Message, Role};
 
     use super::*;
     use crate::commands::{CommandContext, CommandRegistry};
@@ -29,7 +29,7 @@ mod tests {
         let output = NullSink;
         let mut messages = vec![Message::new(Role::User, vec![ContentBlock::Text { text: "hi".into() }])];
         let mut state = CompactState::new();
-        let config = CORA_config::compact::CompactConfig::default();
+        let config = cora_config::compact::CompactConfig::default();
 
         let mut ctx = CommandContext {
             messages: &mut messages,
@@ -65,7 +65,7 @@ mod tests {
             .collect();
         let mut state = CompactState::new();
         state.consecutive_failures = 5;
-        let config = CORA_config::compact::CompactConfig::default();
+        let config = cora_config::compact::CompactConfig::default();
 
         let mut ctx = CommandContext {
             messages: &mut messages,

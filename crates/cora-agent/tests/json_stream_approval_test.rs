@@ -4,14 +4,14 @@ use std::sync::Arc;
 
 use serde_json::json;
 
-use CORA_agent::engine::AgentEngine;
-use CORA_agent::output::OutputSink;
-use CORA_agent::output::terminal::TerminalSink;
-use CORA_protocol::writer::ProtocolWriter;
-use CORA_protocol::{ToolApprovalManager, ToolApprovalResult};
-use CORA_tools::registry::ToolRegistry;
-use CORA_types::llm::LlmEvent;
-use CORA_types::message::{StopReason, TokenUsage};
+use cora_agent::engine::AgentEngine;
+use cora_agent::output::OutputSink;
+use cora_agent::output::terminal::TerminalSink;
+use cora_protocol::writer::ProtocolWriter;
+use cora_protocol::{ToolApprovalManager, ToolApprovalResult};
+use cora_tools::registry::ToolRegistry;
+use cora_types::llm::LlmEvent;
+use cora_types::message::{StopReason, TokenUsage};
 
 use common::{ExecMockTool, MockLlmProvider, test_config};
 

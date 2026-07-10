@@ -8,8 +8,8 @@
 
 use std::collections::HashMap;
 
-use CORA_mcp::config::{McpServerConfig, TransportType};
-use CORA_mcp::manager::McpManager;
+use cora_mcp::config::{McpServerConfig, TransportType};
+use cora_mcp::manager::McpManager;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpListener;
 

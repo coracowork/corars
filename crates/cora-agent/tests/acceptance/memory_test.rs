@@ -3,11 +3,11 @@
 // These tests verify that the memory system's file I/O, index management,
 // and prompt building work together correctly. No LLM API calls are needed.
 
-use CORA_agent::context::{SystemPromptCache, build_system_prompt};
-use CORA_memory::index::{append_index_entry, remove_index_entry};
-use CORA_memory::paths::ENTRYPOINT_NAME;
-use CORA_memory::store::{delete_memory, write_memory};
-use CORA_memory::types::{MemoryEntry, MemoryType};
+use cora_agent::context::{SystemPromptCache, build_system_prompt};
+use cora_memory::index::{append_index_entry, remove_index_entry};
+use cora_memory::paths::ENTRYPOINT_NAME;
+use cora_memory::store::{delete_memory, write_memory};
+use cora_memory::types::{MemoryEntry, MemoryType};
 
 /// TC-A1-01: Memory injection into system prompt.
 ///

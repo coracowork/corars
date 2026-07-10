@@ -6,9 +6,9 @@ use serde_json::Value;
 
 use super::config::McpServerConfig;
 use super::manager::McpManager;
-use CORA_protocol::events::ToolCategory;
-use CORA_tools::Tool;
-use CORA_types::tool::{JsonSchema, ToolResult};
+use cora_protocol::events::ToolCategory;
+use cora_tools::Tool;
+use cora_types::tool::{JsonSchema, ToolResult};
 
 /// Wraps an MCP server tool as a local Tool trait implementation.
 /// Uses naming convention "mcp__{server}__{tool}" when collisions exist,
@@ -108,7 +108,7 @@ impl Tool for McpToolProxy {
 /// Each tool's deferred flag is read from the server's config:
 /// `McpServerConfig::deferred` — defaults to `true` when absent.
 pub fn register_mcp_tools(
-    registry: &mut CORA_tools::registry::ToolRegistry,
+    registry: &mut cora_tools::registry::ToolRegistry,
     manager: &Arc<McpManager>,
     builtin_names: &[String],
     server_configs: &HashMap<String, McpServerConfig>,
@@ -154,7 +154,7 @@ pub fn register_mcp_tools(
 /// Register tools from a single newly-connected MCP server.
 /// Uses the same collision-detection logic as `register_mcp_tools`.
 pub fn register_single_server_tools(
-    registry: &mut CORA_tools::registry::ToolRegistry,
+    registry: &mut cora_tools::registry::ToolRegistry,
     manager: &Arc<McpManager>,
     server_name: &str,
     builtin_names: &[String],

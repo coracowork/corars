@@ -2,7 +2,7 @@
 //
 // This is a LOCAL test — no LLM call required.
 
-use CORA_agent::context::{SystemPromptCache, build_system_prompt};
+use cora_agent::context::{SystemPromptCache, build_system_prompt};
 
 /// TC-A4-01: System prompt contains tool guidance.
 ///

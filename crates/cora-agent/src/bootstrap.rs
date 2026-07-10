@@ -3,24 +3,24 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::AtomicBool;
 use std::sync::{Arc, RwLock};
 
-use CORA_config::config::{Config, McpServerConfig};
-use CORA_config::shell::{ResolvedShell, resolve_shell_config};
-use CORA_mcp::manager::McpManager;
-use CORA_mcp::tool_proxy::register_mcp_tools;
-use CORA_memory::paths::auto_memory_dir;
-use CORA_providers::{LlmProvider, create_provider};
-use CORA_skills::loader::load_all_skills;
-use CORA_skills::permissions::SkillPermissionChecker;
-use CORA_skills::types::SkillMetadata;
-use CORA_tools::edit::EditTool;
-use CORA_tools::exec_command::ExecCommandTool;
-use CORA_tools::file_cache::FileStateCache;
-use CORA_tools::glob::GlobTool;
-use CORA_tools::grep::GrepTool;
-use CORA_tools::read::ReadTool;
-use CORA_tools::registry::ToolRegistry;
-use CORA_tools::tool_search::ToolSearchTool;
-use CORA_tools::write::WriteTool;
+use cora_config::config::{Config, McpServerConfig};
+use cora_config::shell::{ResolvedShell, resolve_shell_config};
+use cora_mcp::manager::McpManager;
+use cora_mcp::tool_proxy::register_mcp_tools;
+use cora_memory::paths::auto_memory_dir;
+use cora_providers::{LlmProvider, create_provider};
+use cora_skills::loader::load_all_skills;
+use cora_skills::permissions::SkillPermissionChecker;
+use cora_skills::types::SkillMetadata;
+use cora_tools::edit::EditTool;
+use cora_tools::exec_command::ExecCommandTool;
+use cora_tools::file_cache::FileStateCache;
+use cora_tools::glob::GlobTool;
+use cora_tools::grep::GrepTool;
+use cora_tools::read::ReadTool;
+use cora_tools::registry::ToolRegistry;
+use cora_tools::tool_search::ToolSearchTool;
+use cora_tools::write::WriteTool;
 use anyhow::Result;
 use tracing::info;
 
@@ -167,7 +167,7 @@ impl AgentBootstrap {
 
     fn resolve_workspace_path(&self) -> PathBuf {
         info!(
-            target: "CORA_agent",
+            target: "cora_agent",
             workspace = %self.workspace.display(),
             "agent bootstrap: workspace cwd resolved",
         );

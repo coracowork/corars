@@ -3,7 +3,7 @@ use super::*;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use CORA_types::message::{ContentBlock, Message, Role};
+    use cora_types::message::{ContentBlock, Message, Role};
 
     fn no_compat() -> ProviderCompat {
         ProviderCompat::default()

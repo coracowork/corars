@@ -4,9 +4,9 @@ use super::*;
 mod tests {
     use std::sync::{Arc, Mutex};
 
-    use CORA_providers::{LlmProvider, ProviderError};
-    use CORA_types::llm::{LlmEvent, LlmRequest};
-    use CORA_types::message::Message;
+    use cora_providers::{LlmProvider, ProviderError};
+    use cora_types::llm::{LlmEvent, LlmRequest};
+    use cora_types::message::Message;
 
     use super::*;
     use crate::commands::{CommandContext, default_registry};
@@ -58,7 +58,7 @@ mod tests {
         let output = CaptureSink::new();
         let mut messages: Vec<Message> = Vec::new();
         let mut state = CompactState::new();
-        let config = CORA_config::compact::CompactConfig::default();
+        let config = cora_config::compact::CompactConfig::default();
 
         let mut ctx = CommandContext {
             messages: &mut messages,
@@ -90,7 +90,7 @@ mod tests {
         let output = CaptureSink::new();
         let mut messages: Vec<Message> = Vec::new();
         let mut state = CompactState::new();
-        let config = CORA_config::compact::CompactConfig::default();
+        let config = cora_config::compact::CompactConfig::default();
 
         let mut ctx = CommandContext {
             messages: &mut messages,

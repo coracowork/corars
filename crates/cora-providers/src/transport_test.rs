@@ -4,10 +4,10 @@ use super::*;
 mod tests {
     use super::*;
 
-    use CORA_config::compat::ProviderCompat;
-    use CORA_types::llm::LlmRequest;
-    use CORA_types::message::{ContentBlock, Message, Role};
-    use CORA_types::tool::ToolDef;
+    use cora_config::compat::ProviderCompat;
+    use cora_types::llm::LlmRequest;
+    use cora_types::message::{ContentBlock, Message, Role};
+    use cora_types::tool::ToolDef;
     use serde_json::json;
     use wiremock::matchers::{body_bytes, header, method, path};
     use wiremock::{Mock, MockServer, ResponseTemplate};

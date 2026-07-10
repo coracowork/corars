@@ -5,16 +5,16 @@ use async_trait::async_trait;
 use serde_json::{Value, json};
 
 use crate::spawner::Spawner;
-use CORA_config::hooks::HooksConfig;
-use CORA_protocol::events::ToolCategory;
-use CORA_skills::context_modifier::ContextModifier;
-use CORA_skills::executor::{execute_fork, prepare_inline_content};
-use CORA_skills::hooks::{parse_skill_hooks, to_hook_defs};
-use CORA_skills::permissions::{SkillPermission, SkillPermissionChecker};
-use CORA_skills::types::{ExecutionContext, SkillMetadata};
-use CORA_types::tool::{JsonSchema, ToolResult};
+use cora_config::hooks::HooksConfig;
+use cora_protocol::events::ToolCategory;
+use cora_skills::context_modifier::ContextModifier;
+use cora_skills::executor::{execute_fork, prepare_inline_content};
+use cora_skills::hooks::{parse_skill_hooks, to_hook_defs};
+use cora_skills::permissions::{SkillPermission, SkillPermissionChecker};
+use cora_skills::types::{ExecutionContext, SkillMetadata};
+use cora_types::tool::{JsonSchema, ToolResult};
 
-use CORA_tools::Tool;
+use cora_tools::Tool;
 
 /// A tool that allows the LLM to invoke named skills.
 ///
@@ -28,7 +28,7 @@ pub struct SkillTool {
     cwd: PathBuf,
     /// Permission checker for skill-level deny/allow rules.
     checker: SkillPermissionChecker,
-    /// Session ID passed to prepare_inline_content for ${CORARS_SESSION_ID} substitution.
+    /// Session ID passed to prepare_inline_content for ${cora_SESSION_ID} substitution.
     /// None if sessions are disabled or not yet initialised.
     session_id: Option<String>,
     /// Spawner for fork-mode skills. None when SkillTool is built without fork support.
@@ -222,7 +222,7 @@ impl Tool for SkillTool {
         if skill.execution_context == ExecutionContext::Fork {
             return None;
         }
-        CORA_skills::context_modifier::from_skill(skill)
+        cora_skills::context_modifier::from_skill(skill)
     }
 
     fn skill_hooks_for(&self, input: &serde_json::Value) -> Option<HooksConfig> {

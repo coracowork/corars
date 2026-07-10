@@ -14,14 +14,14 @@ use std::time::SystemTime;
 use tokio::runtime::{Handle, Runtime};
 use tokio::sync::mpsc;
 
-use CORA_config::config::BedrockConfig;
-use CORA_types::llm::{LlmEvent, LlmRequest};
+use cora_config::config::BedrockConfig;
+use cora_types::llm::{LlmEvent, LlmRequest};
 
 use crate::composed::ComposedProvider;
 use crate::projector::{ResolvedToolWireShape, WireParams, WireProvider, classify_tools_wire_shape_mismatch};
 use crate::transport::{BedrockTransport, ProjectedHttpRequest, ProviderTransport};
 use crate::{LlmProvider, ProviderError};
-use CORA_config::compat::ProviderCompat;
+use cora_config::compat::ProviderCompat;
 
 pub struct BedrockProvider {
     inner: ComposedProvider,

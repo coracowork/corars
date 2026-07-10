@@ -7,7 +7,7 @@ use super::*;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use CORA_config::config::TransportType;
+    use cora_config::config::TransportType;
     use serde_json::json;
 
     fn make_proxy(deferred: bool) -> McpToolProxy {
@@ -53,7 +53,7 @@ mod tests {
     #[test]
     fn register_defaults_to_deferred_when_config_omits_field() {
         let manager = Arc::new(McpManager::new_for_test(vec![]));
-        let mut registry = CORA_tools::registry::ToolRegistry::new();
+        let mut registry = cora_tools::registry::ToolRegistry::new();
         // Empty server configs — deferred field absent
         let configs = HashMap::new();
 

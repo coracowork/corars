@@ -95,7 +95,7 @@ pub(crate) struct Cli {
     #[arg(long)]
     pub(crate) log_dir: Option<String>,
 
-    /// Log level filter (e.g. "info", "debug", "info,CORA_providers=debug")
+    /// Log level filter (e.g. "info", "debug", "info,cora_providers=debug")
     #[arg(long)]
     pub(crate) log_level: Option<String>,
 

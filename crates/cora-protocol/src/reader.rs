@@ -29,12 +29,12 @@ pub fn spawn_stdin_reader() -> mpsc::UnboundedReceiver<ProtocolCommand> {
                             }
                         }
                         Err(e) => {
-                            tracing::debug!(target: "CORA_protocol", error = %e, "invalid protocol command");
+                            tracing::debug!(target: "cora_protocol", error = %e, "invalid protocol command");
                         }
                     }
                 }
                 Err(e) => {
-                    tracing::debug!(target: "CORA_protocol", error = %e, "stdin read error");
+                    tracing::debug!(target: "cora_protocol", error = %e, "stdin read error");
                     break;
                 }
             }

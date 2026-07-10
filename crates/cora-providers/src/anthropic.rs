@@ -3,12 +3,12 @@ use async_trait::async_trait;
 use serde_json::Value;
 use tokio::sync::mpsc;
 
-use CORA_types::llm::{LlmEvent, LlmRequest};
+use cora_types::llm::{LlmEvent, LlmRequest};
 
 use crate::composed::ComposedProvider;
 use crate::transport::{AnthropicTransport, ProviderTransport};
 use crate::{LlmProvider, ProviderError};
-use CORA_config::compat::ProviderCompat;
+use cora_config::compat::ProviderCompat;
 
 pub struct AnthropicProvider {
     inner: ComposedProvider,

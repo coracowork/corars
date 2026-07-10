@@ -1,18 +1,18 @@
 use std::sync::{Arc, Mutex};
 
-use CORA_agent::confirm::ToolConfirmer;
-use CORA_agent::engine::AgentEngine;
-use CORA_agent::orchestration::execute_tool_calls;
-use CORA_agent::output::OutputSink;
-use CORA_agent::output::null_sink::NullSink;
-use CORA_compact::CompactLevel;
-use CORA_config::compat::ProviderCompat;
-use CORA_config::config::{Config, ProviderType, SessionConfig, ToolsConfig};
-use CORA_config::hooks::HooksConfig;
-use CORA_mcp::config::McpConfig;
-use CORA_providers::create_provider;
-use CORA_tools::registry::ToolRegistry;
-use CORA_types::message::ContentBlock;
+use cora_agent::confirm::ToolConfirmer;
+use cora_agent::engine::AgentEngine;
+use cora_agent::orchestration::execute_tool_calls;
+use cora_agent::output::OutputSink;
+use cora_agent::output::null_sink::NullSink;
+use cora_compact::CompactLevel;
+use cora_config::compat::ProviderCompat;
+use cora_config::config::{Config, ProviderType, SessionConfig, ToolsConfig};
+use cora_config::hooks::HooksConfig;
+use cora_mcp::config::McpConfig;
+use cora_providers::create_provider;
+use cora_tools::registry::ToolRegistry;
+use cora_types::message::ContentBlock;
 use serde_json::json;
 
 const TEST_OUTPUT: &str = "\x1b[32mSTATUS: OK\x1b[0m\n\n\n\n50%\r100%\nCompiling dep-0 v1.0.0\nCompiling dep-1 v1.0.0\nCompiling dep-2 v1.0.0\nCompiling dep-3 v1.0.0\nCompiling dep-4 v1.0.0\n{\n    \"id\": 1,\n    \"name\": \"Alice Wonderland\",\n    \"email\": \"alice@example.com\",\n    \"age\": 30,\n    \"address\": \"123 Main Street, Anytown, USA 12345\",\n    \"phone\": \"+1-555-0123\"\n}";
@@ -41,22 +41,22 @@ fn openai_config(api_key: &str) -> Config {
         tools: ToolsConfig {
             auto_approve: true,
             allow_list: vec![],
-            skills: CORA_config::config::SkillsPermissionConfig::default(),
+            skills: cora_config::config::SkillsPermissionConfig::default(),
         },
         session: SessionConfig {
             enabled: false,
             directory: "/tmp".to_string(),
             max_sessions: 1,
         },
-        compact: CORA_config::compact::CompactConfig::default(),
-        plan: CORA_config::plan::PlanConfig::default(),
-        shell: CORA_config::shell::ShellConfig::default(),
-        file_cache: CORA_config::file_cache::FileCacheConfig::default(),
+        compact: cora_config::compact::CompactConfig::default(),
+        plan: cora_config::plan::PlanConfig::default(),
+        shell: cora_config::shell::ShellConfig::default(),
+        file_cache: cora_config::file_cache::FileCacheConfig::default(),
         hooks: HooksConfig::default(),
         bedrock: None,
         vertex: None,
         mcp: McpConfig::default(),
-        logging: CORA_config::logging::LoggingConfig::default(),
+        logging: cora_config::logging::LoggingConfig::default(),
     }
 }
 
@@ -75,7 +75,7 @@ impl FixedOutputTool {
 }
 
 #[async_trait::async_trait]
-impl CORA_tools::Tool for FixedOutputTool {
+impl cora_tools::Tool for FixedOutputTool {
     fn name(&self) -> &str {
         &self.name
     }
@@ -88,16 +88,16 @@ impl CORA_tools::Tool for FixedOutputTool {
         json!({"type": "object", "properties": {}, "required": []})
     }
 
-    fn category(&self) -> CORA_protocol::events::ToolCategory {
-        CORA_protocol::events::ToolCategory::Info
+    fn category(&self) -> cora_protocol::events::ToolCategory {
+        cora_protocol::events::ToolCategory::Info
     }
 
     fn is_concurrency_safe(&self, _input: &serde_json::Value) -> bool {
         true
     }
 
-    async fn execute(&self, _input: serde_json::Value) -> CORA_types::tool::ToolResult {
-        CORA_types::tool::ToolResult {
+    async fn execute(&self, _input: serde_json::Value) -> cora_types::tool::ToolResult {
+        cora_types::tool::ToolResult {
             content: self.output.clone(),
             is_error: false,
         }

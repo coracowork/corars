@@ -200,7 +200,7 @@ fn parse_frontmatter(raw: &str, path: Option<&Path>) -> (MemoryFrontmatter, Stri
         Ok(fm) => fm,
         Err(e) => {
             if let Some(p) = path {
-                tracing::warn!(target: "CORA_memory", path = %p.display(), error = %e, "failed to parse memory frontmatter");
+                tracing::warn!(target: "cora_memory", path = %p.display(), error = %e, "failed to parse memory frontmatter");
             }
             MemoryFrontmatter::default()
         }

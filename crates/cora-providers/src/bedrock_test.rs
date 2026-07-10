@@ -3,8 +3,8 @@ use super::*;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use CORA_types::message::{ContentBlock, Message, Role};
-    use CORA_types::tool::ToolDef;
+    use cora_types::message::{ContentBlock, Message, Role};
+    use cora_types::tool::ToolDef;
     use serde_json::json;
 
     // --- Golden body snapshots (baseline for compat-split / seam-extraction refactors) ---
@@ -51,7 +51,7 @@ mod tests {
         ($name:literal, $value:expr) => {
             insta::with_settings!({ prepend_module_to_snapshot => false }, {
                 insta::assert_json_snapshot!(
-                    concat!("CORA_providers__bedrock__tests__", $name),
+                    concat!("cora_providers__bedrock__tests__", $name),
                     $value
                 );
             });

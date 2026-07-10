@@ -5,8 +5,8 @@
 
 use std::fs;
 
-use CORA_agent::context::{SystemPromptCache, build_system_prompt};
-use CORA_skills::types::{ExecutionContext, LoadedFrom, SkillMetadata, SkillSource};
+use cora_agent::context::{SystemPromptCache, build_system_prompt};
+use cora_skills::types::{ExecutionContext, LoadedFrom, SkillMetadata, SkillSource};
 
 fn make_skill(name: &str, description: &str) -> SkillMetadata {
     SkillMetadata {

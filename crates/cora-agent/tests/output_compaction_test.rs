@@ -5,16 +5,16 @@ use std::sync::{Arc, Mutex};
 use async_trait::async_trait;
 use tokio::sync::mpsc;
 
-use CORA_agent::context::{SystemPromptCache, build_system_prompt};
-use CORA_agent::engine::AgentEngine;
-use CORA_agent::orchestration::execute_tool_calls;
-use CORA_agent::output::OutputSink;
-use CORA_agent::output::null_sink::NullSink;
-use CORA_compact::CompactLevel;
-use CORA_providers::{LlmProvider, ProviderError};
-use CORA_tools::registry::ToolRegistry;
-use CORA_types::llm::{LlmEvent, LlmRequest};
-use CORA_types::message::{ContentBlock, StopReason, TokenUsage};
+use cora_agent::context::{SystemPromptCache, build_system_prompt};
+use cora_agent::engine::AgentEngine;
+use cora_agent::orchestration::execute_tool_calls;
+use cora_agent::output::OutputSink;
+use cora_agent::output::null_sink::NullSink;
+use cora_compact::CompactLevel;
+use cora_providers::{LlmProvider, ProviderError};
+use cora_tools::registry::ToolRegistry;
+use cora_types::llm::{LlmEvent, LlmRequest};
+use cora_types::message::{ContentBlock, StopReason, TokenUsage};
 use common::{MockLlmProvider, MockTool, auto_approve_confirmer, test_config};
 use serde_json::json;
 

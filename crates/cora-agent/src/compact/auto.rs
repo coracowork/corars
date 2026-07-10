@@ -5,11 +5,11 @@
 //! then replaces the full history with a compact boundary marker and the
 //! summary.  A circuit breaker prevents runaway retries.
 
-use CORA_config::compact::CompactConfig;
-use CORA_providers::{LlmProvider, ProviderError};
-use CORA_types::compact::{CompactMetadata, CompactTrigger};
-use CORA_types::llm::{LlmEvent, LlmRequest, ThinkingConfig};
-use CORA_types::message::{ContentBlock, Message, Role, TokenUsage};
+use cora_config::compact::CompactConfig;
+use cora_providers::{LlmProvider, ProviderError};
+use cora_types::compact::{CompactMetadata, CompactTrigger};
+use cora_types::llm::{LlmEvent, LlmRequest, ThinkingConfig};
+use cora_types::message::{ContentBlock, Message, Role, TokenUsage};
 use tokio::sync::mpsc;
 
 use super::prompt::{

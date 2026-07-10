@@ -61,7 +61,7 @@ pub struct CompactConfig {
     pub cache_diagnostics: bool,
 
     #[serde(default)]
-    pub compaction: CORA_compact::CompactLevel,
+    pub compaction: cora_compact::CompactLevel,
 
     #[serde(default)]
     pub toon: bool,
@@ -81,7 +81,7 @@ impl Default for CompactConfig {
             autocompact_threshold_pct: None,
             enabled: default_true(),
             cache_diagnostics: false,
-            compaction: CORA_compact::CompactLevel::default(),
+            compaction: cora_compact::CompactLevel::default(),
             toon: false,
         }
     }

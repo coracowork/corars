@@ -23,19 +23,19 @@ use crate::tool_call::{
     tool_call_malformed_fingerprint, tool_call_malformed_reason,
 };
 use crate::turn::{FinalizationReason, TurnGuardAction, TurnGuards, TurnKind, TurnOutcome};
-use CORA_compact::CompactLevel;
-use CORA_config::compact::CompactConfig;
-use CORA_config::compat::ProviderCompat;
-use CORA_config::config::Config;
-use CORA_config::hooks::HookEngine;
-use CORA_protocol::ToolApprovalManager;
-use CORA_protocol::events::ToolCategory;
-use CORA_protocol::writer::ProtocolEmitter;
-use CORA_providers::provider::{LlmProvider, create_provider};
-use CORA_tools::registry::ToolRegistry;
-use CORA_types::llm::{LlmEvent, LlmRequest, ThinkingConfig};
-use CORA_types::message::{ContentBlock, Message, Role, StopReason, TokenUsage};
-use CORA_types::skill_types::{ContextModifier, PlanModeTransition, effort_to_string};
+use cora_compact::CompactLevel;
+use cora_config::compact::CompactConfig;
+use cora_config::compat::ProviderCompat;
+use cora_config::config::Config;
+use cora_config::hooks::HookEngine;
+use cora_protocol::ToolApprovalManager;
+use cora_protocol::events::ToolCategory;
+use cora_protocol::writer::ProtocolEmitter;
+use cora_providers::provider::{LlmProvider, create_provider};
+use cora_tools::registry::ToolRegistry;
+use cora_types::llm::{LlmEvent, LlmRequest, ThinkingConfig};
+use cora_types::message::{ContentBlock, Message, Role, StopReason, TokenUsage};
+use cora_types::skill_types::{ContextModifier, PlanModeTransition, effort_to_string};
 use anyhow::{Error as AnyhowError, Result as AnyhowResult};
 use chrono::Utc;
 use serde_json::to_string;
@@ -352,7 +352,7 @@ impl AgentEngine {
     pub async fn run(&mut self, user_input: &str, msg_id: &str) -> Result<AgentResult, AgentError> {
         let session_id = self.current_session.as_ref().map(|s| s.id.clone()).unwrap_or_default();
         let span = info_span!(
-            target: "CORA_agent",
+            target: "cora_agent",
             "agent_run",
             session_id = %session_id,
             msg_id = %msg_id,
@@ -386,7 +386,7 @@ impl AgentEngine {
                 let message = format!(
                     "Stopped after reaching the turn budget (max_turns={limit}); the task did not converge. Try adjusting the request or retrying."
                 );
-                warn!(target: "CORA_agent", limit, "stopping agent run at turn budget");
+                warn!(target: "cora_agent", limit, "stopping agent run at turn budget");
                 self.output.emit_error(&message);
                 return Ok(AgentResult {
                     text: String::new(),
@@ -648,14 +648,14 @@ impl AgentEngine {
                 let status = if *is_error { "error" } else { "completed" };
                 if tool_use_id.trim().is_empty() {
                     error!(
-                        target: "CORA_agent",
+                        target: "cora_agent",
                         tool = %tool_name,
                         status,
                         "tool result has empty tool_use_id"
                     );
                 } else {
                     debug!(
-                        target: "CORA_agent",
+                        target: "cora_agent",
                         tool_use_id = %tool_use_id,
                         tool = %tool_name,
                         status,
@@ -749,13 +749,13 @@ impl AgentEngine {
                 LlmEvent::ToolUse { id, name, input, extra } => {
                     if id.trim().is_empty() {
                         error!(
-                            target: "CORA_agent",
+                            target: "cora_agent",
                             tool = %name,
                             "provider emitted tool call with empty tool_use_id"
                         );
                     } else {
                         debug!(
-                            target: "CORA_agent",
+                            target: "cora_agent",
                             tool_use_id = %id,
                             tool = %name,
                             "provider tool call received"
@@ -867,7 +867,7 @@ impl AgentEngine {
         let mut compacted = false;
         let should_compact = should_autocompact(self.compact_state.last_input_tokens, &self.compact_config);
         if should_compact {
-            info!(target: "CORA_agent", last_input_tokens = self.compact_state.last_input_tokens, "context compaction triggered");
+            info!(target: "cora_agent", last_input_tokens = self.compact_state.last_input_tokens, "context compaction triggered");
             let threshold = if let Some(pct) = self.compact_config.autocompact_threshold_pct {
                 let t = self.compact_config.context_window * pct as usize / 100;
                 self.output.emit_info(&format!(
@@ -953,7 +953,7 @@ impl AgentEngine {
     pub fn init_session(&mut self, provider_name: &str, cwd: &str, session_id: Option<&str>) -> AnyhowResult<()> {
         if let Some(mgr) = &self.session_manager {
             let session = mgr.create(provider_name, &self.model, cwd, session_id)?;
-            info!(target: "CORA_agent", session_id = %session.id, provider = %provider_name, model = %self.model, "session started");
+            info!(target: "cora_agent", session_id = %session.id, provider = %provider_name, model = %self.model, "session started");
             self.current_session = Some(session);
         }
         Ok(())
@@ -1194,7 +1194,7 @@ impl AgentEngine {
             .into_iter()
             .map(|(tool_use_id, name)| {
                 info!(
-                    target: "CORA_agent",
+                    target: "cora_agent",
                     tool_use_id = %tool_use_id,
                     tool = %name,
                     "closing pending tool_use after abort"
@@ -1217,7 +1217,7 @@ impl AgentEngine {
         if let Some(hook_engine) = &self.hooks {
             let messages = hook_engine.run_stop().await;
             for msg in messages {
-                info!(target: "CORA_agent", hook_message = %msg, "stop hook output");
+                info!(target: "cora_agent", hook_message = %msg, "stop hook output");
             }
         }
     }

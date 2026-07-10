@@ -5,11 +5,11 @@
 
 use std::fs;
 
-use CORA_memory::index;
-use CORA_memory::paths;
-use CORA_memory::prompt::build_memory_prompt;
-use CORA_memory::store;
-use CORA_memory::types::{MemoryEntry, MemoryType};
+use cora_memory::index;
+use cora_memory::paths;
+use cora_memory::prompt::build_memory_prompt;
+use cora_memory::store;
+use cora_memory::types::{MemoryEntry, MemoryType};
 
 // ===========================================================================
 // TC-8.1: Complete memory lifecycle

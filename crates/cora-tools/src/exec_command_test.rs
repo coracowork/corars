@@ -46,12 +46,12 @@ mod tests {
     async fn execute_injects_runtime_env() {
         let tool = ExecCommandTool::new_with_env(
             std::env::temp_dir(),
-            vec![("CORA_RUNTIME_ENV_TEST".to_string(), "exec-env-value".to_string())],
+            vec![("cora_RUNTIME_ENV_TEST".to_string(), "exec-env-value".to_string())],
         );
         #[cfg(windows)]
-        let input = json!({"cmd": "Write-Output $env:CORA_RUNTIME_ENV_TEST", "shell": "powershell"});
+        let input = json!({"cmd": "Write-Output $env:cora_RUNTIME_ENV_TEST", "shell": "powershell"});
         #[cfg(not(windows))]
-        let input = json!({"cmd": "printf '%s' \"$CORA_RUNTIME_ENV_TEST\"", "shell": "sh"});
+        let input = json!({"cmd": "printf '%s' \"$cora_RUNTIME_ENV_TEST\"", "shell": "sh"});
 
         let result = tool.execute(input).await;
 
@@ -63,9 +63,9 @@ mod tests {
     async fn execute_timeout_preserves_stdout_emitted_before_timeout() {
         let tool = ExecCommandTool::new(std::env::temp_dir());
         #[cfg(windows)]
-        let cmd = "Write-Output CORA_stdout_before_timeout; Start-Sleep -Seconds 5";
+        let cmd = "Write-Output cora_stdout_before_timeout; Start-Sleep -Seconds 5";
         #[cfg(not(windows))]
-        let cmd = "printf 'CORA_stdout_before_timeout\\n'; sleep 5";
+        let cmd = "printf 'cora_stdout_before_timeout\\n'; sleep 5";
         let input = json!({
             "cmd": cmd,
             "timeout": 1500
@@ -80,7 +80,7 @@ mod tests {
             result.content
         );
         assert!(
-            result.content.contains("STDOUT:\n") && result.content.contains("CORA_stdout_before_timeout"),
+            result.content.contains("STDOUT:\n") && result.content.contains("cora_stdout_before_timeout"),
             "stdout emitted before timeout should be preserved, got: {}",
             result.content
         );
@@ -90,9 +90,9 @@ mod tests {
     async fn execute_timeout_preserves_stderr_emitted_before_timeout() {
         let tool = ExecCommandTool::new(std::env::temp_dir());
         #[cfg(windows)]
-        let cmd = "[Console]::Error.WriteLine('CORA_stderr_before_timeout'); Start-Sleep -Seconds 5";
+        let cmd = "[Console]::Error.WriteLine('cora_stderr_before_timeout'); Start-Sleep -Seconds 5";
         #[cfg(not(windows))]
-        let cmd = "printf 'CORA_stderr_before_timeout\\n' >&2; sleep 5";
+        let cmd = "printf 'cora_stderr_before_timeout\\n' >&2; sleep 5";
         let input = json!({
             "cmd": cmd,
             "timeout": 1500
@@ -107,7 +107,7 @@ mod tests {
             result.content
         );
         assert!(
-            result.content.contains("STDERR:\n") && result.content.contains("CORA_stderr_before_timeout"),
+            result.content.contains("STDERR:\n") && result.content.contains("cora_stderr_before_timeout"),
             "stderr emitted before timeout should be preserved, got: {}",
             result.content
         );
@@ -117,9 +117,9 @@ mod tests {
     async fn execute_timeout_omits_output_after_timeout() {
         let tool = ExecCommandTool::new(std::env::temp_dir());
         #[cfg(windows)]
-        let cmd = "Write-Output CORA_before_timeout; Start-Sleep -Seconds 5; Write-Output CORA_after_timeout";
+        let cmd = "Write-Output cora_before_timeout; Start-Sleep -Seconds 5; Write-Output cora_after_timeout";
         #[cfg(not(windows))]
-        let cmd = "printf 'CORA_before_timeout\\n'; sleep 5; printf 'CORA_after_timeout\\n'";
+        let cmd = "printf 'cora_before_timeout\\n'; sleep 5; printf 'cora_after_timeout\\n'";
         let input = json!({
             "cmd": cmd,
             "timeout": 1500
@@ -134,12 +134,12 @@ mod tests {
             result.content
         );
         assert!(
-            result.content.contains("CORA_before_timeout"),
+            result.content.contains("cora_before_timeout"),
             "output emitted before timeout should be preserved, got: {}",
             result.content
         );
         assert!(
-            !result.content.contains("CORA_after_timeout"),
+            !result.content.contains("cora_after_timeout"),
             "output after timeout should not be present, got: {}",
             result.content
         );
@@ -150,7 +150,7 @@ mod tests {
     async fn execute_powershell_write_output_returns_stdout() {
         let tool = ExecCommandTool::new(std::env::temp_dir());
         let input = json!({
-            "cmd": "Write-Output CORA_powershell_stdout_probe",
+            "cmd": "Write-Output cora_powershell_stdout_probe",
             "shell": "powershell"
         });
 
@@ -158,7 +158,7 @@ mod tests {
 
         assert!(!result.is_error, "unexpected error: {}", result.content);
         assert!(
-            result.content.contains("STDOUT:\n") && result.content.contains("CORA_powershell_stdout_probe"),
+            result.content.contains("STDOUT:\n") && result.content.contains("cora_powershell_stdout_probe"),
             "PowerShell stdout should be preserved, got: {}",
             result.content
         );
@@ -188,7 +188,7 @@ mod tests {
     async fn execute_cmd_echo_returns_stdout() {
         let tool = ExecCommandTool::new(std::env::temp_dir());
         let input = json!({
-            "cmd": "echo CORA_cmd_stdout_probe",
+            "cmd": "echo cora_cmd_stdout_probe",
             "shell": "cmd"
         });
 
@@ -196,7 +196,7 @@ mod tests {
 
         assert!(!result.is_error, "unexpected error: {}", result.content);
         assert!(
-            result.content.contains("STDOUT:\n") && result.content.contains("CORA_cmd_stdout_probe"),
+            result.content.contains("STDOUT:\n") && result.content.contains("cora_cmd_stdout_probe"),
             "cmd stdout should be preserved, got: {}",
             result.content
         );

@@ -7,9 +7,9 @@ use super::*;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use CORA_mcp::manager::McpManager;
-    use CORA_mcp::protocol::{JsonRpcRequest, JsonRpcResponse};
-    use CORA_mcp::transport::{McpError, McpTransport};
+    use cora_mcp::manager::McpManager;
+    use cora_mcp::protocol::{JsonRpcRequest, JsonRpcResponse};
+    use cora_mcp::transport::{McpError, McpTransport};
     use async_trait::async_trait;
     use std::sync::Mutex;
 

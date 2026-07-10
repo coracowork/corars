@@ -8,7 +8,7 @@ mod tests {
     use std::path::PathBuf;
     use tempfile::tempdir;
 
-    use CORA_types::tool::ToolResult;
+    use cora_types::tool::ToolResult;
 
     async fn run_glob(pattern: &str, path: &str) -> ToolResult {
         let tool = GlobTool::new(PathBuf::from(path));

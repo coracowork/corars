@@ -1,4 +1,4 @@
-use CORA_types::llm::LlmEvent;
+use cora_types::llm::LlmEvent;
 
 use crate::framing::{Frame, FrameKind};
 

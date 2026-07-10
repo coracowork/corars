@@ -88,7 +88,7 @@ async fn tc_e2e_1_full_lifecycle_load_skill() {
 
 // ---------------------------------------------------------------------------
 // TC-E2E-2: Inline execution — variable substitution
-// AC-5: $ARGUMENTS, $0, ${CORARS_SKILL_DIR} are correctly substituted
+// AC-5: $ARGUMENTS, $0, ${cora_SKILL_DIR} are correctly substituted
 // ---------------------------------------------------------------------------
 
 #[tokio::test]
@@ -97,7 +97,7 @@ async fn tc_e2e_2_inline_variable_substitution() {
     let skill_root = tmp.join("e2e2-skill");
     let mut skill = make_skill(
         "var-skill",
-        "Arguments: $ARGUMENTS\nFirst arg: $0\nSkill dir: ${CORARS_SKILL_DIR}",
+        "Arguments: $ARGUMENTS\nFirst arg: $0\nSkill dir: ${cora_SKILL_DIR}",
     );
     let skill_root_str = skill_root.to_str().unwrap();
     skill.skill_root = Some(skill_root_str.to_string());
@@ -114,7 +114,7 @@ async fn tc_e2e_2_inline_variable_substitution() {
     );
     assert!(
         result.contains(skill_root_str),
-        "${{CORARS_SKILL_DIR}} should be replaced with skill root, got: {result}"
+        "${{cora_SKILL_DIR}} should be replaced with skill root, got: {result}"
     );
     // $0 (first positional arg) substitution — first token of args
     assert!(
@@ -127,8 +127,8 @@ async fn tc_e2e_2_inline_variable_substitution() {
         "$ARGUMENTS literal should not remain, got: {result}"
     );
     assert!(
-        !result.contains("${CORARS_SKILL_DIR}"),
-        "${{CORARS_SKILL_DIR}} literal should not remain, got: {result}"
+        !result.contains("${cora_SKILL_DIR}"),
+        "${{cora_SKILL_DIR}} literal should not remain, got: {result}"
     );
 }
 

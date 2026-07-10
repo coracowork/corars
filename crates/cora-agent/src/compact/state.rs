@@ -1,4 +1,4 @@
-use CORA_config::compact::CompactConfig;
+use cora_config::compact::CompactConfig;
 
 /// Runtime state for the compaction circuit breaker.
 ///

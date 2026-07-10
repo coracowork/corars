@@ -1,8 +1,8 @@
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 
-use CORA_config::config::app_config_dir;
-use CORA_skills::paths::stop_boundary;
+use cora_config::config::app_config_dir;
+use cora_skills::paths::stop_boundary;
 
 // ---------------------------------------------------------------------------
 // Public types

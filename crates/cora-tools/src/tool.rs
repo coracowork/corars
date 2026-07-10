@@ -1,10 +1,10 @@
 use async_trait::async_trait;
 use serde_json::Value;
 
-use CORA_config::hooks::HooksConfig;
-use CORA_protocol::events::ToolCategory;
-use CORA_types::skill_types::ContextModifier;
-use CORA_types::tool::{JsonSchema, ToolResult};
+use cora_config::hooks::HooksConfig;
+use cora_protocol::events::ToolCategory;
+use cora_types::skill_types::ContextModifier;
+use cora_types::tool::{JsonSchema, ToolResult};
 
 /// Truncate a string to at most `max_bytes`, snapping to a char boundary.
 pub fn truncate_utf8(s: &str, max_bytes: usize) -> &str {

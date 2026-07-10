@@ -3,8 +3,8 @@
 //! These test the public API of PlanConfig from a config-file consumer's
 //! perspective: default values, full TOML override, and partial override.
 
-use CORA_config::config::ConfigFile;
-use CORA_config::plan::PlanConfig;
+use cora_config::config::ConfigFile;
+use cora_config::plan::PlanConfig;
 
 /// TC-3.2-01: PlanConfig default values.
 /// Input: no `[plan]` section in config.

@@ -4,8 +4,8 @@
 //! perspective: default values, full TOML override, partial override, and
 //! Config-level integration.
 
-use CORA_config::compact::CompactConfig;
-use CORA_config::config::ConfigFile;
+use cora_config::compact::CompactConfig;
+use cora_config::config::ConfigFile;
 
 /// TC-2.2-01: CompactConfig default values match spec.
 #[test]

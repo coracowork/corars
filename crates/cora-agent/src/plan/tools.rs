@@ -4,10 +4,10 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use async_trait::async_trait;
 use serde_json::{Value, json};
 
-use CORA_protocol::events::ToolCategory;
-use CORA_tools::Tool;
-use CORA_types::skill_types::{ContextModifier, PlanModeTransition};
-use CORA_types::tool::{JsonSchema, ToolResult};
+use cora_protocol::events::ToolCategory;
+use cora_tools::Tool;
+use cora_types::skill_types::{ContextModifier, PlanModeTransition};
+use cora_types::tool::{JsonSchema, ToolResult};
 
 // ---------------------------------------------------------------------------
 // EnterPlanModeTool

@@ -4,8 +4,8 @@ use std::sync::{Arc, RwLock};
 use async_trait::async_trait;
 use serde_json::{Value, json};
 
-use CORA_protocol::events::ToolCategory;
-use CORA_types::tool::{JsonSchema, ToolResult};
+use cora_protocol::events::ToolCategory;
+use cora_types::tool::{JsonSchema, ToolResult};
 
 use crate::Tool;
 use crate::file_cache::{FileStateCache, file_mtime_ms, update_cache_after_write};

@@ -7,7 +7,7 @@
 //! Unlike autocompact, the emergency check always applies — even when
 //! the compaction system is disabled via `CompactConfig.enabled`.
 
-use CORA_config::compact::CompactConfig;
+use cora_config::compact::CompactConfig;
 
 /// User-facing message shown when the emergency limit is hit.
 pub const EMERGENCY_USER_MESSAGE: &str = "Context window nearly full. Please use /compact or start a new conversation.";

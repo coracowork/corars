@@ -4,7 +4,7 @@ use crate::context_modifier::effort_to_string;
 use crate::shell::{ShellExecutionError, execute_shell_commands};
 use crate::substitution::substitute_arguments;
 use crate::types::{ExecutionContext, SkillMetadata};
-use CORA_types::spawner::{ForkOverrides, Spawner, SubAgentConfig};
+use cora_types::spawner::{ForkOverrides, Spawner, SubAgentConfig};
 
 /// Prepare skill content for inline execution.
 ///

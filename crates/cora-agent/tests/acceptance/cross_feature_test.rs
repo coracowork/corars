@@ -2,14 +2,14 @@
 //
 // Exercises memory + compression + file cache + tool description all at once.
 
-use CORA_agent::compact::micro::{CLEARED_TOOL_RESULT, microcompact};
-use CORA_agent::context::{SystemPromptCache, build_system_prompt};
-use CORA_config::compact::CompactConfig;
-use CORA_config::file_cache::FileCacheConfig;
-use CORA_tools::Tool;
-use CORA_tools::file_cache::FileStateCache;
-use CORA_tools::read::ReadTool;
-use CORA_types::message::{ContentBlock, Message, Role};
+use cora_agent::compact::micro::{CLEARED_TOOL_RESULT, microcompact};
+use cora_agent::context::{SystemPromptCache, build_system_prompt};
+use cora_config::compact::CompactConfig;
+use cora_config::file_cache::FileCacheConfig;
+use cora_tools::Tool;
+use cora_tools::file_cache::FileStateCache;
+use cora_tools::read::ReadTool;
+use cora_types::message::{ContentBlock, Message, Role};
 use serde_json::json;
 use std::sync::{Arc, RwLock};
 

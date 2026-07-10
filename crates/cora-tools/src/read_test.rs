@@ -7,7 +7,7 @@ mod tests {
     use std::io::Write;
     use tempfile::tempdir;
 
-    use CORA_config::file_cache::FileCacheConfig;
+    use cora_config::file_cache::FileCacheConfig;
 
     fn make_cache() -> Arc<RwLock<FileStateCache>> {
         let config = FileCacheConfig {

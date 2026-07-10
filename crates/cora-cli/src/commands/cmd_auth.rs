@@ -1,4 +1,4 @@
-use CORA_config::auth::{AuthConfig, OAuthManager};
+use cora_config::auth::{AuthConfig, OAuthManager};
 
 use crate::cli::AuthAction;
 

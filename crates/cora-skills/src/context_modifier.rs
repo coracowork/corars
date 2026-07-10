@@ -1,7 +1,7 @@
 use crate::types::SkillMetadata;
 
 // Re-export from CORA-types so callers can use a single import path
-pub use CORA_types::skill_types::{ContextModifier, effort_to_string};
+pub use cora_types::skill_types::{ContextModifier, effort_to_string};
 
 /// Build a ContextModifier from skill metadata. Returns None if no overrides are specified.
 pub fn from_skill(skill: &SkillMetadata) -> Option<ContextModifier> {

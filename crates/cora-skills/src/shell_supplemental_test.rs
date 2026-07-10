@@ -211,10 +211,10 @@ async fn tc_4_4b_command_fail_with_output_returns_ok() {
 // TC-4.5: cwd 参数生效
 #[tokio::test]
 async fn tc_4_5_cwd_used() {
-    use CORA_config::shell::ShellKind;
+    use cora_config::shell::ShellKind;
 
     let tmp = std::env::temp_dir();
-    let shell = CORA_config::shell::default_shell();
+    let shell = cora_config::shell::default_shell();
     let command = match shell.kind {
         ShellKind::PowerShell => "(Get-Location).Path",
         ShellKind::Cmd => "cd",
@@ -235,12 +235,12 @@ async fn tc_4_5_cwd_used() {
 #[cfg(windows)]
 #[tokio::test]
 async fn tc_windows_skill_shell_powershell_stdout_preserved() {
-    let result = run("before !`Write-Output CORA_skill_stdout_probe` after")
+    let result = run("before !`Write-Output cora_skill_stdout_probe` after")
         .await
         .unwrap();
 
     assert!(
-        result.contains("CORA_skill_stdout_probe"),
+        result.contains("cora_skill_stdout_probe"),
         "skill embedded shell stdout should be preserved, got: {result}"
     );
 }

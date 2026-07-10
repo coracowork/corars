@@ -3,7 +3,7 @@ use regex::Regex;
 use std::path::Path;
 use std::sync::OnceLock;
 
-use CORA_process::{CommandRunner, DEFAULT_TIMEOUT};
+use cora_process::{CommandRunner, DEFAULT_TIMEOUT};
 
 use crate::types::LoadedFrom;
 
@@ -188,8 +188,8 @@ fn extract_shell_matches(content: &str) -> Vec<ShellMatch> {
 
 /// Execute a single shell command and return its combined stdout/stderr output.
 async fn execute_command(command: &str, cwd: &Path) -> Result<String, ShellExecutionError> {
-    let shell = CORA_config::shell::default_shell();
-    let mut command_builder = CORA_config::shell::shell_command_builder(&shell, command, false);
+    let shell = cora_config::shell::default_shell();
+    let mut command_builder = cora_config::shell::shell_command_builder(&shell, command, false);
     command_builder.current_dir(cwd);
 
     let result = CommandRunner::new(command_builder)

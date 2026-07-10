@@ -6,8 +6,8 @@
 
 use std::collections::{HashMap, HashSet};
 
-use CORA_config::compact::CompactConfig;
-use CORA_types::message::{ContentBlock, Message, Role};
+use cora_config::compact::CompactConfig;
+use cora_types::message::{ContentBlock, Message, Role};
 use chrono::Utc;
 
 /// Placeholder that replaces cleared tool result content.

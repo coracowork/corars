@@ -3,8 +3,8 @@ use std::path::{Path, PathBuf};
 use async_trait::async_trait;
 use serde_json::{Value, json};
 
-use CORA_protocol::events::ToolCategory;
-use CORA_types::tool::{JsonSchema, ToolResult};
+use cora_protocol::events::ToolCategory;
+use cora_types::tool::{JsonSchema, ToolResult};
 
 use crate::Tool;
 

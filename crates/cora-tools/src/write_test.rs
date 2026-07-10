@@ -8,7 +8,7 @@ mod tests {
 
     use crate::Tool;
     use crate::file_cache::file_mtime_ms;
-    use CORA_config::file_cache::FileCacheConfig;
+    use cora_config::file_cache::FileCacheConfig;
 
     fn make_cache() -> Arc<RwLock<FileStateCache>> {
         let config = FileCacheConfig {

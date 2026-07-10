@@ -1,4 +1,4 @@
-use CORA_protocol::commands::ProtocolCommand;
+use cora_protocol::commands::ProtocolCommand;
 
 #[test]
 fn parse_set_config_with_model() {

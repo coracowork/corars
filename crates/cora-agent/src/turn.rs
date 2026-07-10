@@ -1,7 +1,7 @@
 use crate::error::AgentError;
 use crate::stream::StreamOutcome;
 use crate::tool_call::{ToolCallFailureTracker, ToolCallMalformedFingerprint, ToolCallMalformedTracker};
-use CORA_types::message::StopReason;
+use cora_types::message::StopReason;
 
 pub(crate) enum TurnOutcome {
     ToolRound(StreamOutcome),
@@ -150,7 +150,7 @@ impl TurnGuards {
         let malformed_count = self.tool_call_malformed.observe(tool_call_malformed_fingerprint);
         if self.tool_call_malformed.is_limit_exceeded() {
             tracing::warn!(
-                target: "CORA_agent",
+                target: "cora_agent",
                 count = malformed_count,
                 limit = self.tool_call_malformed.limit(),
                 "stopping tool-call malformed loop"
@@ -164,7 +164,7 @@ impl TurnGuards {
         let tool_call_failure_count = self.tool_call_failures.observe(tool_call_failure_round);
         if self.tool_call_failures.is_limit_exceeded() {
             tracing::warn!(
-                target: "CORA_agent",
+                target: "cora_agent",
                 count = tool_call_failure_count,
                 limit = self.tool_call_failures.limit(),
                 "stopping tool-call failure loop"

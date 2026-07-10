@@ -7,8 +7,8 @@ use regex::Regex;
 /// 2. Indexed arguments: `$ARGUMENTS[0]`, `$ARGUMENTS[1]`
 /// 3. Shorthand indexed: `$0`, `$1`, `$2`
 /// 4. Full arguments: `$ARGUMENTS` → entire args string
-/// 5. Skill directory: `${CORARS_SKILL_DIR}` → `skill_root`
-/// 6. Session ID: `${CORARS_SESSION_ID}` → `session_id`
+/// 5. Skill directory: `${cora_SKILL_DIR}` → `skill_root`
+/// 6. Session ID: `${cora_SESSION_ID}` → `session_id`
 /// 7. Fallback: if content is unchanged and args is non-empty, append `\n\nARGUMENTS: {args}`
 ///
 /// When `args` is `None`, the content is returned unchanged (no placeholders replaced).
@@ -22,14 +22,14 @@ pub fn substitute_arguments(
     // Always apply env-var substitutions regardless of args.
     let mut result = content.to_owned();
 
-    // 5. ${CORARS_SKILL_DIR}
+    // 5. ${cora_SKILL_DIR}
     if let Some(root) = skill_root {
-        result = result.replace("${CORARS_SKILL_DIR}", root);
+        result = result.replace("${cora_SKILL_DIR}", root);
     }
 
-    // 6. ${CORARS_SESSION_ID}
+    // 6. ${cora_SESSION_ID}
     if let Some(sid) = session_id {
-        result = result.replace("${CORARS_SESSION_ID}", sid);
+        result = result.replace("${cora_SESSION_ID}", sid);
     }
 
     // If no args provided, return after env substitutions only.

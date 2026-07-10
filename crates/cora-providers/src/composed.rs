@@ -3,8 +3,8 @@ use async_trait::async_trait;
 use serde_json::Value;
 use tokio::sync::mpsc;
 
-use CORA_config::compat::ProviderCompat;
-use CORA_types::llm::{LlmEvent, LlmRequest};
+use cora_config::compat::ProviderCompat;
+use cora_types::llm::{LlmEvent, LlmRequest};
 
 use crate::error::ProviderError;
 use crate::provider::LlmProvider;
@@ -34,7 +34,7 @@ impl LlmProvider for ComposedProvider {
     async fn stream(&self, request: &LlmRequest) -> Result<mpsc::Receiver<LlmEvent>, ProviderError> {
         let (body, tool_wire_shape) = self.transport.project_body(request, &self.compat)?;
 
-        tracing::debug!(target: "CORA_providers", body = %serde_json::to_string_pretty(&body).unwrap_or_default(), "outgoing request");
+        tracing::debug!(target: "cora_providers", body = %serde_json::to_string_pretty(&body).unwrap_or_default(), "outgoing request");
 
         let projected_request =
             self.transport

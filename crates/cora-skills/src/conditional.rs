@@ -123,7 +123,7 @@ impl ConditionalSkillManager {
 
                 for pattern in &entry.patterns {
                     if pattern.matches(&rel) {
-                        tracing::info!(target: "CORA_skills", skill = %name, path = %rel, "activated conditional skill");
+                        tracing::info!(target: "cora_skills", skill = %name, path = %rel, "activated conditional skill");
                         to_activate.push(name.clone());
                         continue 'outer;
                     }
@@ -195,7 +195,7 @@ fn compile_patterns(skill_name: &str, raw_patterns: &[String]) -> Vec<Pattern> {
         .filter_map(|p| match Pattern::new(p) {
             Ok(pat) => Some(pat),
             Err(e) => {
-                tracing::warn!(target: "CORA_skills", skill = %skill_name, pattern = %p, error = %e, "invalid glob pattern, skipping");
+                tracing::warn!(target: "cora_skills", skill = %skill_name, pattern = %p, error = %e, "invalid glob pattern, skipping");
                 None
             }
         })

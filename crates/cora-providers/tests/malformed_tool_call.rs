@@ -1,9 +1,9 @@
-use CORA_config::compat::ProviderCompat;
-use CORA_providers::LlmProvider;
-use CORA_providers::anthropic_shared;
-use CORA_providers::openai::OpenAIProvider;
-use CORA_types::llm::{LlmEvent, LlmRequest};
-use CORA_types::message::{ContentBlock, Message, Role};
+use cora_config::compat::ProviderCompat;
+use cora_providers::LlmProvider;
+use cora_providers::anthropic_shared;
+use cora_providers::openai::OpenAIProvider;
+use cora_types::llm::{LlmEvent, LlmRequest};
+use cora_types::message::{ContentBlock, Message, Role};
 use serde_json::{Value, json};
 use wiremock::matchers::{method, path};
 use wiremock::{Mock, MockServer, ResponseTemplate};

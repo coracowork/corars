@@ -140,7 +140,7 @@ impl SkillWatcher {
     /// after [`start`](Self::start).
     pub fn watch_directory(&mut self, dir: &Path) -> notify::Result<()> {
         if !dir.is_dir() {
-            tracing::debug!(target: "CORA_skills", path = %dir.display(), "skipped non-existent watcher directory");
+            tracing::debug!(target: "cora_skills", path = %dir.display(), "skipped non-existent watcher directory");
             return Ok(());
         }
 
@@ -151,7 +151,7 @@ impl SkillWatcher {
         if let Some(ref mut w) = self.watcher {
             w.watch(dir, RecursiveMode::Recursive)?;
             self.watched_dirs.push(dir.to_path_buf());
-            tracing::debug!(target: "CORA_skills", path = %dir.display(), "watching skill directory");
+            tracing::debug!(target: "cora_skills", path = %dir.display(), "watching skill directory");
         }
 
         Ok(())

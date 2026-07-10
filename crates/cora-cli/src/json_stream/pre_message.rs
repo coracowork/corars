@@ -9,14 +9,14 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use CORA_agent::engine::AgentEngine;
-use CORA_agent::output::OutputSink;
-use CORA_config::config::{McpServerConfig, TransportType};
-use CORA_mcp::manager::McpManager;
-use CORA_mcp::tool_proxy::register_single_server_tools;
-use CORA_protocol::commands::ProtocolCommand;
-use CORA_protocol::events::ProtocolEvent;
-use CORA_protocol::writer::{ProtocolEmitter, ProtocolWriter};
+use cora_agent::engine::AgentEngine;
+use cora_agent::output::OutputSink;
+use cora_config::config::{McpServerConfig, TransportType};
+use cora_mcp::manager::McpManager;
+use cora_mcp::tool_proxy::register_single_server_tools;
+use cora_protocol::commands::ProtocolCommand;
+use cora_protocol::events::ProtocolEvent;
+use cora_protocol::writer::{ProtocolEmitter, ProtocolWriter};
 use tokio::sync::mpsc::UnboundedReceiver;
 
 fn to_mcp_server_config(
@@ -80,7 +80,7 @@ pub(super) async fn run(
                 url,
                 headers,
             } => {
-                tracing::info!(target: "CORA_mcp", %name, %transport, ?command, "AddMcpServer received");
+                tracing::info!(target: "cora_mcp", %name, %transport, ?command, "AddMcpServer received");
                 let config = match to_mcp_server_config(&transport, command, args, env, url, headers) {
                     Ok(c) => c,
                     Err(e) => {
@@ -91,11 +91,11 @@ pub(super) async fn run(
 
                 let mut single_configs = HashMap::new();
                 single_configs.insert(name.clone(), config.clone());
-                tracing::info!(target: "CORA_mcp", %name, "connecting to mcp server");
+                tracing::info!(target: "cora_mcp", %name, "connecting to mcp server");
                 match McpManager::connect_all(&single_configs).await {
                     Ok(mgr) => {
                         let tool_names: Vec<String> = mgr.all_tools().iter().map(|(_, t)| t.name.clone()).collect();
-                        tracing::info!(target: "CORA_mcp", %name, tools = tool_names.len(), "mcp server connected");
+                        tracing::info!(target: "cora_mcp", %name, tools = tool_names.len(), "mcp server connected");
                         let mgr_arc = Arc::new(mgr);
                         let builtin_names = engine.tool_names();
                         register_single_server_tools(
@@ -112,7 +112,7 @@ pub(super) async fn run(
                         });
                     }
                     Err(e) => {
-                        tracing::warn!(target: "CORA_mcp", %name, error = %e, "mcp server connection failed");
+                        tracing::warn!(target: "cora_mcp", %name, error = %e, "mcp server connection failed");
                         output.emit_error(&format!("AddMcpServer '{name}' failed: {e}"));
                     }
                 }

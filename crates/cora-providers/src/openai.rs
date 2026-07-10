@@ -2,14 +2,14 @@ use async_trait::async_trait;
 use serde_json::Value;
 use tokio::sync::mpsc;
 
-use CORA_types::llm::{LlmEvent, LlmRequest};
-use CORA_types::message::{StopReason, TokenUsage};
+use cora_types::llm::{LlmEvent, LlmRequest};
+use cora_types::message::{StopReason, TokenUsage};
 
 use crate::composed::ComposedProvider;
 use crate::openai_messages::generate_call_id;
 use crate::transport::{OpenAiTransport, ProviderTransport};
 use crate::{LlmProvider, ProviderError};
-use CORA_config::compat::ProviderCompat;
+use cora_config::compat::ProviderCompat;
 
 pub struct OpenAIProvider {
     inner: ComposedProvider,
@@ -174,7 +174,7 @@ pub(crate) fn parse_sse_chunk(data: &str, state: &mut StreamState, auto_tool_id:
                             serde_json::from_str(&tc.arguments).unwrap_or(Value::Object(serde_json::Map::new()));
                         if tc.name.is_empty() {
                             tracing::warn!(
-                                target: "CORA_providers",
+                                target: "cora_providers",
                                 tool_call_id = %id,
                                 "provider emitted tool_call with empty function name; recorded to history as-is"
                             );

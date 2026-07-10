@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use CORA_config::config::app_config_dir;
+use cora_config::config::app_config_dir;
 
 // ---------------------------------------------------------------------------
 // User-level directories (<config_dir>/CORArs/)

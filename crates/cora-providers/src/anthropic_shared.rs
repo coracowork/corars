@@ -4,13 +4,13 @@
 use serde_json::{Value, json};
 use std::collections::{HashMap, HashSet, VecDeque};
 
-use CORA_types::llm::LlmEvent;
-use CORA_types::message::{ContentBlock, Message, Role, StopReason, TokenUsage};
-use CORA_types::tool::ToolDef;
+use cora_types::llm::LlmEvent;
+use cora_types::message::{ContentBlock, Message, Role, StopReason, TokenUsage};
+use cora_types::tool::ToolDef;
 
 use crate::projector::{ResolvedToolWireShape, project_tools};
 use crate::tool_call_sanitize::{DroppedToolCallReason, format_dropped_tool_call};
-use CORA_config::compat::ProviderCompat;
+use cora_config::compat::ProviderCompat;
 
 /// Convert internal Message format to Anthropic API message format.
 /// Compat flags control merging and alternation behavior.
@@ -55,7 +55,7 @@ pub fn build_messages(messages: &[Message], compat: &ProviderCompat) -> Vec<Valu
                             "text": format_dropped_tool_call(reason, input)
                         }));
                         tracing::warn!(
-                            target: "CORA_providers",
+                            target: "cora_providers",
                             tool_call_id = %id,
                             reason = reason.log_reason(),
                             "downgraded malformed tool_call to text in outgoing request"
@@ -71,7 +71,7 @@ pub fn build_messages(messages: &[Message], compat: &ProviderCompat) -> Vec<Valu
                             "text": format_dropped_tool_call(reason, input)
                         }));
                         tracing::warn!(
-                            target: "CORA_providers",
+                            target: "cora_providers",
                             tool_call_id = %id,
                             reason = reason.log_reason(),
                             "downgraded malformed tool_call to text in outgoing request"
@@ -118,7 +118,7 @@ pub fn build_messages(messages: &[Message], compat: &ProviderCompat) -> Vec<Valu
                     if clean_orphan_tool_results && !available_tool_use_ids.contains(&projected_tool_use_id) {
                         empty_message_placeholder.get_or_insert("[tool call skipped: malformed (orphan tool result).]");
                         tracing::warn!(
-                            target: "CORA_providers",
+                            target: "cora_providers",
                             tool_call_id = %tool_use_id,
                             reason = "orphan_result",
                             "dropped orphan tool_result in outgoing request"
@@ -340,7 +340,7 @@ pub fn parse_sse_data(event_type: &str, data: &str, state: &mut StreamState) -> 
                     serde_json::from_str(&state.tool_input_json).unwrap_or(Value::Object(serde_json::Map::new()));
                 if state.tool_name.is_empty() {
                     tracing::warn!(
-                        target: "CORA_providers",
+                        target: "cora_providers",
                         tool_call_id = %state.tool_id,
                         "provider emitted tool_call with empty function name; recorded to history as-is"
                     );

@@ -5,10 +5,10 @@ use std::time::Duration;
 use async_trait::async_trait;
 use serde_json::{Value, json};
 
-use CORA_config::shell::{resolve_shell, shell_command_builder};
-use CORA_process::CommandRunner;
-use CORA_protocol::events::ToolCategory;
-use CORA_types::tool::{JsonSchema, ToolResult};
+use cora_config::shell::{resolve_shell, shell_command_builder};
+use cora_process::CommandRunner;
+use cora_protocol::events::ToolCategory;
+use cora_types::tool::{JsonSchema, ToolResult};
 
 use crate::Tool;
 

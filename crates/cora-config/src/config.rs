@@ -11,7 +11,7 @@ use crate::hooks::HooksConfig;
 use crate::logging::LoggingConfig;
 use crate::plan::PlanConfig;
 use crate::shell::ShellConfig;
-use CORA_types::llm::ThinkingConfig;
+use cora_types::llm::ThinkingConfig;
 
 // ---------------------------------------------------------------------------
 // Provider-specific sub-configurations (defined here to avoid circular deps)
@@ -587,7 +587,7 @@ fn project_config_path() -> PathBuf {
 fn load_config_file(path: &Path) -> ConfigFile {
     match std::fs::read_to_string(path) {
         Ok(content) => toml::from_str(&content).unwrap_or_else(|e| {
-            tracing::warn!(target: "CORA_config", path = %path.display(), error = %e, "failed to parse config file");
+            tracing::warn!(target: "cora_config", path = %path.display(), error = %e, "failed to parse config file");
             ConfigFile::default()
         }),
         Err(_) => ConfigFile::default(),
@@ -847,14 +847,14 @@ fn apply_profile(mut config: ConfigFile, profile_name: &str) -> anyhow::Result<C
 pub fn init_config() -> anyhow::Result<()> {
     let path = global_config_path();
     if path.exists() {
-        tracing::info!(target: "CORA_config", path = %path.display(), "config file already exists");
+        tracing::info!(target: "cora_config", path = %path.display(), "config file already exists");
         return Ok(());
     }
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent)?;
     }
     std::fs::write(&path, DEFAULT_CONFIG_TEMPLATE)?;
-    tracing::info!(target: "CORA_config", path = %path.display(), "config file created");
+    tracing::info!(target: "cora_config", path = %path.display(), "config file created");
     Ok(())
 }
 

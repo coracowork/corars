@@ -7,8 +7,8 @@ use super::*;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use CORA_skills::permissions::SkillPermissionChecker;
-    use CORA_skills::types::{ExecutionContext, LoadedFrom, SkillSource};
+    use cora_skills::permissions::SkillPermissionChecker;
+    use cora_skills::types::{ExecutionContext, LoadedFrom, SkillSource};
     use serde_json::json;
 
     fn make_skill(name: &str, content: &str) -> SkillMetadata {
@@ -135,11 +135,11 @@ mod supplemental_tests {
 
     use serde_json::json;
 
-    use CORA_skills::permissions::SkillPermissionChecker;
-    use CORA_skills::types::{ExecutionContext, LoadedFrom, SkillMetadata, SkillSource};
+    use cora_skills::permissions::SkillPermissionChecker;
+    use cora_skills::types::{ExecutionContext, LoadedFrom, SkillMetadata, SkillSource};
 
     use super::SkillTool;
-    use CORA_tools::Tool;
+    use cora_tools::Tool;
 
     fn make_skill(name: &str, content: &str) -> SkillMetadata {
         SkillMetadata {
@@ -307,7 +307,7 @@ mod supplemental_tests {
 
     #[tokio::test]
     async fn tc_13_8_full_variable_substitution_integration() {
-        let mut skill = make_skill("my-skill", "Run ${CORARS_SKILL_DIR}/tool.sh $ARGUMENTS[0]");
+        let mut skill = make_skill("my-skill", "Run ${cora_SKILL_DIR}/tool.sh $ARGUMENTS[0]");
         skill.skill_root = Some("/my/skill".to_string());
         let tool = tool_with(vec![skill]);
         let result = tool.execute(json!({"skill": "my-skill", "args": "alpha"})).await;
@@ -355,9 +355,9 @@ mod supplemental_tests_p6 {
 
     use serde_json::json;
 
-    use CORA_skills::permissions::SkillPermissionChecker;
-    use CORA_skills::types::{EffortLevel, ExecutionContext, LoadedFrom, SkillMetadata, SkillSource};
-    use CORA_tools::Tool;
+    use cora_skills::permissions::SkillPermissionChecker;
+    use cora_skills::types::{EffortLevel, ExecutionContext, LoadedFrom, SkillMetadata, SkillSource};
+    use cora_tools::Tool;
 
     use super::SkillTool;
 
@@ -532,11 +532,11 @@ mod permission_tests {
 
     use serde_json::json;
 
-    use CORA_skills::permissions::SkillPermissionChecker;
-    use CORA_skills::types::{ExecutionContext, LoadedFrom, SkillMetadata, SkillSource};
+    use cora_skills::permissions::SkillPermissionChecker;
+    use cora_skills::types::{ExecutionContext, LoadedFrom, SkillMetadata, SkillSource};
 
     use super::SkillTool;
-    use CORA_tools::Tool;
+    use cora_tools::Tool;
 
     fn make_skill(name: &str, content: &str) -> SkillMetadata {
         SkillMetadata {
@@ -610,10 +610,10 @@ mod phase7_tests {
     use serde_json::json;
 
     use crate::spawner::{ForkOverrides, Spawner, SubAgentConfig, SubAgentResult};
-    use CORA_skills::permissions::SkillPermissionChecker;
-    use CORA_skills::types::{EffortLevel, ExecutionContext, LoadedFrom, SkillMetadata, SkillSource};
-    use CORA_tools::Tool;
-    use CORA_types::message::TokenUsage;
+    use cora_skills::permissions::SkillPermissionChecker;
+    use cora_skills::types::{EffortLevel, ExecutionContext, LoadedFrom, SkillMetadata, SkillSource};
+    use cora_tools::Tool;
+    use cora_types::message::TokenUsage;
 
     use super::SkillTool;
 
@@ -934,9 +934,9 @@ mod phase11_tests {
 
     use serde_json::json;
 
-    use CORA_skills::permissions::SkillPermissionChecker;
-    use CORA_skills::types::{ExecutionContext, LoadedFrom, SkillMetadata, SkillSource};
-    use CORA_tools::Tool;
+    use cora_skills::permissions::SkillPermissionChecker;
+    use cora_skills::types::{ExecutionContext, LoadedFrom, SkillMetadata, SkillSource};
+    use cora_tools::Tool;
 
     use super::SkillTool;
 

@@ -3,8 +3,8 @@
 //! These test Message.timestamp serialization and CompactMetadata roundtrip
 //! from a consumer's perspective.
 
-use CORA_types::compact::{CompactMetadata, CompactTrigger};
-use CORA_types::message::{ContentBlock, Message, Role};
+use cora_types::compact::{CompactMetadata, CompactTrigger};
+use cora_types::message::{ContentBlock, Message, Role};
 
 /// TC-2.2-04: Message timestamp serialization — ISO 8601 format.
 #[test]
@@ -58,8 +58,8 @@ fn tc_2_2_06_compact_metadata_roundtrip() {
 /// Additional: CompactState circuit breaker integration with CompactConfig.
 #[test]
 fn compact_state_circuit_breaker_integration() {
-    use CORA_agent::compact::state::CompactState;
-    use CORA_config::compact::CompactConfig;
+    use cora_agent::compact::state::CompactState;
+    use cora_config::compact::CompactConfig;
 
     let config = CompactConfig {
         max_failures: 3,

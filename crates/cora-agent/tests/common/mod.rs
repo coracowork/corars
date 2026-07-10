@@ -7,16 +7,16 @@ use async_trait::async_trait;
 use serde_json::{Value, json};
 use tokio::sync::mpsc;
 
-use CORA_agent::confirm::ToolConfirmer;
-use CORA_config::config::{Config, ProviderType, SessionConfig, ToolsConfig};
-use CORA_config::hooks::HooksConfig;
-use CORA_mcp::config::McpConfig;
-use CORA_protocol::events::ToolCategory;
-use CORA_providers::{LlmProvider, ProviderError};
-use CORA_tools::Tool;
-use CORA_types::llm::{LlmEvent, LlmRequest};
-use CORA_types::message::{StopReason, TokenUsage};
-use CORA_types::tool::ToolResult;
+use cora_agent::confirm::ToolConfirmer;
+use cora_config::config::{Config, ProviderType, SessionConfig, ToolsConfig};
+use cora_config::hooks::HooksConfig;
+use cora_mcp::config::McpConfig;
+use cora_protocol::events::ToolCategory;
+use cora_providers::{LlmProvider, ProviderError};
+use cora_tools::Tool;
+use cora_types::llm::{LlmEvent, LlmRequest};
+use cora_types::message::{StopReason, TokenUsage};
+use cora_types::tool::ToolResult;
 
 // ---------------------------------------------------------------------------
 // MockLlmProvider — deterministic LLM for engine / spawn tests
@@ -247,26 +247,26 @@ pub fn test_config() -> Config {
         system_prompt: Some("You are a test assistant.".to_string()),
         thinking: None,
         prompt_caching: false,
-        compat: CORA_config::compat::ProviderCompat::anthropic_defaults(),
+        compat: cora_config::compat::ProviderCompat::anthropic_defaults(),
         tools: ToolsConfig {
             auto_approve: true,
             allow_list: vec![],
-            skills: CORA_config::config::SkillsPermissionConfig::default(),
+            skills: cora_config::config::SkillsPermissionConfig::default(),
         },
         session: SessionConfig {
             enabled: false,
             directory: "/tmp/CORArs-test-sessions".to_string(),
             max_sessions: 5,
         },
-        compact: CORA_config::compact::CompactConfig::default(),
-        plan: CORA_config::plan::PlanConfig::default(),
-        shell: CORA_config::shell::ShellConfig::default(),
-        file_cache: CORA_config::file_cache::FileCacheConfig::default(),
+        compact: cora_config::compact::CompactConfig::default(),
+        plan: cora_config::plan::PlanConfig::default(),
+        shell: cora_config::shell::ShellConfig::default(),
+        file_cache: cora_config::file_cache::FileCacheConfig::default(),
         hooks: HooksConfig::default(),
         bedrock: None,
         vertex: None,
         mcp: McpConfig::default(),
-        logging: CORA_config::logging::LoggingConfig::default(),
+        logging: cora_config::logging::LoggingConfig::default(),
     }
 }
 

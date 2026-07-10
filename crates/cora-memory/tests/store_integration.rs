@@ -8,8 +8,8 @@ use std::path::Path;
 use std::thread;
 use std::time::Duration;
 
-use CORA_memory::store;
-use CORA_memory::types::{MemoryEntry, MemoryFrontmatter, MemoryType};
+use cora_memory::store;
+use cora_memory::types::{MemoryEntry, MemoryFrontmatter, MemoryType};
 
 // ===========================================================================
 // TC-3: Memory file read/write
@@ -253,14 +253,14 @@ fn tc_4_7_format_manifest() {
     use chrono::{TimeZone, Utc};
 
     let headers = vec![
-        CORA_memory::types::MemoryHeader {
+        cora_memory::types::MemoryHeader {
             filename: "user_role.md".into(),
             file_path: "/mem/user_role.md".into(),
             mtime: Utc.with_ymd_and_hms(2026, 4, 10, 12, 0, 0).unwrap(),
             description: Some("User role info".into()),
             memory_type: Some(MemoryType::User),
         },
-        CORA_memory::types::MemoryHeader {
+        cora_memory::types::MemoryHeader {
             filename: "notes.md".into(),
             file_path: "/mem/notes.md".into(),
             mtime: Utc.with_ymd_and_hms(2026, 4, 9, 8, 0, 0).unwrap(),

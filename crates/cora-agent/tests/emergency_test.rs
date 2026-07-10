@@ -3,8 +3,8 @@
 //! These tests treat `is_at_emergency_limit` as a public API and verify
 //! functional requirements from test-plan.md without relying on internal details.
 
-use CORA_agent::compact::emergency::{EMERGENCY_USER_MESSAGE, is_at_emergency_limit};
-use CORA_config::compact::CompactConfig;
+use cora_agent::compact::emergency::{EMERGENCY_USER_MESSAGE, is_at_emergency_limit};
+use cora_config::compact::CompactConfig;
 
 // ── TC-2.5-01: Below emergency threshold ───────────────────────────────────
 
@@ -94,7 +94,7 @@ fn user_message_is_actionable() {
 fn autocompact_fires_before_emergency() {
     // Verify that the autocompact threshold is lower than the emergency limit
     // so autocompact gets a chance to run before the safety net kicks in.
-    use CORA_agent::compact::auto::should_autocompact;
+    use cora_agent::compact::auto::should_autocompact;
 
     let config = CompactConfig::default();
 
@@ -113,7 +113,7 @@ fn autocompact_fires_before_emergency() {
 #[test]
 fn both_trigger_near_limit() {
     // When very close to the limit, both autocompact and emergency should fire
-    use CORA_agent::compact::auto::should_autocompact;
+    use cora_agent::compact::auto::should_autocompact;
 
     let config = CompactConfig::default();
     let token_count: u64 = 198_000;

@@ -5,7 +5,7 @@
 
 use std::fs;
 
-use CORA_agent::context::{SystemPromptCache, build_system_prompt};
+use cora_agent::context::{SystemPromptCache, build_system_prompt};
 
 // ---------------------------------------------------------------------------
 // TC-7.1: With memory_dir, system prompt includes memory content
@@ -97,7 +97,7 @@ fn tc_7_3_section_ordering() {
     fs::write(mem_dir.join("MEMORY.md"), "- [A](a.md) \u{2014} test\n").unwrap();
 
     // Create a minimal skill metadata
-    use CORA_skills::types::{ExecutionContext, LoadedFrom, SkillMetadata, SkillSource};
+    use cora_skills::types::{ExecutionContext, LoadedFrom, SkillMetadata, SkillSource};
     let skill = SkillMetadata {
         name: "test-skill".to_string(),
         display_name: None,

@@ -11,11 +11,11 @@ use super::{
 mod tests_set_config {
     use std::sync::{Arc, Mutex};
 
-    use CORA_config::compat::ReasoningCompat;
-    use CORA_providers::error::ProviderError;
-    use CORA_providers::provider::LlmProvider;
-    use CORA_tools::registry::ToolRegistry;
-    use CORA_types::llm::{LlmEvent, LlmRequest};
+    use cora_config::compat::ReasoningCompat;
+    use cora_providers::error::ProviderError;
+    use cora_providers::provider::LlmProvider;
+    use cora_tools::registry::ToolRegistry;
+    use cora_types::llm::{LlmEvent, LlmRequest};
 
     use super::{CompactLevel, ProviderCompat};
     use crate::confirm::ToolConfirmer;
@@ -66,7 +66,7 @@ mod tests_set_config {
             output: Arc::new(NullOutput),
             approval_manager: None,
             protocol_writer: None,
-            compact_config: CORA_config::compact::CompactConfig::default(),
+            compact_config: cora_config::compact::CompactConfig::default(),
             compact_state: super::CompactState::new(),
             compact_level: CompactLevel::default(),
             toon_enabled: false,
@@ -154,7 +154,7 @@ mod tests_set_config {
         let mut engine = make_engine("m");
         let changes = engine.apply_config_update(None, Some("enabled".into()), Some(16000), None, None);
         match &engine.thinking {
-            Some(CORA_types::llm::ThinkingConfig::Enabled { budget_tokens }) => {
+            Some(cora_types::llm::ThinkingConfig::Enabled { budget_tokens }) => {
                 assert_eq!(*budget_tokens, 16000);
             }
             other => panic!("expected Enabled, got: {other:?}"),
@@ -165,10 +165,10 @@ mod tests_set_config {
     #[test]
     fn set_config_disables_thinking() {
         let mut engine = make_engine("m");
-        engine.thinking = Some(CORA_types::llm::ThinkingConfig::Enabled { budget_tokens: 8000 });
+        engine.thinking = Some(cora_types::llm::ThinkingConfig::Enabled { budget_tokens: 8000 });
         let changes = engine.apply_config_update(None, Some("disabled".into()), None, None, None);
         match &engine.thinking {
-            Some(CORA_types::llm::ThinkingConfig::Disabled) => {}
+            Some(cora_types::llm::ThinkingConfig::Disabled) => {}
             other => panic!("expected Disabled, got: {other:?}"),
         }
         assert_eq!(changes.len(), 1);
@@ -179,7 +179,7 @@ mod tests_set_config {
         let mut engine = make_engine("m");
         let changes = engine.apply_config_update(None, Some("enabled".into()), None, None, None);
         match &engine.thinking {
-            Some(CORA_types::llm::ThinkingConfig::Enabled { budget_tokens }) => {
+            Some(cora_types::llm::ThinkingConfig::Enabled { budget_tokens }) => {
                 assert!(*budget_tokens > 0);
             }
             other => panic!("expected Enabled with default budget, got: {other:?}"),
@@ -190,10 +190,10 @@ mod tests_set_config {
     #[test]
     fn set_config_invalid_thinking_ignored() {
         let mut engine = make_engine("m");
-        engine.thinking = Some(CORA_types::llm::ThinkingConfig::Enabled { budget_tokens: 8000 });
+        engine.thinking = Some(cora_types::llm::ThinkingConfig::Enabled { budget_tokens: 8000 });
         let changes = engine.apply_config_update(None, Some("invalid_value".into()), None, None, None);
         match &engine.thinking {
-            Some(CORA_types::llm::ThinkingConfig::Enabled { budget_tokens }) => {
+            Some(cora_types::llm::ThinkingConfig::Enabled { budget_tokens }) => {
                 assert_eq!(*budget_tokens, 8000);
             }
             other => panic!("expected Enabled unchanged, got: {other:?}"),
@@ -225,7 +225,7 @@ mod tests_set_config {
         assert_eq!(engine.model, "new-model");
         assert_eq!(engine.reasoning_effort.as_deref(), Some("low"));
         match &engine.thinking {
-            Some(CORA_types::llm::ThinkingConfig::Enabled { budget_tokens }) => {
+            Some(cora_types::llm::ThinkingConfig::Enabled { budget_tokens }) => {
                 assert_eq!(*budget_tokens, 12000);
             }
             other => panic!("expected Enabled, got: {other:?}"),
@@ -238,10 +238,10 @@ mod tests_set_config {
     #[test]
     fn set_config_thinking_budget_only_updates_existing_enabled() {
         let mut engine = make_engine("m");
-        engine.thinking = Some(CORA_types::llm::ThinkingConfig::Enabled { budget_tokens: 5000 });
+        engine.thinking = Some(cora_types::llm::ThinkingConfig::Enabled { budget_tokens: 5000 });
         let changes = engine.apply_config_update(None, None, Some(20000), None, None);
         match &engine.thinking {
-            Some(CORA_types::llm::ThinkingConfig::Enabled { budget_tokens }) => {
+            Some(cora_types::llm::ThinkingConfig::Enabled { budget_tokens }) => {
                 assert_eq!(*budget_tokens, 20000);
             }
             other => panic!("expected Enabled with 20000, got: {other:?}"),
@@ -252,10 +252,10 @@ mod tests_set_config {
     #[test]
     fn set_config_thinking_budget_ignored_when_disabled() {
         let mut engine = make_engine("m");
-        engine.thinking = Some(CORA_types::llm::ThinkingConfig::Disabled);
+        engine.thinking = Some(cora_types::llm::ThinkingConfig::Disabled);
         let changes = engine.apply_config_update(None, None, Some(20000), None, None);
         match &engine.thinking {
-            Some(CORA_types::llm::ThinkingConfig::Disabled) => {}
+            Some(cora_types::llm::ThinkingConfig::Disabled) => {}
             other => panic!("expected Disabled unchanged, got: {other:?}"),
         }
         assert!(changes.is_empty());
@@ -326,11 +326,11 @@ mod tests_set_config {
 mod tests_phase6 {
     use std::sync::{Arc, Mutex};
 
-    use CORA_providers::error::ProviderError;
-    use CORA_providers::provider::LlmProvider;
-    use CORA_tools::registry::ToolRegistry;
-    use CORA_types::llm::{LlmEvent, LlmRequest};
-    use CORA_types::skill_types::{ContextModifier, EffortLevel};
+    use cora_providers::error::ProviderError;
+    use cora_providers::provider::LlmProvider;
+    use cora_tools::registry::ToolRegistry;
+    use cora_types::llm::{LlmEvent, LlmRequest};
+    use cora_types::skill_types::{ContextModifier, EffortLevel};
 
     use super::{CompactLevel, ProviderCompat};
     use crate::confirm::ToolConfirmer;
@@ -381,7 +381,7 @@ mod tests_phase6 {
             output: Arc::new(NullOutput),
             approval_manager: None,
             protocol_writer: None,
-            compact_config: CORA_config::compact::CompactConfig::default(),
+            compact_config: cora_config::compact::CompactConfig::default(),
             compact_state: super::CompactState::new(),
             compact_level: CompactLevel::default(),
             toon_enabled: false,
@@ -519,12 +519,12 @@ mod tests_phase6 {
 mod tests_compact {
     use std::sync::{Arc, Mutex};
 
-    use CORA_config::compact::CompactConfig;
-    use CORA_providers::error::ProviderError;
-    use CORA_providers::provider::LlmProvider;
-    use CORA_tools::registry::ToolRegistry;
-    use CORA_types::llm::{LlmEvent, LlmRequest};
-    use CORA_types::message::{ContentBlock, Message, Role, TokenUsage};
+    use cora_config::compact::CompactConfig;
+    use cora_providers::error::ProviderError;
+    use cora_providers::provider::LlmProvider;
+    use cora_tools::registry::ToolRegistry;
+    use cora_types::llm::{LlmEvent, LlmRequest};
+    use cora_types::message::{ContentBlock, Message, Role, TokenUsage};
     use serde_json::json;
 
     use super::{CompactLevel, ProviderCompat};
@@ -929,11 +929,11 @@ mod tests_plan_mode {
     use std::sync::atomic::{AtomicBool, Ordering};
     use std::sync::{Arc, Mutex};
 
-    use CORA_providers::error::ProviderError;
-    use CORA_providers::provider::LlmProvider;
-    use CORA_tools::registry::ToolRegistry;
-    use CORA_types::llm::{LlmEvent, LlmRequest};
-    use CORA_types::skill_types::{ContextModifier, PlanModeTransition};
+    use cora_providers::error::ProviderError;
+    use cora_providers::provider::LlmProvider;
+    use cora_tools::registry::ToolRegistry;
+    use cora_types::llm::{LlmEvent, LlmRequest};
+    use cora_types::skill_types::{ContextModifier, PlanModeTransition};
 
     use super::{CompactLevel, ProviderCompat};
     use crate::compact::state::CompactState;
@@ -987,7 +987,7 @@ mod tests_plan_mode {
             output: Arc::new(NullOutput),
             approval_manager: None,
             protocol_writer: None,
-            compact_config: CORA_config::compact::CompactConfig::default(),
+            compact_config: cora_config::compact::CompactConfig::default(),
             compact_state: CompactState::new(),
             compact_level: CompactLevel::default(),
             toon_enabled: false,
@@ -1138,11 +1138,11 @@ mod tests_plan_mode {
 mod tests_handle_command {
     use std::sync::{Arc, Mutex};
 
-    use CORA_providers::error::ProviderError;
-    use CORA_providers::provider::LlmProvider;
-    use CORA_tools::registry::ToolRegistry;
-    use CORA_types::llm::{LlmEvent, LlmRequest};
-    use CORA_types::message::{ContentBlock, Message, Role};
+    use cora_providers::error::ProviderError;
+    use cora_providers::provider::LlmProvider;
+    use cora_tools::registry::ToolRegistry;
+    use cora_types::llm::{LlmEvent, LlmRequest};
+    use cora_types::message::{ContentBlock, Message, Role};
 
     use super::{CompactLevel, ProviderCompat};
     use crate::compact::state::CompactState;
@@ -1194,7 +1194,7 @@ mod tests_handle_command {
             output: Arc::new(NullOutput),
             approval_manager: None,
             protocol_writer: None,
-            compact_config: CORA_config::compact::CompactConfig::default(),
+            compact_config: cora_config::compact::CompactConfig::default(),
             compact_state: CompactState::new(),
             compact_level: CompactLevel::default(),
             toon_enabled: false,
@@ -1296,7 +1296,7 @@ mod tests_handle_command {
 
 #[cfg(test)]
 mod tests_loop_helpers {
-    use CORA_types::message::{ContentBlock, StopReason, TokenUsage};
+    use cora_types::message::{ContentBlock, StopReason, TokenUsage};
     use serde_json::json;
 
     use super::{AgentError, merge_tool_results, tool_call_malformed_fingerprint};

@@ -12,16 +12,16 @@ use std::sync::{Arc, Mutex};
 use async_trait::async_trait;
 use tokio::sync::mpsc;
 
-use CORA_agent::engine::AgentEngine;
-use CORA_agent::error::AgentError;
-use CORA_agent::output::OutputSink;
-use CORA_agent::output::terminal::TerminalSink;
-use CORA_agent::session::SessionManager;
-use CORA_config::compact::CompactConfig;
-use CORA_providers::{LlmProvider, ProviderError};
-use CORA_tools::registry::ToolRegistry;
-use CORA_types::llm::{LlmEvent, LlmRequest};
-use CORA_types::message::{StopReason, TokenUsage};
+use cora_agent::engine::AgentEngine;
+use cora_agent::error::AgentError;
+use cora_agent::output::OutputSink;
+use cora_agent::output::terminal::TerminalSink;
+use cora_agent::session::SessionManager;
+use cora_config::compact::CompactConfig;
+use cora_providers::{LlmProvider, ProviderError};
+use cora_tools::registry::ToolRegistry;
+use cora_types::llm::{LlmEvent, LlmRequest};
+use cora_types::message::{StopReason, TokenUsage};
 use tempfile::tempdir;
 
 use common::test_config;
@@ -287,7 +287,7 @@ async fn tc_2_6_05_session_save_after_compact() {
     // Verify at least one message contains compact boundary marker
     let has_boundary = session.messages.iter().any(|m| {
         m.content.iter().any(|b| {
-            matches!(b, CORA_types::message::ContentBlock::Text { text } if text.contains("[Conversation compacted]"))
+            matches!(b, cora_types::message::ContentBlock::Text { text } if text.contains("[Conversation compacted]"))
         })
     });
     assert!(has_boundary, "session should contain compact boundary marker");
@@ -406,12 +406,12 @@ async fn tc_2_6_02_micro_before_auto_execution_order() {
     // microcompact already cleared old tool results before autocompact
     // was invoked.
 
-    let captured: Arc<Mutex<Option<Vec<CORA_types::message::Message>>>> = Arc::new(Mutex::new(None));
+    let captured: Arc<Mutex<Option<Vec<cora_types::message::Message>>>> = Arc::new(Mutex::new(None));
     let capture_ref = captured.clone();
 
     struct OrderProvider {
         regular_count: Mutex<usize>,
-        captured: Arc<Mutex<Option<Vec<CORA_types::message::Message>>>>,
+        captured: Arc<Mutex<Option<Vec<cora_types::message::Message>>>>,
     }
 
     #[async_trait]
@@ -536,8 +536,8 @@ async fn tc_2_6_02_micro_before_auto_execution_order() {
         .filter(|b| {
             matches!(
                 b,
-                CORA_types::message::ContentBlock::ToolResult { content, .. }
-                    if content == CORA_agent::compact::micro::CLEARED_TOOL_RESULT
+                cora_types::message::ContentBlock::ToolResult { content, .. }
+                    if content == cora_agent::compact::micro::CLEARED_TOOL_RESULT
             )
         })
         .count();

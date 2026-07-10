@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
-use CORA_process::CommandRunner;
+use cora_process::CommandRunner;
 use serde::{Deserialize, Serialize};
 
 use crate::shell::{default_shell, shell_command_builder};

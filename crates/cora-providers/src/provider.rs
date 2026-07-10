@@ -4,8 +4,8 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use tokio::sync::mpsc;
 
-use CORA_config::config::{Config, ProviderType};
-use CORA_types::llm::{LlmEvent, LlmRequest};
+use cora_config::config::{Config, ProviderType};
+use cora_types::llm::{LlmEvent, LlmRequest};
 
 use crate::anthropic;
 use crate::bedrock;

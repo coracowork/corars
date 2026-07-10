@@ -1,5 +1,5 @@
 use crate::types::SkillSource;
-use CORA_config::hooks::{HookDef, HooksConfig};
+use cora_config::hooks::{HookDef, HooksConfig};
 
 /// A single hook command extracted from skill frontmatter.
 /// Only command-type hooks are supported; prompt/http/agent are silently skipped.
@@ -32,7 +32,7 @@ pub fn parse_skill_hooks(
 ) -> Option<SkillHooksConfig> {
     // MCP skills may not register hooks (security boundary).
     if source == SkillSource::Mcp {
-        tracing::warn!(target: "CORA_skills", skill = %skill_name, "hooks ignored for MCP source");
+        tracing::warn!(target: "cora_skills", skill = %skill_name, "hooks ignored for MCP source");
         return None;
     }
 
@@ -41,7 +41,7 @@ pub fn parse_skill_hooks(
     let obj = match raw.as_object() {
         Some(o) => o,
         None => {
-            tracing::warn!(target: "CORA_skills", skill = %skill_name, "hooks_raw is not a JSON object, ignoring");
+            tracing::warn!(target: "cora_skills", skill = %skill_name, "hooks_raw is not a JSON object, ignoring");
             return None;
         }
     };
@@ -58,7 +58,7 @@ pub fn parse_skill_hooks(
             "PostToolUse" => &mut config.post_tool_use,
             "Stop" => &mut config.stop,
             other => {
-                tracing::warn!(target: "CORA_skills", skill = %skill_name, event = %other, "unknown hook event, skipping");
+                tracing::warn!(target: "cora_skills", skill = %skill_name, event = %other, "unknown hook event, skipping");
                 continue;
             }
         };
@@ -66,7 +66,7 @@ pub fn parse_skill_hooks(
         let matchers = match matchers_val.as_array() {
             Some(a) => a,
             None => {
-                tracing::warn!(target: "CORA_skills", skill = %skill_name, event = %event_key, "hook event value is not an array, skipping");
+                tracing::warn!(target: "cora_skills", skill = %skill_name, event = %event_key, "hook event value is not an array, skipping");
                 continue;
             }
         };
@@ -84,11 +84,11 @@ pub fn parse_skill_hooks(
                 match hook["type"].as_str() {
                     Some("command") => {}
                     Some(other) => {
-                        tracing::warn!(target: "CORA_skills", skill = %skill_name, hook_type = %other, "unsupported hook type, skipping");
+                        tracing::warn!(target: "cora_skills", skill = %skill_name, hook_type = %other, "unsupported hook type, skipping");
                         continue;
                     }
                     None => {
-                        tracing::warn!(target: "CORA_skills", skill = %skill_name, "hook missing type field, skipping");
+                        tracing::warn!(target: "cora_skills", skill = %skill_name, "hook missing type field, skipping");
                         continue;
                     }
                 }
@@ -96,7 +96,7 @@ pub fn parse_skill_hooks(
                 let command = match hook["command"].as_str() {
                     Some(c) => c.to_string(),
                     None => {
-                        tracing::warn!(target: "CORA_skills", skill = %skill_name, "command-type hook missing command field, skipping");
+                        tracing::warn!(target: "cora_skills", skill = %skill_name, "command-type hook missing command field, skipping");
                         continue;
                     }
                 };

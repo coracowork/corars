@@ -96,7 +96,7 @@ cache_diagnostics = true
     #[test]
     fn default_compaction_is_safe() {
         let cfg = CompactConfig::default();
-        assert_eq!(cfg.compaction, CORA_compact::CompactLevel::Safe);
+        assert_eq!(cfg.compaction, cora_compact::CompactLevel::Safe);
     }
 
     #[test]
@@ -109,14 +109,14 @@ cache_diagnostics = true
     fn toml_compaction_level_override() {
         let toml_str = r#"compaction = "full""#;
         let cfg: CompactConfig = toml::from_str(toml_str).unwrap();
-        assert_eq!(cfg.compaction, CORA_compact::CompactLevel::Full);
+        assert_eq!(cfg.compaction, cora_compact::CompactLevel::Full);
     }
 
     #[test]
     fn toml_compaction_off() {
         let toml_str = r#"compaction = "off""#;
         let cfg: CompactConfig = toml::from_str(toml_str).unwrap();
-        assert_eq!(cfg.compaction, CORA_compact::CompactLevel::Off);
+        assert_eq!(cfg.compaction, cora_compact::CompactLevel::Off);
     }
 
     #[test]

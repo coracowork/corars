@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
-use CORA_config::compat::ProviderCompat;
-use CORA_protocol::events::{Capabilities, ErrorInfo, ProtocolEvent, Usage};
-use CORA_protocol::writer::{ProtocolEmitter, ProtocolWriter};
+use cora_config::compat::ProviderCompat;
+use cora_protocol::events::{Capabilities, ErrorInfo, ProtocolEvent, Usage};
+use cora_protocol::writer::{ProtocolEmitter, ProtocolWriter};
 
 use super::OutputSink;
 

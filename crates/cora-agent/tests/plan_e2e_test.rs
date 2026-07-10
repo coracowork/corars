@@ -5,12 +5,12 @@
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 
-use CORA_agent::plan::prompt::plan_mode_instructions;
-use CORA_agent::plan::tools::{EnterPlanModeTool, ExitPlanModeTool};
-use CORA_protocol::events::ToolCategory;
-use CORA_tools::Tool;
-use CORA_tools::registry::ToolRegistry;
-use CORA_types::skill_types::PlanModeTransition;
+use cora_agent::plan::prompt::plan_mode_instructions;
+use cora_agent::plan::tools::{EnterPlanModeTool, ExitPlanModeTool};
+use cora_protocol::events::ToolCategory;
+use cora_tools::Tool;
+use cora_tools::registry::ToolRegistry;
+use cora_types::skill_types::PlanModeTransition;
 use async_trait::async_trait;
 use serde_json::json;
 
@@ -41,8 +41,8 @@ impl Tool for MockTool {
         true
     }
 
-    async fn execute(&self, _input: serde_json::Value) -> CORA_types::tool::ToolResult {
-        CORA_types::tool::ToolResult {
+    async fn execute(&self, _input: serde_json::Value) -> cora_types::tool::ToolResult {
+        cora_types::tool::ToolResult {
             content: format!("{} executed", self.tool_name),
             is_error: false,
         }
@@ -179,10 +179,10 @@ async fn tc_3_6_e2e_01_full_plan_mode_lifecycle() {
 
 #[test]
 fn tc_3_6_e2e_02_plan_mode_and_compaction_independent() {
-    use CORA_agent::compact::micro::microcompact;
-    use CORA_agent::plan::state::PlanState;
-    use CORA_config::compact::CompactConfig;
-    use CORA_types::message::{ContentBlock, Message, Role};
+    use cora_agent::compact::micro::microcompact;
+    use cora_agent::plan::state::PlanState;
+    use cora_config::compact::CompactConfig;
+    use cora_types::message::{ContentBlock, Message, Role};
 
     // Build messages with compactable tool results
     let mut messages = Vec::new();
@@ -272,7 +272,7 @@ fn tc_3_6_e2e_03_skill_tool_available_in_plan_mode() {
 
 #[test]
 fn tc_3_6_e2e_04_plan_state_not_persisted_across_sessions() {
-    use CORA_agent::plan::state::PlanState;
+    use cora_agent::plan::state::PlanState;
 
     // Simulate a "previous session" where plan mode was active
     let active_state = PlanState {

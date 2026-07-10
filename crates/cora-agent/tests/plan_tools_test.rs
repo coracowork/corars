@@ -7,11 +7,11 @@ use std::sync::atomic::{AtomicBool, Ordering};
 
 use serde_json::json;
 
-use CORA_agent::plan::state::PlanState;
-use CORA_agent::plan::tools::{EnterPlanModeTool, ExitPlanModeTool};
-use CORA_protocol::events::ToolCategory;
-use CORA_tools::Tool;
-use CORA_types::skill_types::PlanModeTransition;
+use cora_agent::plan::state::PlanState;
+use cora_agent::plan::tools::{EnterPlanModeTool, ExitPlanModeTool};
+use cora_protocol::events::ToolCategory;
+use cora_tools::Tool;
+use cora_types::skill_types::PlanModeTransition;
 
 // ---------------------------------------------------------------------------
 // TC-3.3-01  PlanState initial state

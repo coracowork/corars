@@ -3,10 +3,10 @@
 
 use std::fs;
 
-use CORA_tools::Tool;
-use CORA_tools::exec_command::ExecCommandTool;
-use CORA_tools::glob::GlobTool;
-use CORA_tools::grep::GrepTool;
+use cora_tools::Tool;
+use cora_tools::exec_command::ExecCommandTool;
+use cora_tools::glob::GlobTool;
+use cora_tools::grep::GrepTool;
 use serde_json::json;
 use tempfile::tempdir;
 

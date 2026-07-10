@@ -11,12 +11,12 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
-use CORA_agent::context::{SystemPromptCache, build_system_prompt};
-use CORA_agent::skill_tool::SkillTool;
-use CORA_agent::skills::loader::load_all_skills;
-use CORA_agent::skills::permissions::SkillPermissionChecker;
-use CORA_agent::skills::types::SkillMetadata;
-use CORA_tools::Tool;
+use cora_agent::context::{SystemPromptCache, build_system_prompt};
+use cora_agent::skill_tool::SkillTool;
+use cora_agent::skills::loader::load_all_skills;
+use cora_agent::skills::permissions::SkillPermissionChecker;
+use cora_agent::skills::types::SkillMetadata;
+use cora_tools::Tool;
 use serde_json::json;
 use tempfile::TempDir;
 
@@ -59,7 +59,7 @@ fn make_project() -> (TempDir, PathBuf) {
     fs::create_dir_all(&migrate_dir).unwrap();
     fs::write(
         migrate_dir.join("SKILL.md"),
-        "---\nname: db:migrate\ndescription: Run database migrations\n---\n\nRunning migrations for: $ARGUMENTS\nSkill directory: ${CORARS_SKILL_DIR}\n",
+        "---\nname: db:migrate\ndescription: Run database migrations\n---\n\nRunning migrations for: $ARGUMENTS\nSkill directory: ${cora_SKILL_DIR}\n",
     ).unwrap();
 
     // --- rust-review (conditional paths) ---
@@ -234,7 +234,7 @@ async fn e7_system_prompt_injection() {
 }
 
 // ---------------------------------------------------------------------------
-// E8: Full SkillTool execution (db:migrate with $ARGUMENTS + ${CORARS_SKILL_DIR})
+// E8: Full SkillTool execution (db:migrate with $ARGUMENTS + ${cora_SKILL_DIR})
 // ---------------------------------------------------------------------------
 
 #[tokio::test]
@@ -251,11 +251,11 @@ async fn e8_full_execution() {
         result.content
     );
     assert!(
-        !result.content.contains("${CORARS_SKILL_DIR}"),
-        "E8 FAIL: ${{CORARS_SKILL_DIR}} not expanded. Got: {}",
+        !result.content.contains("${cora_SKILL_DIR}"),
+        "E8 FAIL: ${{cora_SKILL_DIR}} not expanded. Got: {}",
         result.content
     );
-    println!("E8 PASS: full execution with $ARGUMENTS and ${{CORARS_SKILL_DIR}} substitution");
+    println!("E8 PASS: full execution with $ARGUMENTS and ${{cora_SKILL_DIR}} substitution");
 }
 
 // ---------------------------------------------------------------------------

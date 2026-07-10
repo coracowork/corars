@@ -17,7 +17,7 @@ pub const ENTRYPOINT_NAME: &str = "MEMORY.md";
 const MAX_SANITIZED_LENGTH: usize = 200;
 
 /// Environment variable to override the memory base directory.
-const MEMORY_DIR_ENV: &str = "CORARS_MEMORY_DIR";
+const MEMORY_DIR_ENV: &str = "cora_MEMORY_DIR";
 
 // ---------------------------------------------------------------------------
 // Base directory resolution
@@ -26,7 +26,7 @@ const MEMORY_DIR_ENV: &str = "CORARS_MEMORY_DIR";
 /// Returns the base directory for memory storage.
 ///
 /// Resolution order:
-///   1. `CORARS_MEMORY_DIR` environment variable (explicit override)
+///   1. `cora_MEMORY_DIR` environment variable (explicit override)
 ///   2. `app_config_dir()` from `CORA-config` (platform-aware default)
 ///
 /// Returns `None` only when both the env var is unset AND the platform
@@ -37,7 +37,7 @@ pub fn memory_base_dir() -> Option<PathBuf> {
     {
         return Some(PathBuf::from(dir));
     }
-    CORA_config::config::app_config_dir()
+    cora_config::config::app_config_dir()
 }
 
 // ---------------------------------------------------------------------------

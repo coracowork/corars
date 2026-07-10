@@ -7,7 +7,7 @@ mod tests {
     use tempfile::tempdir;
 
     use crate::file_cache::update_cache_after_write;
-    use CORA_config::file_cache::FileCacheConfig;
+    use cora_config::file_cache::FileCacheConfig;
 
     fn make_cache() -> Arc<RwLock<FileStateCache>> {
         let config = FileCacheConfig {

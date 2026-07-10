@@ -11,16 +11,16 @@ use std::sync::Mutex;
 use async_trait::async_trait;
 use tokio::sync::mpsc;
 
-use CORA_agent::compact::auto::{
+use cora_agent::compact::auto::{
     CompactError, autocompact, extract_compact_metadata, is_compact_boundary, should_autocompact,
 };
-use CORA_agent::compact::prompt::{build_compact_prompt, build_summary_content, format_compact_summary};
-use CORA_agent::compact::state::CompactState;
-use CORA_config::compact::CompactConfig;
-use CORA_providers::{LlmProvider, ProviderError};
-use CORA_types::compact::CompactTrigger;
-use CORA_types::llm::{LlmEvent, LlmRequest};
-use CORA_types::message::{ContentBlock, Message, Role, StopReason, TokenUsage};
+use cora_agent::compact::prompt::{build_compact_prompt, build_summary_content, format_compact_summary};
+use cora_agent::compact::state::CompactState;
+use cora_config::compact::CompactConfig;
+use cora_providers::{LlmProvider, ProviderError};
+use cora_types::compact::CompactTrigger;
+use cora_types::llm::{LlmEvent, LlmRequest};
+use cora_types::message::{ContentBlock, Message, Role, StopReason, TokenUsage};
 
 // ── Mock provider ───────────────────────────────────────────────────────────
 

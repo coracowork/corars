@@ -1,7 +1,7 @@
 use tokio::sync::mpsc;
 
-use CORA_types::llm::LlmEvent;
-use CORA_types::message::{StopReason, TokenUsage};
+use cora_types::llm::LlmEvent;
+use cora_types::message::{StopReason, TokenUsage};
 
 use crate::error::ProviderError;
 use crate::framing::{FrameKind, SseBlockFramer, SseLineFramer, bedrock_payload_to_frame};
@@ -52,7 +52,7 @@ pub(crate) async fn process_openai_sse_stream(
         };
         let text = String::from_utf8_lossy(&chunk);
         for frame in framer.push_text(&text, "[DONE]") {
-            tracing::debug!(target: "CORA_providers", chunk = %frame.data, "sse chunk received");
+            tracing::debug!(target: "cora_providers", chunk = %frame.data, "sse chunk received");
             let is_done = frame.kind == FrameKind::Done;
             let events = parser.parse_frame(&frame, &mut state);
             for event in events {
@@ -107,7 +107,7 @@ pub(crate) async fn process_anthropic_sse_stream(
         };
         let text = String::from_utf8_lossy(&chunk);
         for frame in framer.push_text(&text) {
-            tracing::debug!(target: "CORA_providers", chunk = %frame.data, "sse chunk received");
+            tracing::debug!(target: "cora_providers", chunk = %frame.data, "sse chunk received");
             let events = parser.parse_frame(&frame, &mut state);
             for event in events {
                 if matches!(
@@ -170,7 +170,7 @@ pub(crate) async fn process_bedrock_aws_event_stream(
             };
 
             if let Some(frame) = bedrock_payload_to_frame(&payload) {
-                tracing::debug!(target: "CORA_providers", chunk = %frame.data, "bedrock event chunk");
+                tracing::debug!(target: "cora_providers", chunk = %frame.data, "bedrock event chunk");
                 let events = parser.parse_frame(&frame, &mut state);
                 for event in events {
                     if matches!(

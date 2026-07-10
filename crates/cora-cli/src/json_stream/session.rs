@@ -9,13 +9,13 @@
 
 use std::sync::Arc;
 
-use CORA_agent::output::OutputSink;
-use CORA_agent::output::protocol_sink::ProtocolSink;
-use CORA_config::config::Config;
-use CORA_protocol::ToolApprovalManager;
-use CORA_protocol::commands::ProtocolCommand;
-use CORA_protocol::reader::spawn_stdin_reader;
-use CORA_protocol::writer::ProtocolWriter;
+use cora_agent::output::OutputSink;
+use cora_agent::output::protocol_sink::ProtocolSink;
+use cora_config::config::Config;
+use cora_protocol::ToolApprovalManager;
+use cora_protocol::commands::ProtocolCommand;
+use cora_protocol::reader::spawn_stdin_reader;
+use cora_protocol::writer::ProtocolWriter;
 
 use super::context::StreamContext;
 use super::dispatch::DispatchOutcome;

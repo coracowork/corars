@@ -4,9 +4,9 @@ use super::*;
 mod tests {
     use super::*;
 
-    use CORA_config::compat::{MessageCompat, ToolCompat};
-    use CORA_config::schema::legalize_json_schema;
-    use CORA_types::tool::ToolDef;
+    use cora_config::compat::{MessageCompat, ToolCompat};
+    use cora_config::schema::legalize_json_schema;
+    use cora_types::tool::ToolDef;
     use serde_json::json;
 
     /// Compat with merge but no alternation — matches pre-compat behavior

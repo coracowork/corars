@@ -1,4 +1,4 @@
-use CORA_types::{message::ContentBlock, skill_types::ContextModifier};
+use cora_types::{message::ContentBlock, skill_types::ContextModifier};
 
 pub(crate) const DEFAULT_MAX_TOOL_CALL_MALFORMED: usize = 3;
 pub(crate) const DEFAULT_MAX_TOOL_CALL_FAILURE: usize = 3;
@@ -147,7 +147,7 @@ pub(crate) fn merge_tool_results(
                 continue;
             };
             tracing::warn!(
-                target: "CORA_agent",
+                target: "cora_agent",
                 tool_call_id = %id,
                 tool = %name,
                 reason = reason.log_reason(),

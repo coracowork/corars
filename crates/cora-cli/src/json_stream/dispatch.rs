@@ -4,11 +4,11 @@
 //! select-loop machinery in `message.rs`) and the `AddMcpServer` pre-message
 //! phase (handled in `pre_message.rs` before this loop starts).
 
-use CORA_agent::engine::AgentEngine;
-use CORA_protocol::ToolApprovalResult;
-use CORA_protocol::commands::ProtocolCommand;
-use CORA_protocol::events::ProtocolEvent;
-use CORA_protocol::writer::ProtocolEmitter;
+use cora_agent::engine::AgentEngine;
+use cora_protocol::ToolApprovalResult;
+use cora_protocol::commands::ProtocolCommand;
+use cora_protocol::events::ProtocolEvent;
+use cora_protocol::writer::ProtocolEmitter;
 
 use super::context::StreamContext;
 
@@ -34,7 +34,7 @@ pub(super) fn handle(cmd: ProtocolCommand, engine: &mut AgentEngine, ctx: &Strea
                 .resolve(&call_id, ToolApprovalResult::Denied { reason });
         }
         ProtocolCommand::InitHistory { text } => {
-            tracing::debug!(target: "CORA_protocol", chars = text.len(), "InitHistory received");
+            tracing::debug!(target: "cora_protocol", chars = text.len(), "InitHistory received");
         }
         ProtocolCommand::SetMode { mode } => {
             let mode_str = format!("{mode:?}").to_lowercase();
@@ -45,7 +45,7 @@ pub(super) fn handle(cmd: ProtocolCommand, engine: &mut AgentEngine, ctx: &Strea
             });
             ctx.protocol_sink
                 .emit_config_changed(engine.compat(), ctx.has_mcp, &ctx.approval_manager.current_mode());
-            tracing::debug!(target: "CORA_protocol", mode = %mode_str, "SetMode applied");
+            tracing::debug!(target: "cora_protocol", mode = %mode_str, "SetMode applied");
         }
         ProtocolCommand::SetConfig {
             model,
@@ -80,7 +80,7 @@ pub(super) fn handle(cmd: ProtocolCommand, engine: &mut AgentEngine, ctx: &Strea
             // reaching this dispatcher. Reaching here means the caller's
             // routing changed; log and ignore rather than panic.
             tracing::warn!(
-                target: "CORA_protocol",
+                target: "cora_protocol",
                 "Message reached dispatch::handle; expected routing to message::handle"
             );
         }

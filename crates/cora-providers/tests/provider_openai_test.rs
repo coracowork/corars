@@ -1,11 +1,11 @@
 use std::time::Duration;
 
-use CORA_config::compat::ProviderCompat;
-use CORA_providers::LlmProvider;
-use CORA_providers::openai::OpenAIProvider;
-use CORA_types::llm::{LlmEvent, LlmRequest};
-use CORA_types::message::{ContentBlock, Message, Role, StopReason};
-use CORA_types::tool::ToolDef;
+use cora_config::compat::ProviderCompat;
+use cora_providers::LlmProvider;
+use cora_providers::openai::OpenAIProvider;
+use cora_types::llm::{LlmEvent, LlmRequest};
+use cora_types::message::{ContentBlock, Message, Role, StopReason};
+use cora_types::tool::ToolDef;
 use serde_json::{Value, json};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpListener;
@@ -549,7 +549,7 @@ async fn test_openai_api_error_non_success_status() {
 
     assert!(result.is_err());
     match result.unwrap_err() {
-        CORA_providers::ProviderError::Api { status, .. } => {
+        cora_providers::ProviderError::Api { status, .. } => {
             assert_eq!(status, 401);
         }
         e => panic!("expected Api error, got: {:?}", e),
@@ -583,7 +583,7 @@ async fn test_aio_140_openai_tools_wire_shape_mismatch_error_is_readable_and_not
     );
 
     match result.unwrap_err() {
-        CORA_providers::ProviderError::Api { status, message } => {
+        cora_providers::ProviderError::Api { status, message } => {
             assert_eq!(status, 400);
             assert!(message.contains("tools wire shape mismatch"));
             assert!(message.contains("openai_function"));
@@ -612,7 +612,7 @@ async fn test_openai_rate_limited() {
 
     assert!(result.is_err());
     match result.unwrap_err() {
-        CORA_providers::ProviderError::RateLimited { retry_after_ms, body } => {
+        cora_providers::ProviderError::RateLimited { retry_after_ms, body } => {
             assert_eq!(retry_after_ms, 5000);
             assert_eq!(body.as_deref(), Some("Too Many Requests"));
         }

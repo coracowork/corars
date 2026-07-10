@@ -1,4 +1,4 @@
-use CORA_protocol::events::{Capabilities, ProtocolEvent};
+use cora_protocol::events::{Capabilities, ProtocolEvent};
 
 #[test]
 fn capabilities_serialize_with_all_fields() {

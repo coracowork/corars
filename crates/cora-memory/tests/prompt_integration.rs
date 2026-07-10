@@ -6,7 +6,7 @@
 use std::fs;
 use std::path::Path;
 
-use CORA_memory::prompt::{build_memory_instructions, build_memory_prompt, memory_type_descriptions};
+use cora_memory::prompt::{build_memory_instructions, build_memory_prompt, memory_type_descriptions};
 
 // ---------------------------------------------------------------------------
 // TC-6.1: Complete prompt contains all required sections

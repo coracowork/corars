@@ -3,23 +3,23 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 
-use CORA_config::config::Config;
-use CORA_providers::LlmProvider;
-use CORA_tools::edit::EditTool;
-use CORA_tools::exec_command::ExecCommandTool;
-use CORA_tools::glob::GlobTool;
-use CORA_tools::grep::GrepTool;
-use CORA_tools::read::ReadTool;
-use CORA_tools::registry::ToolRegistry;
-use CORA_tools::write::WriteTool;
-use CORA_types::message::TokenUsage;
+use cora_config::config::Config;
+use cora_providers::LlmProvider;
+use cora_tools::edit::EditTool;
+use cora_tools::exec_command::ExecCommandTool;
+use cora_tools::glob::GlobTool;
+use cora_tools::grep::GrepTool;
+use cora_tools::read::ReadTool;
+use cora_tools::registry::ToolRegistry;
+use cora_tools::write::WriteTool;
+use cora_types::message::TokenUsage;
 
 use crate::engine::AgentEngine;
 use crate::output::OutputSink;
 use crate::output::null_sink::NullSink;
 
 // Re-export from CORA-types — single source of truth
-pub use CORA_types::spawner::{ForkOverrides, Spawner, SubAgentConfig, SubAgentResult};
+pub use cora_types::spawner::{ForkOverrides, Spawner, SubAgentConfig, SubAgentResult};
 
 /// Spawns independent child agents that share the parent's LLM provider.
 ///
@@ -64,7 +64,7 @@ impl AgentSpawner {
         config.session.enabled = false;
         config.tools.auto_approve = true;
 
-        tracing::info!(target: "CORA_agent", cwd = %self.cwd.display(), "sub-agent spawned with workspace cwd");
+        tracing::info!(target: "cora_agent", cwd = %self.cwd.display(), "sub-agent spawned with workspace cwd");
 
         let tools = build_tool_registry(&[], &self.cwd, &self.runtime_env);
         let output: Arc<dyn OutputSink> = Arc::new(NullSink);
@@ -178,7 +178,7 @@ impl Spawner for AgentSpawner {
 }
 
 fn build_tool_registry(allowed: &[String], cwd: &Path, runtime_env: &[(String, String)]) -> ToolRegistry {
-    let all_tools: Vec<(&str, Box<dyn CORA_tools::Tool>)> = vec![
+    let all_tools: Vec<(&str, Box<dyn cora_tools::Tool>)> = vec![
         ("Read", Box::new(ReadTool::new(None))),
         ("Write", Box::new(WriteTool::new(None))),
         ("Edit", Box::new(EditTool::new(None))),

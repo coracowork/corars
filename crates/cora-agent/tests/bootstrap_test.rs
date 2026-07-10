@@ -1,9 +1,9 @@
 use std::sync::Arc;
 
-use CORA_agent::bootstrap::AgentBootstrap;
-use CORA_agent::output::null_sink::NullSink;
-use CORA_config::compat::ProviderCompat;
-use CORA_config::config::{Config, ProviderType};
+use cora_agent::bootstrap::AgentBootstrap;
+use cora_agent::output::null_sink::NullSink;
+use cora_config::compat::ProviderCompat;
+use cora_config::config::{Config, ProviderType};
 
 fn minimal_config() -> Config {
     Config {
@@ -34,7 +34,7 @@ fn minimal_config() -> Config {
     }
 }
 
-fn null_output() -> Arc<dyn CORA_agent::output::OutputSink> {
+fn null_output() -> Arc<dyn cora_agent::output::OutputSink> {
     Arc::new(NullSink)
 }
 
@@ -158,7 +158,7 @@ async fn bootstrap_config_accessor_returns_config() {
 #[tokio::test]
 async fn bootstrap_with_external_provider() {
     let config = minimal_config();
-    let provider = CORA_providers::create_provider(&config);
+    let provider = cora_providers::create_provider(&config);
 
     let result = AgentBootstrap::new(config, "/tmp/test-workspace", null_output())
         .provider(provider)

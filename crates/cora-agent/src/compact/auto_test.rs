@@ -3,7 +3,7 @@ use super::*;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use CORA_types::compact::CompactTrigger;
+    use cora_types::compact::CompactTrigger;
 
     fn default_config() -> CompactConfig {
         CompactConfig::default()

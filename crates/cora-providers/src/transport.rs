@@ -1,5 +1,5 @@
-use CORA_config::compat::ProviderCompat;
-use CORA_types::llm::LlmRequest;
+use cora_config::compat::ProviderCompat;
+use cora_types::llm::LlmRequest;
 use reqwest::header::{AUTHORIZATION, CONTENT_TYPE, HeaderMap, HeaderValue};
 use serde_json::Value;
 

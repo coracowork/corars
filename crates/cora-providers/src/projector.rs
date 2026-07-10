@@ -1,7 +1,7 @@
-use CORA_config::compat::{self, ProviderCompat, ToolWireShape};
-use CORA_config::schema::legalize_json_schema;
-use CORA_types::llm::{LlmRequest, ThinkingConfig};
-use CORA_types::tool::{ToolDef, truncate_deferred_description};
+use cora_config::compat::{self, ProviderCompat, ToolWireShape};
+use cora_config::schema::legalize_json_schema;
+use cora_types::llm::{LlmRequest, ThinkingConfig};
+use cora_types::tool::{ToolDef, truncate_deferred_description};
 use serde_json::{Value, json};
 use std::fmt;
 
@@ -175,7 +175,7 @@ impl OpenAiProjector {
             body["tools"] = json!(tools);
         } else if !request.tools.is_empty() {
             tracing::warn!(
-                target: "CORA_providers",
+                target: "cora_providers",
                 "OpenAI-compatible outgoing tools omitted because compat.emit_tools is disabled"
             );
         }
@@ -185,7 +185,7 @@ impl OpenAiProjector {
                 body["reasoning_effort"] = json!(effort);
             } else {
                 tracing::warn!(
-                    target: "CORA_providers",
+                    target: "cora_providers",
                     "OpenAI-compatible reasoning_effort omitted because compat.supports_effort is disabled"
                 );
             }

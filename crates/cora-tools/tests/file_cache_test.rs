@@ -6,9 +6,9 @@
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, RwLock};
 
-use CORA_config::file_cache::FileCacheConfig;
-use CORA_tools::file_cache::{FileStateCache, file_mtime_ms, update_cache_after_write};
-use CORA_types::file_state::FileState;
+use cora_config::file_cache::FileCacheConfig;
+use cora_tools::file_cache::{FileStateCache, file_mtime_ms, update_cache_after_write};
+use cora_types::file_state::FileState;
 
 fn default_config() -> FileCacheConfig {
     FileCacheConfig {

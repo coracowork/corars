@@ -70,7 +70,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_prepare_inline_substitutes_skill_dir() {
-        let skill = make_skill("Dir: ${CORARS_SKILL_DIR}", Some("/skills/mine"));
+        let skill = make_skill("Dir: ${cora_SKILL_DIR}", Some("/skills/mine"));
         let result = prepare_inline_content(&skill, None, None, Path::new("/tmp"))
             .await
             .unwrap();
@@ -80,7 +80,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_prepare_inline_substitutes_session_id() {
-        let skill = make_skill("Session: ${CORARS_SESSION_ID}", None);
+        let skill = make_skill("Session: ${cora_SESSION_ID}", None);
         let result = prepare_inline_content(&skill, None, Some("sess-abc"), Path::new("/tmp"))
             .await
             .unwrap();
@@ -170,7 +170,7 @@ mod supplemental_tests {
     async fn tc_10_3_skill_root_prepends_header() {
         let skill = make_skill_full(
             "s",
-            "${CORARS_SKILL_DIR}/script.sh",
+            "${cora_SKILL_DIR}/script.sh",
             Some("/path/to/skill"),
             vec![],
             ExecutionContext::Inline,
@@ -188,7 +188,7 @@ mod supplemental_tests {
     // TC-10.x: session_id substitution wired through
     #[tokio::test]
     async fn tc_10_x_session_id_substituted() {
-        let skill = make_skill_full("s", "${CORARS_SESSION_ID}", None, vec![], ExecutionContext::Inline);
+        let skill = make_skill_full("s", "${cora_SESSION_ID}", None, vec![], ExecutionContext::Inline);
         let result = prepare_inline_content(&skill, None, Some("sess-xyz"), Path::new("/tmp"))
             .await
             .unwrap();
@@ -325,8 +325,8 @@ mod phase7_tests {
 
     use super::execute_fork;
     use crate::types::{EffortLevel, ExecutionContext, LoadedFrom, SkillMetadata, SkillSource};
-    use CORA_types::message::TokenUsage;
-    use CORA_types::spawner::{ForkOverrides, Spawner, SubAgentConfig, SubAgentResult};
+    use cora_types::message::TokenUsage;
+    use cora_types::spawner::{ForkOverrides, Spawner, SubAgentConfig, SubAgentResult};
 
     // ---------------------------------------------------------------------------
     // MockSpawner — captures args passed to spawn_fork, returns preset result

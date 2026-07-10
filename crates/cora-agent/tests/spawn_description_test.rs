@@ -7,9 +7,9 @@ mod common;
 
 use std::sync::Arc;
 
-use CORA_agent::spawn_tool::SpawnTool;
-use CORA_agent::spawner::AgentSpawner;
-use CORA_tools::Tool;
+use cora_agent::spawn_tool::SpawnTool;
+use cora_agent::spawner::AgentSpawner;
+use cora_tools::Tool;
 use common::{MockLlmProvider, test_config};
 
 fn make_spawn_tool() -> SpawnTool {

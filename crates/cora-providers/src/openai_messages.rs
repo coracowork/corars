@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet, VecDeque};
 
-use CORA_config::compat::ProviderCompat;
-use CORA_types::message::{ContentBlock, Message, Role};
+use cora_config::compat::ProviderCompat;
+use cora_types::message::{ContentBlock, Message, Role};
 use serde_json::{Value, json};
 
 use crate::tool_call_sanitize::{DroppedToolCallReason, format_dropped_tool_call};
@@ -49,7 +49,7 @@ pub(crate) fn build_messages(messages: &[Message], system: &str, compat: &Provid
                                 .unwrap_or_else(|| tool_use_id.clone());
                             if clean_orphan_tool_results && !available_tool_call_ids.contains(&projected_tool_use_id) {
                                 tracing::warn!(
-                                    target: "CORA_providers",
+                                    target: "cora_providers",
                                     tool_call_id = %tool_use_id,
                                     reason = "orphan_result",
                                     "dropped orphan tool_result in outgoing request"
@@ -131,7 +131,7 @@ pub(crate) fn build_messages(messages: &[Message], system: &str, compat: &Provid
                                 .push_back(DroppedToolCallReason::EmptyName);
                             dropped_lines.push(format_dropped_tool_call(DroppedToolCallReason::EmptyName, input));
                             tracing::warn!(
-                                target: "CORA_providers",
+                                target: "cora_providers",
                                 tool_call_id = %id,
                                 reason = DroppedToolCallReason::EmptyName.log_reason(),
                                 "downgraded malformed tool_call to text in outgoing request"
@@ -146,7 +146,7 @@ pub(crate) fn build_messages(messages: &[Message], system: &str, compat: &Provid
                                 .push_back(DroppedToolCallReason::EmptyId);
                             dropped_lines.push(format_dropped_tool_call(DroppedToolCallReason::EmptyId, input));
                             tracing::warn!(
-                                target: "CORA_providers",
+                                target: "cora_providers",
                                 tool_call_id = %id,
                                 reason = DroppedToolCallReason::EmptyId.log_reason(),
                                 "downgraded malformed tool_call to text in outgoing request"
@@ -221,7 +221,7 @@ pub(crate) fn build_messages(messages: &[Message], system: &str, compat: &Provid
                             .unwrap_or_else(|| tool_use_id.clone());
                         if clean_orphan_tool_results && !available_tool_call_ids.contains(&projected_tool_use_id) {
                             tracing::warn!(
-                                target: "CORA_providers",
+                                target: "cora_providers",
                                 tool_call_id = %tool_use_id,
                                 reason = "orphan_result",
                                 "dropped orphan tool_result in outgoing request"

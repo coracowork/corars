@@ -5,7 +5,7 @@ mod tests {
     use std::collections::HashMap;
     use std::sync::Arc;
 
-    use CORA_config::config::{CliArgs, McpServerConfig, TransportType};
+    use cora_config::config::{CliArgs, McpServerConfig, TransportType};
 
     use crate::output::OutputSink;
     use crate::output::null_sink::NullSink;

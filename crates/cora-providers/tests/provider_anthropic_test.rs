@@ -3,12 +3,12 @@
 use wiremock::matchers::{header, method, path};
 use wiremock::{Mock, MockServer, ResponseTemplate};
 
-use CORA_config::compat::ProviderCompat;
-use CORA_providers::anthropic::AnthropicProvider;
-use CORA_providers::{LlmProvider, ProviderError};
-use CORA_types::llm::{LlmEvent, LlmRequest, ThinkingConfig};
-use CORA_types::message::{ContentBlock, Message, Role, StopReason};
-use CORA_types::tool::ToolDef;
+use cora_config::compat::ProviderCompat;
+use cora_providers::anthropic::AnthropicProvider;
+use cora_providers::{LlmProvider, ProviderError};
+use cora_types::llm::{LlmEvent, LlmRequest, ThinkingConfig};
+use cora_types::message::{ContentBlock, Message, Role, StopReason};
+use cora_types::tool::ToolDef;
 use serde_json::{Value, json};
 
 // ---------------------------------------------------------------------------

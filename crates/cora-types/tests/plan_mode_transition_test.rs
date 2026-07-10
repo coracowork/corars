@@ -1,7 +1,7 @@
 //! Black-box integration tests for PlanModeTransition and ContextModifier
 //! extensions (TC-3.2-04, TC-3.2-05).
 
-use CORA_types::skill_types::{ContextModifier, PlanModeTransition};
+use cora_types::skill_types::{ContextModifier, PlanModeTransition};
 
 /// TC-3.2-04: ContextModifier without plan_mode_transition is backward-compatible.
 /// Existing code that does not set plan_mode_transition should see None.

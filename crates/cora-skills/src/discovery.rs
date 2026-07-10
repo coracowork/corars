@@ -91,7 +91,7 @@ impl RuntimeDiscovery {
                             .unwrap_or(&current);
 
                         if is_path_gitignored(containing_dir, resolved_cwd).await {
-                            tracing::debug!(target: "CORA_skills", path = %skill_dir.display(), "skipping gitignored skills directory");
+                            tracing::debug!(target: "cora_skills", path = %skill_dir.display(), "skipping gitignored skills directory");
                         } else {
                             new_dirs.push(skill_dir);
                         }
@@ -156,7 +156,7 @@ impl RuntimeDiscovery {
         let added = new_count.saturating_sub(previous_count);
 
         if added > 0 {
-            tracing::info!(target: "CORA_skills", added, directories = dirs.len(), "dynamically discovered new skills");
+            tracing::info!(target: "cora_skills", added, directories = dirs.len(), "dynamically discovered new skills");
         }
 
         added

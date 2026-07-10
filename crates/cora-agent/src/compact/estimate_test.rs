@@ -3,7 +3,7 @@ use super::*;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use CORA_types::message::{Message, Role};
+    use cora_types::message::{Message, Role};
     use serde_json::json;
 
     #[test]

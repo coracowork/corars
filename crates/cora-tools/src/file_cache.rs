@@ -5,8 +5,8 @@ use std::time::UNIX_EPOCH;
 
 use lru::LruCache;
 
-use CORA_config::file_cache::FileCacheConfig;
-use CORA_types::file_state::FileState;
+use cora_config::file_cache::FileCacheConfig;
+use cora_types::file_state::FileState;
 
 /// LRU cache for file states seen by the model.
 ///
