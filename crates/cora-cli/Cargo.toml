@@ -5,19 +5,23 @@ edition.workspace = true
 license.workspace = true
 repository.workspace = true
 
-[dependencies]anyhow.workspace = true
-serde.workspace = true
-thiserror.workspace = true
+[[bin]]
+name = "corars"
+path = "src/main.rs"
+
+[dependencies]
+anyhow.workspace = true
+clap.workspace = true
 tokio.workspace = true
-tracing.workspace = truecora-agent.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+cora-agent.workspace = true
 cora-compact.workspace = true
 cora-config.workspace = true
 cora-memory.workspace = true
-cora-providers.workspace = true
-cora-tools.workspace = true
 cora-mcp.workspace = true
 cora-protocol.workspace = true
+cora-providers.workspace = true
 cora-skills.workspace = true
+cora-tools.workspace = true
 cora-types.workspace = true
-clap.workspace = true
-tracing-subscriber.workspace = true
