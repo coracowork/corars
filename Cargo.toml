@@ -1,6 +1,7 @@
-[workspace]
+﻿[workspace]
 resolver = "3"
 members = [
+    "crates/cora-cli",
     "crates/cora-cowork-assets",
     "crates/cora-cowork-common",
     "crates/cora-cowork-db",
@@ -33,6 +34,39 @@ repository = "https://github.com/coracowork/"
 documentation = "https://github.com/coracowork/"
 
 [workspace.dependencies]
+  cora-cora-agent = { path = "crates/cora-cora-agent" }
+  cora-cora-cli = { path = "crates/cora-cora-cli" }
+  cora-cora-compact = { path = "crates/cora-cora-compact" }
+  cora-cora-config = { path = "crates/cora-cora-config" }
+  cora-cora-cowork-ai-agent = { path = "crates/cora-cora-cowork-ai-agent" }
+  cora-cora-cowork-api-types = { path = "crates/cora-cora-cowork-api-types" }
+  cora-cora-cowork-app = { path = "crates/cora-cora-cowork-app" }
+  cora-cora-cowork-assets = { path = "crates/cora-cora-cowork-assets" }
+  cora-cora-cowork-assistant = { path = "crates/cora-cora-cowork-assistant" }
+  cora-cora-cowork-auth = { path = "crates/cora-cora-cowork-auth" }
+  cora-cora-cowork-channel = { path = "crates/cora-cora-cowork-channel" }
+  cora-cora-cowork-common = { path = "crates/cora-cora-cowork-common" }
+  cora-cora-cowork-conversation = { path = "crates/cora-cora-cowork-conversation" }
+  cora-cora-cowork-cron = { path = "crates/cora-cora-cowork-cron" }
+  cora-cora-cowork-db = { path = "crates/cora-cora-cowork-db" }
+  cora-cora-cowork-extension = { path = "crates/cora-cora-cowork-extension" }
+  cora-cora-cowork-file = { path = "crates/cora-cora-cowork-file" }
+  cora-cora-cowork-mcp = { path = "crates/cora-cora-cowork-mcp" }
+  cora-cora-cowork-office = { path = "crates/cora-cora-cowork-office" }
+  cora-cora-cowork-realtime = { path = "crates/cora-cora-cowork-realtime" }
+  cora-cora-cowork-runtime = { path = "crates/cora-cora-cowork-runtime" }
+  cora-cora-cowork-shell = { path = "crates/cora-cora-cowork-shell" }
+  cora-cora-cowork-system = { path = "crates/cora-cora-cowork-system" }
+  cora-cora-cowork-team = { path = "crates/cora-cora-cowork-team" }
+  cora-cora-cowork-team-prompts = { path = "crates/cora-cora-cowork-team-prompts" }
+  cora-cora-mcp = { path = "crates/cora-cora-mcp" }
+  cora-cora-memory = { path = "crates/cora-cora-memory" }
+  cora-cora-process = { path = "crates/cora-cora-process" }
+  cora-cora-protocol = { path = "crates/cora-cora-protocol" }
+  cora-cora-providers = { path = "crates/cora-cora-providers" }
+  cora-cora-skills = { path = "crates/cora-cora-skills" }
+  cora-cora-tools = { path = "crates/cora-cora-tools" }
+  cora-cora-types = { path = "crates/cora-cora-types" }
 # Internal crates
 cora-cowork-common = { path = "crates/cora-cowork-common" }
 cora-cowork-assets = { path = "crates/cora-cowork-assets" }
@@ -105,7 +139,7 @@ aes-gcm = "0.10"
 # UUID
 uuid = { version = "1", features = ["v7"] }
 
-# HTTP client — use rustls with native roots to align backend trust with the host system.
+# HTTP client â€” use rustls with native roots to align backend trust with the host system.
 reqwest = { version = "0.12", features = ["json", "multipart", "rustls-tls-native-roots"], default-features = false }
 
 # Concurrency
@@ -199,3 +233,5 @@ incremental = false
 debug = "line-tables-only"
 split-debuginfo = "unpacked"
 incremental = false
+
+
