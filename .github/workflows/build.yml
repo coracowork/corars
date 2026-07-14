@@ -1,0 +1,61 @@
+﻿name: Build Multi-Platform
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact: coracore-linux-x64
+          - os: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+            artifact: coracore-linux-arm64
+            cross: true
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact: coracore-windows-x64.exe
+          - os: windows-latest
+            target: aarch64-pc-windows-msvc
+            artifact: coracore-windows-arm64.exe
+            xwin: true
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          target: ${{ matrix.target }}
+      
+      - name: Install cross
+        if: matrix.cross == true
+        run: cargo install cross --force
+      
+      - name: Install cargo-xwin
+        if: matrix.xwin == true
+        run: cargo install cargo-xwin --locked
+      
+      - name: Build
+        if: matrix.cross != true && matrix.xwin != true
+        run: cargo build --target ${{ matrix.target }} --release
+      
+      - name: Build with cross
+        if: matrix.cross == true
+        run: cross build --target ${{ matrix.target }} --release
+      
+      - name: Build with cargo-xwin
+        if: matrix.xwin == true
+        run: cargo xwin build --target ${{ matrix.target }} --release
+      
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: target/${{ matrix.target }}/release/coracore*
