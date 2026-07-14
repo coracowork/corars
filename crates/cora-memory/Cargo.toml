@@ -1,23 +1,12 @@
 ﻿[package]
 name = "cora-memory"
-description = "Long-term memory system for corars: cross-session storage of user preferences, feedback, project context, and external references"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 repository.workspace = true
 
-[dependencies]
-cora-config.workspace = true
-
-tracing.workspace    = true
-serde.workspace      = true
-serde_yaml.workspace = true
-chrono.workspace     = true
-thiserror.workspace  = true
-.workspace = true
-
-[dev-dependencies]
-tempfile.workspace    = true
-rstest.workspace      = true
-serial_test.workspace = true
-
+[dependencies]anyhow.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tracing.workspace = true

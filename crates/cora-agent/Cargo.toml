@@ -4,10 +4,12 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 repository.workspace = true
-description = "AI agent core for cora"
 
-[dependencies]
-cora-compact.workspace = true
+[dependencies]anyhow.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tracing.workspace = truecora-compact.workspace = true
 cora-config.workspace = true
 cora-memory.workspace = true
 cora-providers.workspace = true
@@ -16,13 +18,7 @@ cora-mcp.workspace = true
 cora-protocol.workspace = true
 cora-skills.workspace = true
 cora-types.workspace = true
-
-anyhow.workspace = true
 async-trait.workspace = true
 futures.workspace = true
-serde.workspace = true
 serde_json.workspace = true
-thiserror.workspace = true
-tokio.workspace = true
-tracing.workspace = true
 uuid.workspace = true

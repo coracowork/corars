@@ -1,32 +1,23 @@
 ﻿[package]
 name = "cora-cli"
-description = "CLI binary for corars â€” a multi-provider AI agent with tool orchestration"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 repository.workspace = true
-keywords = ["ai", "agent", "cli", "llm", "anthropic"]
-categories = ["command-line-utilities"]
 
-[[bin]]
-name = "corars"
-path = "src/main.rs"
-
-[dependencies]
-cora-agent.workspace    = true
-cora-compact.workspace  = true
-cora-config.workspace   = true
-cora-memory.workspace   = true
+[dependencies]anyhow.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tracing.workspace = truecora-agent.workspace = true
+cora-compact.workspace = true
+cora-config.workspace = true
+cora-memory.workspace = true
 cora-providers.workspace = true
-cora-tools.workspace    = true
-cora-mcp.workspace      = true
+cora-tools.workspace = true
+cora-mcp.workspace = true
 cora-protocol.workspace = true
-cora-skills.workspace   = true
-
-tokio.workspace              = true
-anyhow.workspace             = true
-clap.workspace               = true
-tracing.workspace            = true
+cora-skills.workspace = true
+cora-types.workspace = true
+clap.workspace = true
 tracing-subscriber.workspace = true
-.workspace = true
-
