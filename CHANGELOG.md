@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.2](https://github.com/coracowork/corars/compare/v0.2.1...v0.2.2) (2026-07-14)
+
+
+### Features
+
+* rename aionrs to corars - initial corars release ([38fda8a](https://github.com/coracowork/corars/commit/38fda8a211559a0c26cbb0f06428dba61686f50e))
+
+
+### Bug Fixes
+
+* corrige imports de CORA_* para cora_* ([e34db78](https://github.com/coracowork/corars/commit/e34db78722d08b027677020126f59a62c81436cd))
+
 ## [0.2.1](https://github.com/iOfficeAI/aionrs/compare/v0.2.0...v0.2.1) (2026-07-08)
 
 
