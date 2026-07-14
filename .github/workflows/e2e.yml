@@ -1,4 +1,4 @@
-name: E2E Tests
+﻿name: E2E Tests
 
 # E2E tests call real LLM APIs. They run:
 #   1. Manually via workflow_dispatch (any branch)
