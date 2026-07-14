@@ -1,54 +1,28 @@
-[package]
+﻿[package]
 name = "cora-agent"
-description = "Agent engine, session management, output sinks, and orchestration for corars"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 repository.workspace = true
+description = "AI agent core for cora"
 
 [dependencies]
-cora-types.workspace     = true
-cora-protocol.workspace  = true
-cora-config.workspace    = true
+cora-compact.workspace = true
+cora-config.workspace = true
+cora-memory.workspace = true
 cora-providers.workspace = true
-cora-tools.workspace     = true
-cora-mcp.workspace       = true
-cora-skills.workspace    = true
-cora-memory.workspace    = true
-cora-compact.workspace   = true
+cora-tools.workspace = true
+cora-mcp.workspace = true
+cora-protocol.workspace = true
+cora-skills.workspace = true
+cora-types.workspace = true
 
-tracing.workspace     = true
-tokio.workspace       = true
-futures.workspace     = true
-serde.workspace       = true
-serde_json.workspace  = true
+anyhow.workspace = true
 async-trait.workspace = true
-anyhow.workspace      = true
-thiserror.workspace   = true
-glob.workspace        = true
-chrono.workspace      = true
-uuid.workspace        = true
-dirs.workspace        = true
-crossterm.workspace   = true
-is-terminal.workspace = true
-workspace-hack.workspace = true
-
-[dev-dependencies]
-cora-mcp = { path = "../cora-mcp", features = ["test-utils"] }
-wiremock.workspace    = true
-tokio-test.workspace  = true
-tempfile.workspace    = true
-mockall.workspace     = true
-rstest.workspace      = true
-serial_test.workspace = true
-
-# ── Integration test binaries ──────────────────────────────────────────────
-[[test]]
-name = "e2e"
-path = "tests/e2e/mod.rs"
-# E2E tests require real API keys; run via: cargo nextest run --profile e2e --test e2e
-
-[[test]]
-name = "acceptance"
-path = "tests/acceptance/mod.rs"
-# Acceptance tests for evolution features; run via: cargo nextest run --profile e2e --test acceptance
+futures.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+uuid.workspace = true

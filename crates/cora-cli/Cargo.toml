@@ -1,6 +1,6 @@
-[package]
+﻿[package]
 name = "cora-cli"
-description = "CLI binary for corars — a multi-provider AI agent with tool orchestration"
+description = "CLI binary for corars â€” a multi-provider AI agent with tool orchestration"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -28,4 +28,5 @@ anyhow.workspace             = true
 clap.workspace               = true
 tracing.workspace            = true
 tracing-subscriber.workspace = true
-workspace-hack.workspace = true
+.workspace = true
+

@@ -1,4 +1,4 @@
-[package]
+﻿[package]
 name = "cora-process"
 description = "Process execution helpers for corars"
 version.workspace = true
@@ -8,7 +8,7 @@ repository.workspace = true
 
 [dependencies]
 tokio.workspace = true
-workspace-hack.workspace = true
+.workspace = true
 
 [target.'cfg(unix)'.dependencies]
 libc.workspace = true
@@ -20,3 +20,4 @@ windows-sys = { workspace = true, features = [
     "Win32_System_JobObjects",
     "Win32_System_Threading",
 ] }
+

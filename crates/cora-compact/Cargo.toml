@@ -1,4 +1,4 @@
-[package]
+﻿[package]
 name = "cora-compact"
 version.workspace = true
 edition.workspace = true
@@ -9,6 +9,7 @@ tracing.workspace = true
 regex = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
-workspace-hack.workspace = true
+.workspace = true
 
 [dev-dependencies]
+

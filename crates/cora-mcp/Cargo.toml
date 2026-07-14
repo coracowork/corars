@@ -1,4 +1,4 @@
-[package]
+﻿[package]
 name = "cora-mcp"
 description = "MCP (Model Context Protocol) client implementation for corars"
 version.workspace = true
@@ -21,7 +21,8 @@ thiserror.workspace   = true
 anyhow.workspace      = true
 reqwest.workspace     = true
 futures.workspace     = true
-workspace-hack.workspace = true
+.workspace = true
 
 [features]
 test-utils = []
+

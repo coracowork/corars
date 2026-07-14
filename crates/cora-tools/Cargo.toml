@@ -1,4 +1,4 @@
-[package]
+﻿[package]
 name = "cora-tools"
 description = "Built-in agent tools for corars (Read, Write, Edit, ExecCommand, Grep, Glob, Spawn)"
 version.workspace = true
@@ -21,7 +21,8 @@ async-trait.workspace = true
 anyhow.workspace      = true
 glob.workspace        = true
 lru.workspace         = true
-workspace-hack.workspace = true
+.workspace = true
 
 [dev-dependencies]
 tempfile.workspace = true
+

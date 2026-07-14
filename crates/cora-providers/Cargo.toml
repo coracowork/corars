@@ -1,4 +1,4 @@
-[package]
+﻿[package]
 name = "cora-providers"
 description = "LLM provider implementations for corars (Anthropic, OpenAI, Bedrock, Vertex)"
 version.workspace = true
@@ -30,9 +30,10 @@ aws-config.workspace           = true
 aws-sdk-sts.workspace          = true
 
 tracing.workspace        = true
-workspace-hack.workspace = true
+.workspace = true
 
 [dev-dependencies]
 wiremock.workspace   = true
 tokio-test.workspace = true
 insta.workspace      = true
+

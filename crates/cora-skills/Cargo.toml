@@ -1,4 +1,4 @@
-[package]
+﻿[package]
 name = "cora-skills"
 description = "Skills system for corars: named prompt snippets with tool orchestration, permissions, hooks, and MCP integration"
 version.workspace = true
@@ -30,10 +30,11 @@ unicode-width.workspace = true
 [target.'cfg(unix)'.dependencies]
 libc.workspace = true
 
-workspace-hack.workspace = true
+.workspace = true
 
 [dev-dependencies]
 cora-mcp = { workspace = true, features = ["test-utils"] }
 tempfile.workspace   = true
 rstest.workspace     = true
 serial_test.workspace = true
+

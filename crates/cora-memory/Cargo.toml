@@ -1,4 +1,4 @@
-[package]
+﻿[package]
 name = "cora-memory"
 description = "Long-term memory system for corars: cross-session storage of user preferences, feedback, project context, and external references"
 version.workspace = true
@@ -14,9 +14,10 @@ serde.workspace      = true
 serde_yaml.workspace = true
 chrono.workspace     = true
 thiserror.workspace  = true
-workspace-hack.workspace = true
+.workspace = true
 
 [dev-dependencies]
 tempfile.workspace    = true
 rstest.workspace      = true
 serial_test.workspace = true
+

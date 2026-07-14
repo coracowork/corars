@@ -1,4 +1,4 @@
-[package]
+﻿[package]
 name = "cora-types"
 description = "Shared provider-neutral data types for corars (LLM, message, tool)"
 version.workspace = true
@@ -11,4 +11,5 @@ serde.workspace       = true
 serde_json.workspace  = true
 async-trait.workspace = true
 chrono.workspace      = true
-workspace-hack.workspace = true
+.workspace = true
+
