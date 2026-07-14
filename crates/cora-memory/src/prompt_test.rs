@@ -1,4 +1,4 @@
-use super::*;
+﻿use super::*;
 
 // ===========================================================================
 // Unit tests
@@ -324,7 +324,7 @@ mod tests {
         ];
         for text in all_text {
             assert!(
-                !text.contains("~/.config/CORArs"),
+                !text.contains("~/.config/corars"),
                 "should not hardcode platform-specific path"
             );
             assert!(!text.contains("~/.claude"), "should not contain bb brand path");

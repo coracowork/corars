@@ -1,4 +1,4 @@
-// Acceptance tests for file cache dedup and cross-tool integration.
+﻿// Acceptance tests for file cache dedup and cross-tool integration.
 //
 // These are LOCAL tests — no LLM call required.
 

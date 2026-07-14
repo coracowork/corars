@@ -1,4 +1,4 @@
-use cora_config::compat::ProviderCompat;
+﻿use cora_config::compat::ProviderCompat;
 use cora_types::llm::LlmRequest;
 use reqwest::header::{AUTHORIZATION, CONTENT_TYPE, HeaderMap, HeaderValue};
 use serde_json::Value;
@@ -68,7 +68,7 @@ impl OpenAiTransport {
         Self {
             client: reqwest::Client::new(),
             api_key: api_key.to_string(),
-            base_url: base_url.to_string(),
+            base_url: normalize_openai_base_url(base_url),
         }
     }
 
@@ -86,7 +86,7 @@ impl OpenAiTransport {
         headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
 
         Ok(ProjectedHttpRequest {
-            url: format!("{}{}", self.base_url, compat.api_path()),
+            url: join_base_url_and_api_path(&self.base_url, compat.api_path()),
             headers,
             body,
             body_bytes: None,
@@ -149,9 +149,9 @@ impl ProviderTransport {
 
     pub(crate) fn retry_policy(&self) -> RetryPolicy {
         match self {
-            Self::OpenAi(_) => RetryPolicy::new(MAX_STREAM_RETRIES, true, true),
-            Self::Anthropic(_) | Self::Vertex(_) => RetryPolicy::new(MAX_STREAM_RETRIES, false, true),
-            Self::Bedrock(_) => RetryPolicy::new(0, false, false),
+            Self::OpenAi(_) => RetryPolicy::new(MAX_STREAM_RETRIES, true, true, true),
+            Self::Anthropic(_) | Self::Vertex(_) => RetryPolicy::new(MAX_STREAM_RETRIES, false, true, true),
+            Self::Bedrock(_) => RetryPolicy::new(0, false, false, true),
         }
     }
 
@@ -231,6 +231,25 @@ impl ProviderTransport {
             Self::Bedrock(transport) => transport.inner.send(request).await,
         }
     }
+}
+
+fn join_base_url_and_api_path(base_url: &str, api_path: &str) -> String {
+    let base = base_url.trim_end_matches('/');
+    let path = api_path.trim_start_matches('/');
+    if path.is_empty() {
+        base.to_string()
+    } else {
+        format!("{base}/{path}")
+    }
+}
+
+fn normalize_openai_base_url(base_url: &str) -> String {
+    let trimmed = base_url.trim_end_matches('/');
+    if trimmed.eq_ignore_ascii_case("https://api.openai.com") || trimmed.eq_ignore_ascii_case("http://api.openai.com") {
+        return format!("{trimmed}/v1");
+    }
+
+    base_url.to_string()
 }
 
 async fn send_projected_json_request(

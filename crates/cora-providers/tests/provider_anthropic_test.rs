@@ -1,4 +1,4 @@
-// Integration tests for AnthropicProvider using wiremock to mock the Anthropic API.
+﻿// Integration tests for AnthropicProvider using wiremock to mock the Anthropic API.
 
 use wiremock::matchers::{header, method, path};
 use wiremock::{Mock, MockServer, ResponseTemplate};
@@ -26,7 +26,7 @@ fn minimal_request() -> LlmRequest {
             }],
         )],
         tools: vec![],
-        max_tokens: 1024,
+        max_tokens: Some(1024),
         thinking: None,
         reasoning_effort: None,
     }

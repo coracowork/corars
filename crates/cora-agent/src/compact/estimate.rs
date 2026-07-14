@@ -1,4 +1,4 @@
-use cora_types::message::{ContentBlock, Message};
+﻿use cora_types::message::{ContentBlock, Message};
 
 const CHARS_PER_TOKEN_TEXT: usize = 4;
 

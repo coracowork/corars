@@ -1,9 +1,9 @@
-mod common;
+﻿mod common;
 
-use CORArs::hooks::{HookDef, HookEngine, HooksConfig};
-use CORArs::tools::orchestration::execute_tool_calls;
-use CORArs::tools::registry::ToolRegistry;
-use CORArs::types::message::ContentBlock;
+use corars::hooks::{HookDef, HookEngine, HooksConfig};
+use corars::tools::orchestration::execute_tool_calls;
+use corars::tools::registry::ToolRegistry;
+use corars::types::message::ContentBlock;
 use common::{auto_approve_confirmer, MockTool};
 use serde_json::json;
 

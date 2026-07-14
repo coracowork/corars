@@ -1,4 +1,4 @@
-// Acceptance tests for context compression (all three compaction levels).
+﻿// Acceptance tests for context compression (all three compaction levels).
 //
 // TC-A2-01 and TC-A2-03 are purely local (no LLM call).
 // TC-A2-02 makes a real LLM call and is skipped when OPENAI_API_KEY is absent.

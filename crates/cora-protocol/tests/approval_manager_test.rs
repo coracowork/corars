@@ -1,4 +1,4 @@
-use cora_protocol::commands::ApprovalScope;
+﻿use cora_protocol::commands::ApprovalScope;
 use cora_protocol::events::ToolCategory;
 use cora_protocol::{ToolApprovalManager, ToolApprovalResult};
 use rstest::rstest;

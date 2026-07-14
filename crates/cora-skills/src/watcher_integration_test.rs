@@ -1,4 +1,4 @@
-/// Black-box tests for `SkillWatcher` based on the Phase 13 test plan.
+﻿/// Black-box tests for `SkillWatcher` based on the Phase 13 test plan.
 ///
 /// All tests are async (`#[tokio::test]`) because the watcher relies on
 /// tokio tasks for debouncing.
@@ -44,7 +44,7 @@ fn make_visible_test_dir(name: &str) -> (PathBuf, TempDirGuard) {
     } else {
         std::env::temp_dir()
     };
-    let dir = base.join(format!("cora_watcher_test_{name}_{id}"));
+    let dir = base.join(format!("corars_watcher_test_{name}_{id}"));
     fs::create_dir_all(&dir).expect("failed to create test dir");
     let guard = TempDirGuard(dir.clone());
     (dir, guard)

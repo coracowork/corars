@@ -1,4 +1,4 @@
-// Shared test utilities for integration tests.
+﻿// Shared test utilities for integration tests.
 #![allow(dead_code)]
 
 use std::sync::{Arc, Mutex};
@@ -240,7 +240,7 @@ pub fn test_config() -> Config {
         api_key: "test-key".to_string(),
         base_url: "http://localhost:0".to_string(),
         model: "test-model".to_string(),
-        max_tokens: 4096,
+        max_tokens: Some(4096),
         max_turns: Some(10),
         max_tool_call_malformed_turns: Some(3),
         max_tool_call_failure_turns: Some(3),
@@ -255,7 +255,7 @@ pub fn test_config() -> Config {
         },
         session: SessionConfig {
             enabled: false,
-            directory: "/tmp/CORArs-test-sessions".to_string(),
+            directory: "/tmp/corars-test-sessions".to_string(),
             max_sessions: 5,
         },
         compact: cora_config::compact::CompactConfig::default(),

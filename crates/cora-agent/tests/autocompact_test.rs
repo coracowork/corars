@@ -1,4 +1,4 @@
-//! Black-box integration tests for the autocompact subsystem.
+﻿//! Black-box integration tests for the autocompact subsystem.
 //!
 //! These tests correspond to TC-2.4-* in the test plan.
 //! They exercise the public autocompact API with a mock LLM provider,

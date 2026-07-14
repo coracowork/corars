@@ -1,6 +1,6 @@
-use serde::{Deserialize, Serialize};
+﻿use serde::{Deserialize, Serialize};
 
-// Re-export EffortLevel from CORA-types (single source of truth)
+// Re-export EffortLevel from cora-types (single source of truth)
 pub use cora_types::skill_types::EffortLevel;
 
 /// Raw fields from skill frontmatter (YAML deserialization target).
@@ -78,17 +78,17 @@ pub enum ExecutionContext {
 /// Where the skill file originates.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SkillSource {
-    /// `<config_dir>/CORArs/skills/`
+    /// `<config_dir>/corars/skills/`
     User,
-    /// .CORArs/skills/ (project-level)
+    /// .corars/skills/ (project-level)
     Project,
-    /// .CORArs/.managed/skills/
+    /// .corars/.managed/skills/
     Managed,
     /// Built-in bundled skills
     Bundled,
     /// Loaded via MCP protocol
     Mcp,
-    /// .CORArs/commands/ (legacy compatibility)
+    /// .corars/commands/ (legacy compatibility)
     Legacy,
 }
 

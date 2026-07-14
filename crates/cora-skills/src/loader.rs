@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+﻿use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 
 use futures::future::join_all;
@@ -319,7 +319,7 @@ async fn load_skill_file(
 
     let resolved_name = build_namespace(base_dir, skill_dir);
     // skill_root is the directory containing SKILL.md (i.e., skill_dir itself),
-    // used for ${cora_SKILL_DIR} variable substitution in skill content.
+    // used for ${CORARS_SKILL_DIR} variable substitution in skill content.
     let skill_root = Some(skill_dir.to_string_lossy().into_owned());
 
     let metadata = parse_skill_fields(
@@ -346,8 +346,8 @@ async fn load_skill_file(
 /// Build a colon-separated namespace from a directory hierarchy.
 ///
 /// Examples:
-/// - base=`<config_dir>/CORArs/skills`, target=`<config_dir>/CORArs/skills/db/migrate` → `"db:migrate"`
-/// - base=`<config_dir>/CORArs/skills`, target=`<config_dir>/CORArs/skills/my-skill` → `"my-skill"`
+/// - base=`<config_dir>/corars/skills`, target=`<config_dir>/corars/skills/db/migrate` → `"db:migrate"`
+/// - base=`<config_dir>/corars/skills`, target=`<config_dir>/corars/skills/my-skill` → `"my-skill"`
 pub(crate) fn build_namespace(base_dir: &Path, target_dir: &Path) -> String {
     match target_dir.strip_prefix(base_dir) {
         Ok(relative) => relative

@@ -1,4 +1,4 @@
-// TC-AX-01: Multi-feature collaboration test (LOCAL, no LLM).
+﻿// TC-AX-01: Multi-feature collaboration test (LOCAL, no LLM).
 //
 // Exercises memory + compression + file cache + tool description all at once.
 

@@ -1,5 +1,5 @@
-// Pure, provider-neutral data types shared across all CORArs crates.
-// No dependencies on other CORA-* crates.
+﻿// Pure, provider-neutral data types shared across all corars crates.
+// No dependencies on other cora-* crates.
 
 pub mod compact;
 pub mod file_state;

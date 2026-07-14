@@ -1,4 +1,4 @@
-//! Black-box integration tests for PlanConfig (TC-3.2-01 through TC-3.2-03).
+﻿//! Black-box integration tests for PlanConfig (TC-3.2-01 through TC-3.2-03).
 //!
 //! These test the public API of PlanConfig from a config-file consumer's
 //! perspective: default values, full TOML override, and partial override.
@@ -8,12 +8,12 @@ use cora_config::plan::PlanConfig;
 
 /// TC-3.2-01: PlanConfig default values.
 /// Input: no `[plan]` section in config.
-/// Expected: enabled = true, plan_directory = ".CORArs/plans".
+/// Expected: enabled = true, plan_directory = ".corars/plans".
 #[test]
 fn tc_3_2_01_plan_config_defaults() {
     let cfg = PlanConfig::default();
     assert!(cfg.enabled);
-    assert_eq!(cfg.plan_directory, ".CORArs/plans");
+    assert_eq!(cfg.plan_directory, ".corars/plans");
 }
 
 /// TC-3.2-01 (variant): absent [plan] section in ConfigFile yields defaults.
@@ -21,7 +21,7 @@ fn tc_3_2_01_plan_config_defaults() {
 fn tc_3_2_01_absent_plan_section_uses_defaults() {
     let config: ConfigFile = toml::from_str("").unwrap();
     assert!(config.plan.enabled);
-    assert_eq!(config.plan.plan_directory, ".CORArs/plans");
+    assert_eq!(config.plan.plan_directory, ".corars/plans");
 }
 
 /// TC-3.2-02: PlanConfig TOML deserialization with all fields.
@@ -50,7 +50,7 @@ enabled = false
 "#;
     let config: ConfigFile = toml::from_str(toml_str).unwrap();
     assert!(!config.plan.enabled);
-    assert_eq!(config.plan.plan_directory, ".CORArs/plans");
+    assert_eq!(config.plan.plan_directory, ".corars/plans");
 }
 
 /// ConfigFile with [plan] section alongside other sections parses completely.
@@ -65,11 +65,11 @@ context_window = 100000
 
 [plan]
 enabled = true
-plan_directory = ".CORArs/custom-plans"
+plan_directory = ".corars/custom-plans"
 "#;
     let config: ConfigFile = toml::from_str(toml_str).unwrap();
     assert!(config.plan.enabled);
-    assert_eq!(config.plan.plan_directory, ".CORArs/custom-plans");
+    assert_eq!(config.plan.plan_directory, ".corars/custom-plans");
     assert_eq!(config.default.provider, "anthropic");
     assert_eq!(config.compact.context_window, 100_000);
 }

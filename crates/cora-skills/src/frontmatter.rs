@@ -1,4 +1,4 @@
-use super::types::{
+﻿use super::types::{
     BoolOrString, EffortLevel, ExecutionContext, FrontmatterData, LoadedFrom, ParsedMarkdown, SkillMetadata,
     SkillSource, StringOrNumber, StringOrVec,
 };

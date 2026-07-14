@@ -1,4 +1,4 @@
-use super::*;
+﻿use super::*;
 use std::fs;
 use tempfile::TempDir;
 
@@ -218,8 +218,8 @@ async fn test_load_commands_nested_flat() {
 #[tokio::test]
 async fn test_load_all_skills_bare_mode() {
     let tmp = TempDir::new().unwrap();
-    // Create .CORArs/skills/ under the add_dir
-    let skills_dir = tmp.path().join(".CORArs").join("skills");
+    // Create .corars/skills/ under the add_dir
+    let skills_dir = tmp.path().join(".corars").join("skills");
     fs::create_dir_all(&skills_dir).unwrap();
     write_skill(&skills_dir, "my-skill/SKILL.md", "---\n---\n");
 
@@ -235,7 +235,7 @@ async fn test_load_all_skills_deduplicates() {
     fs::create_dir(root.join(".git")).unwrap();
 
     // Create same skill in project dir (will appear twice due to walk)
-    let skills_dir = root.join(".CORArs").join("skills");
+    let skills_dir = root.join(".corars").join("skills");
     fs::create_dir_all(&skills_dir).unwrap();
     write_skill(&skills_dir, "my-skill/SKILL.md", "---\n---\n");
 

@@ -1,4 +1,4 @@
-// Phase 10 inline tests for src/skills/bundled/mod.rs
+﻿// Phase 10 inline tests for src/skills/bundled/mod.rs
 // Covers TC-10.01 ~ TC-10.28 (registration API, field mapping, file extraction,
 // resolve_skill_file_path path validation, prepare_bundled_skills, thread safety).
 
@@ -321,8 +321,8 @@ fn tc_10_17_extract_dir_path_format() {
     let path = get_bundled_skill_extract_dir("my-skill");
     let s = path.to_string_lossy();
     assert!(
-        s.contains("CORArs-bundled-skills"),
-        "path should contain CORArs-bundled-skills"
+        s.contains("corars-bundled-skills"),
+        "path should contain corars-bundled-skills"
     );
     assert!(s.contains("my-skill"), "path should contain skill name");
 }

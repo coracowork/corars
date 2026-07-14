@@ -1,4 +1,4 @@
-/// End-to-end tests that hit real LLM provider APIs.
+﻿/// End-to-end tests that hit real LLM provider APIs.
 ///
 /// These tests are skipped when the required environment variable is absent,
 /// making them safe to compile and run in any environment while still providing
@@ -9,7 +9,7 @@
 ///   OPENAI_API_KEY    — runs OpenAI provider tests
 ///
 /// Run manually:
-///   ANTHROPIC_API_KEY=sk-ant-... cargo test -p CORA-agent --test e2e -- --nocapture
+///   ANTHROPIC_API_KEY=sk-ant-... cargo test -p cora-agent --test e2e -- --nocapture
 mod anthropic;
 mod compaction;
 mod openai;

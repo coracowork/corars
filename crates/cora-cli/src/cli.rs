@@ -1,10 +1,10 @@
-use std::path::PathBuf;
+﻿use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
 #[command(
-    name = "CORArs",
+    name = "corars",
     about = "A multi-provider AI agent CLI with tool orchestration support",
     version
 )]
@@ -34,6 +34,14 @@ pub(crate) struct Cli {
     #[arg(long)]
     pub(crate) max_tokens: Option<u32>,
 
+    /// Thinking mode for providers that support a thinking request object: enabled or disabled
+    #[arg(long)]
+    pub(crate) thinking: Option<String>,
+
+    /// Token budget used with --thinking enabled; Anthropic-only, ignored by OpenAI-compatible requests
+    #[arg(long)]
+    pub(crate) thinking_budget: Option<u32>,
+
     // --- Runtime guards ---
     /// Max model turns per run. Defaults to 20; 0 disables.
     #[arg(long)]
@@ -60,7 +68,7 @@ pub(crate) struct Cli {
     #[arg(long)]
     pub(crate) auto_approve: bool,
 
-    /// Project directory to load .CORArs.toml from (defaults to CWD)
+    /// Project directory to load .corars.toml from (defaults to CWD)
     #[arg(long)]
     pub(crate) project_dir: Option<PathBuf>,
 

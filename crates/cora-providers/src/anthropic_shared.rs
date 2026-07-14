@@ -1,4 +1,4 @@
-// Shared Anthropic message/tool building and SSE parsing logic.
+﻿// Shared Anthropic message/tool building and SSE parsing logic.
 // Used by AnthropicProvider, BedrockProvider, and VertexProvider.
 
 use serde_json::{Value, json};

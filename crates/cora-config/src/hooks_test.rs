@@ -1,4 +1,4 @@
-use super::*;
+﻿use super::*;
 
 #[cfg(test)]
 mod tests {
@@ -102,7 +102,7 @@ mod tests {
             pre_tool_use: vec![make_hook(
                 "runtime-env",
                 vec!["Read"],
-                &env_equals_command("cora_RUNTIME_ENV_TEST", "hook-value"),
+                &env_equals_command("CORA_RUNTIME_ENV_TEST", "hook-value"),
             )],
             post_tool_use: vec![],
             stop: vec![],
@@ -110,7 +110,7 @@ mod tests {
         let engine = HookEngine::new_with_env(
             config,
             std::env::temp_dir(),
-            vec![("cora_RUNTIME_ENV_TEST".to_string(), "hook-value".to_string())],
+            vec![("CORA_RUNTIME_ENV_TEST".to_string(), "hook-value".to_string())],
         );
 
         let result = engine.run_pre_tool_use("Read", &json!({})).await;

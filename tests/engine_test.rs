@@ -1,14 +1,14 @@
-mod common;
+﻿mod common;
 
 use std::sync::Arc;
 
-use CORArs::engine::{AgentEngine, AgentError};
-use CORArs::output::terminal::TerminalSink;
-use CORArs::output::OutputSink;
-use CORArs::session::SessionManager;
-use CORArs::tools::registry::ToolRegistry;
-use CORArs::types::llm::LlmEvent;
-use CORArs::types::message::{StopReason, TokenUsage};
+use corars::engine::{AgentEngine, AgentError};
+use corars::output::terminal::TerminalSink;
+use corars::output::OutputSink;
+use corars::session::SessionManager;
+use corars::tools::registry::ToolRegistry;
+use corars::types::llm::LlmEvent;
+use corars::types::message::{StopReason, TokenUsage};
 use serde_json::json;
 use tempfile::tempdir;
 

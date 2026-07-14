@@ -1,4 +1,4 @@
-// Integration tests for the memory store.
+﻿// Integration tests for the memory store.
 //
 // These tests target functional requirements from test-plan.md TC-3 and TC-4,
 // treating the public API as a black box.

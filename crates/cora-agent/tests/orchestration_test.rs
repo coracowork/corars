@@ -1,4 +1,4 @@
-mod common;
+﻿mod common;
 
 use cora_agent::orchestration::execute_tool_calls;
 use cora_compact::CompactLevel;

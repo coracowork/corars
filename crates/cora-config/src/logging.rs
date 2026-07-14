@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+﻿use std::path::PathBuf;
 
 use serde::Deserialize;
 
@@ -33,28 +33,28 @@ pub fn default_log_dir() -> PathBuf {
     #[cfg(target_os = "macos")]
     {
         dirs::home_dir()
-            .map(|h| h.join("Library").join("Logs").join("CORArs"))
-            .unwrap_or_else(|| PathBuf::from("CORArs/logs"))
+            .map(|h| h.join("Library").join("Logs").join("corars"))
+            .unwrap_or_else(|| PathBuf::from("corars/logs"))
     }
     #[cfg(target_os = "linux")]
     {
         dirs::state_dir()
-            .map(|d| d.join("CORArs").join("logs"))
+            .map(|d| d.join("corars").join("logs"))
             .unwrap_or_else(|| {
                 dirs::home_dir()
-                    .map(|h| h.join(".local").join("state").join("CORArs").join("logs"))
-                    .unwrap_or_else(|| PathBuf::from("CORArs/logs"))
+                    .map(|h| h.join(".local").join("state").join("corars").join("logs"))
+                    .unwrap_or_else(|| PathBuf::from("corars/logs"))
             })
     }
     #[cfg(target_os = "windows")]
     {
         dirs::data_dir()
-            .map(|d| d.join("CORArs").join("logs"))
-            .unwrap_or_else(|| PathBuf::from("CORArs/logs"))
+            .map(|d| d.join("corars").join("logs"))
+            .unwrap_or_else(|| PathBuf::from("corars/logs"))
     }
     #[cfg(not(any(target_os = "macos", target_os = "linux", target_os = "windows")))]
     {
-        PathBuf::from("CORArs/logs")
+        PathBuf::from("corars/logs")
     }
 }
 
@@ -80,7 +80,7 @@ where
 
     let file_appender = tracing_appender::rolling::RollingFileAppender::builder()
         .rotation(tracing_appender::rolling::Rotation::DAILY)
-        .filename_suffix("CORArs.log")
+        .filename_suffix("corars.log")
         .build(&config.dir)
         .map_err(|e| LoggingError::AppenderInit(e.to_string()))?;
 

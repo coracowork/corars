@@ -1,4 +1,4 @@
-// Supplemental tests for Phase 8 — RuntimeDiscovery.
+﻿// Supplemental tests for Phase 8 — RuntimeDiscovery.
 // Covers test-plan.md TC-21 through TC-37.
 //
 // These tests use `tempfile::TempDir` to create real filesystem structures.
@@ -17,9 +17,9 @@ mod discovery_supplemental_tests {
     // Helpers
     // ---------------------------------------------------------------------------
 
-    /// Create a `.CORArs/skills/` directory inside `parent`.
+    /// Create a `.corars/skills/` directory inside `parent`.
     fn create_skill_dir(parent: &Path) -> PathBuf {
-        let dir = parent.join(".CORArs").join("skills");
+        let dir = parent.join(".corars").join("skills");
         fs::create_dir_all(&dir).unwrap();
         dir
     }
@@ -54,13 +54,13 @@ mod discovery_supplemental_tests {
     // TC-22: discover_dirs_finds_skill_dir_in_subdir
     // ---------------------------------------------------------------------------
 
-    // TC-22: discovers `.CORArs/skills/` inside a direct subdirectory of cwd.
+    // TC-22: discovers `.corars/skills/` inside a direct subdirectory of cwd.
     #[tokio::test]
-    async fn tc22_discover_dirs_finds_cora_skills_in_subdir() {
+    async fn tc22_discover_dirs_finds_corars_skills_in_subdir() {
         let tmp = TempDir::new().unwrap();
         let cwd = tmp.path().to_str().unwrap().to_string();
 
-        // Create /tmp/proj/module/.CORArs/skills/
+        // Create /tmp/proj/module/.corars/skills/
         let module = tmp.path().join("module");
         fs::create_dir_all(&module).unwrap();
         create_skill_dir(&module);
@@ -72,14 +72,14 @@ mod discovery_supplemental_tests {
         let found = mgr.discover_dirs_for_paths(&[file_path.to_str().unwrap()], &cwd).await;
 
         assert_eq!(found.len(), 1);
-        assert!(found[0].ends_with(".CORArs/skills"));
+        assert!(found[0].ends_with(".corars/skills"));
     }
 
     // ---------------------------------------------------------------------------
     // TC-23: cwd-level skill dir not re-discovered
     // ---------------------------------------------------------------------------
 
-    // TC-23: `.CORArs/skills/` at cwd level is not returned (loaded at startup).
+    // TC-23: `.corars/skills/` at cwd level is not returned (loaded at startup).
     #[tokio::test]
     async fn tc23_discover_dirs_does_not_return_cwd_level() {
         let tmp = TempDir::new().unwrap();
@@ -130,14 +130,14 @@ mod discovery_supplemental_tests {
     // TC-25: miss dirs are also recorded in checked_dirs
     // ---------------------------------------------------------------------------
 
-    // TC-25: directories without `.CORArs/skills/` are still recorded to avoid
+    // TC-25: directories without `.corars/skills/` are still recorded to avoid
     // repeated stat calls.
     #[tokio::test]
     async fn tc25_discover_dirs_records_miss_dirs_in_checked() {
         let tmp = TempDir::new().unwrap();
         let cwd = tmp.path().to_str().unwrap().to_string();
 
-        // `b` does NOT have .CORArs/skills/
+        // `b` does NOT have .corars/skills/
         let subdir = tmp.path().join("b");
         fs::create_dir_all(&subdir).unwrap();
         let file_path = subdir.join("bar.rs");

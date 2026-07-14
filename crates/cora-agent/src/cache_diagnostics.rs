@@ -1,4 +1,4 @@
-//! Prompt cache break detection.
+﻿//! Prompt cache break detection.
 //!
 //! Pairs request-side prompt state (hashes) with response-side cache tokens
 //! to detect and diagnose prompt cache breaks across turns.

@@ -1,14 +1,14 @@
-// Integration tests for AnthropicProvider using wiremock to mock the Anthropic API.
+﻿// Integration tests for AnthropicProvider using wiremock to mock the Anthropic API.
 
 use wiremock::matchers::{header, method, path};
 use wiremock::{Mock, MockServer, ResponseTemplate};
 
-use CORArs::provider::anthropic::AnthropicProvider;
-use CORArs::provider::compat::ProviderCompat;
-use CORArs::provider::debug::DebugConfig;
-use CORArs::provider::{LlmProvider, ProviderError};
-use CORArs::types::llm::{LlmEvent, LlmRequest, ThinkingConfig};
-use CORArs::types::message::{ContentBlock, Message, Role, StopReason};
+use corars::provider::anthropic::AnthropicProvider;
+use corars::provider::compat::ProviderCompat;
+use corars::provider::debug::DebugConfig;
+use corars::provider::{LlmProvider, ProviderError};
+use corars::types::llm::{LlmEvent, LlmRequest, ThinkingConfig};
+use corars::types::message::{ContentBlock, Message, Role, StopReason};
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -25,7 +25,7 @@ fn minimal_request() -> LlmRequest {
             }],
         }],
         tools: vec![],
-        max_tokens: 1024,
+        max_tokens: Some(1024),
         thinking: None,
         reasoning_effort: None,
     }

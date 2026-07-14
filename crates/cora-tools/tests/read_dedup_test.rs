@@ -1,4 +1,4 @@
-//! Integration tests for ReadTool dedup and cache integration (TC-5.3 series).
+﻿//! Integration tests for ReadTool dedup and cache integration (TC-5.3 series).
 //!
 //! Black-box tests: exercise ReadTool through its public API with a real
 //! filesystem, validating dedup detection and cache update behavior.

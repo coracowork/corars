@@ -1,9 +1,9 @@
-use CORArs::provider::LlmProvider;
-use CORArs::provider::compat::ProviderCompat;
-use CORArs::provider::debug::DebugConfig;
-use CORArs::provider::openai::OpenAIProvider;
-use CORArs::types::llm::{LlmEvent, LlmRequest};
-use CORArs::types::message::{ContentBlock, Message, Role, StopReason};
+﻿use corars::provider::LlmProvider;
+use corars::provider::compat::ProviderCompat;
+use corars::provider::debug::DebugConfig;
+use corars::provider::openai::OpenAIProvider;
+use corars::types::llm::{LlmEvent, LlmRequest};
+use corars::types::message::{ContentBlock, Message, Role, StopReason};
 use serde_json::json;
 use wiremock::matchers::{header, method, path};
 use wiremock::{Mock, MockServer, ResponseTemplate};
@@ -24,7 +24,7 @@ fn make_request() -> LlmRequest {
             }],
         }],
         tools: vec![],
-        max_tokens: 512,
+        max_tokens: Some(512),
         thinking: None,
         reasoning_effort: None,
     }
@@ -469,7 +469,7 @@ async fn test_openai_api_error_non_success_status() {
 
     assert!(result.is_err());
     match result.unwrap_err() {
-        CORArs::provider::ProviderError::Api { status, .. } => {
+        corars::provider::ProviderError::Api { status, .. } => {
             assert_eq!(status, 401);
         }
         e => panic!("expected Api error, got: {:?}", e),
@@ -496,7 +496,7 @@ async fn test_openai_rate_limited() {
 
     assert!(result.is_err());
     match result.unwrap_err() {
-        CORArs::provider::ProviderError::RateLimited { retry_after_ms } => {
+        corars::provider::ProviderError::RateLimited { retry_after_ms } => {
             assert_eq!(retry_after_ms, 5000);
         }
         e => panic!("expected RateLimited error, got: {:?}", e),

@@ -1,4 +1,4 @@
-use super::*;
+﻿use super::*;
 
 #[cfg(test)]
 mod tests {
@@ -12,8 +12,8 @@ mod tests {
 
     #[test]
     fn strip_ansi_bold_and_nested() {
-        let input = "\x1b[1m\x1b[32mCompiling\x1b[0m CORA-compact v0.1.0";
-        assert_eq!(strip_ansi(input), "Compiling CORA-compact v0.1.0");
+        let input = "\x1b[1m\x1b[32mCompiling\x1b[0m cora-compact v0.1.0";
+        assert_eq!(strip_ansi(input), "Compiling cora-compact v0.1.0");
     }
 
     #[test]

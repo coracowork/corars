@@ -1,4 +1,4 @@
-use cora_protocol::commands::{ApprovalScope, ProtocolCommand, SessionMode};
+﻿use cora_protocol::commands::{ApprovalScope, ProtocolCommand, SessionMode};
 use rstest::rstest;
 
 #[rstest]

@@ -1,4 +1,4 @@
----
+﻿---
 source: crates/cora-providers/src/openai.rs
 expression: body
 ---

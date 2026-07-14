@@ -1,4 +1,4 @@
-// Long-term memory system for CORArs.
+﻿// Long-term memory system for corars.
 //
 // Provides cross-session storage of user preferences, feedback,
 // project context, and external references.

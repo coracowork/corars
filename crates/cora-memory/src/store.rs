@@ -1,4 +1,4 @@
-// Memory file read, write, delete, scan, and manifest formatting.
+﻿// Memory file read, write, delete, scan, and manifest formatting.
 //
 // This module handles the file-level operations for memory persistence:
 // parsing YAML frontmatter, writing memory entries, scanning directories

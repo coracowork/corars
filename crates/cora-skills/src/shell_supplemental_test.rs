@@ -1,4 +1,4 @@
-use super::*;
+﻿use super::*;
 
 // Helper: run execute_shell_commands with LoadedFrom::Skills
 async fn run(content: &str) -> Result<String, ShellExecutionError> {

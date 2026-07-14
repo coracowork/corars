@@ -1,4 +1,4 @@
-// Core agent infrastructure: engine, session, orchestration, output sinks.
+﻿// Core agent infrastructure: engine, session, orchestration, output sinks.
 
 pub mod agents_md;
 pub mod bootstrap;
@@ -18,9 +18,10 @@ pub mod spawn_tool;
 pub mod spawner;
 mod stream;
 mod tool_call;
+pub mod tool_policy;
 mod turn;
 pub mod vcr;
 
-// Re-export the skills crate so existing callers (CORA-cli, tests) can use
+// Re-export the skills crate so existing callers (cora-cli, tests) can use
 // `cora_agent::skills::` without changing their import paths.
 pub use cora_skills as skills;

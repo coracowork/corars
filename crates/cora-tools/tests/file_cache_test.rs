@@ -1,4 +1,4 @@
-//! Integration tests for FileStateCache (TC-5.2 series from test-plan.md).
+﻿//! Integration tests for FileStateCache (TC-5.2 series from test-plan.md).
 //!
 //! Black-box tests targeting the public API of FileStateCache without
 //! depending on internal implementation details.

@@ -1,4 +1,4 @@
-//! Setup and top-level orchestration for the JSON stream protocol.
+﻿//! Setup and top-level orchestration for the JSON stream protocol.
 //!
 //! Flow: build protocol plumbing (writer/sink/approval manager) → bootstrap
 //! the engine (silently resuming a session if requested — unlike the

@@ -1,4 +1,4 @@
-//! Black-box integration tests for CompactConfig (TC-2.2-01 through TC-2.2-03, TC-2.2-07).
+﻿//! Black-box integration tests for CompactConfig (TC-2.2-01 through TC-2.2-03, TC-2.2-07).
 //!
 //! These test the public API of CompactConfig from a config-file consumer's
 //! perspective: default values, full TOML override, partial override, and

@@ -1,14 +1,19 @@
 ﻿[package]
 name = "cora-protocol"
+description = "JSON stream protocol (events, commands, approval manager) for corars host integration"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 repository.workspace = true
 
 [dependencies]
-anyhow.workspace = true
-serde.workspace = true
+cora-types.workspace = true
+
+tracing.workspace    = true
+serde.workspace      = true
 serde_json.workspace = true
-thiserror.workspace = true
-tokio.workspace = true
-tracing.workspace = true
+tokio.workspace      = true
+workspace-hack.workspace = true
+
+[dev-dependencies]
+rstest.workspace = true

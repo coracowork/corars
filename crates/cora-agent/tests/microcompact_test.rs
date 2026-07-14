@@ -1,4 +1,4 @@
-//! Black-box integration tests for the microcompact subsystem.
+﻿//! Black-box integration tests for the microcompact subsystem.
 //!
 //! These tests correspond to TC-2.3-01 through TC-2.3-11 in the test plan.
 //! They treat `should_microcompact` and `microcompact` as opaque functions

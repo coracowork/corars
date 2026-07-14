@@ -1,4 +1,4 @@
-//! Integration tests for Plan Mode tools (task 3.3).
+﻿//! Integration tests for Plan Mode tools (task 3.3).
 //!
 //! Tests are numbered to match the test-plan.md identifiers (TC-3.3-*).
 

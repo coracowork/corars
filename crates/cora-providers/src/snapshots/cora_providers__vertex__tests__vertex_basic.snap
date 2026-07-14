@@ -1,4 +1,4 @@
----
+﻿---
 source: crates/cora-providers/src/vertex.rs
 expression: p.build_request_body(&r)
 ---

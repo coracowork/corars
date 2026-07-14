@@ -1,4 +1,4 @@
-# Core Concepts
+﻿# Core Concepts
 
 This document defines the runtime units used by corars. These terms matter
 because user-facing protocol events, model calls, and tool execution operate at

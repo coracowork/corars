@@ -1,4 +1,4 @@
-// Google Vertex AI provider for Claude models.
+﻿// Google Vertex AI provider for Claude models.
 // Uses GCP OAuth2 authentication. Response is standard SSE (same as Anthropic).
 
 use async_trait::async_trait;
@@ -343,7 +343,7 @@ struct AdcCredentials {
     refresh_token: String,
 }
 
-/// Build GcpAuth from CORA-config's VertexConfig
+/// Build GcpAuth from cora-config's VertexConfig
 pub fn auth_from_config(vc: &VertexConfig) -> GcpAuth {
     if let Some(creds_file) = &vc.credentials_file {
         GcpAuth::ServiceAccount {

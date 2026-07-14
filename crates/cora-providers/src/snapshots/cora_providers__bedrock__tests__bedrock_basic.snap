@@ -1,4 +1,4 @@
----
+﻿---
 source: crates/cora-providers/src/bedrock.rs
 expression: p.build_request_body(&r)
 ---

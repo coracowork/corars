@@ -1,4 +1,4 @@
-//! Black-box integration tests for PlanModeTransition and ContextModifier
+﻿//! Black-box integration tests for PlanModeTransition and ContextModifier
 //! extensions (TC-3.2-04, TC-3.2-05).
 
 use cora_types::skill_types::{ContextModifier, PlanModeTransition};

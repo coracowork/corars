@@ -1,4 +1,4 @@
-# Skills
+﻿# Skills
 
 Skills are named prompt snippets that the agent can invoke on demand.  They
 let you package reusable instructions, workflows, or tool sequences into a

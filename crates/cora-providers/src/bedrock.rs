@@ -1,4 +1,4 @@
-// AWS Bedrock provider for Claude models.
+﻿// AWS Bedrock provider for Claude models.
 // Uses AWS SigV4 authentication and AWS event stream binary framing.
 
 use async_trait::async_trait;
@@ -109,7 +109,7 @@ impl BedrockTransportState {
                 secret_access_key,
                 session_token.clone(),
                 None,
-                "CORArs",
+                "corars",
             )),
             AwsCredentials::Profile(profile) => Self::credentials_from_sdk(Some(profile.clone())),
             AwsCredentials::Environment => Self::credentials_from_sdk(None),
@@ -146,7 +146,7 @@ impl BedrockTransportState {
                 creds.secret_access_key(),
                 creds.session_token().map(|s| s.to_string()),
                 creds.expiry(),
-                "CORArs-sdk",
+                "corars-sdk",
             ))
         };
 
@@ -328,7 +328,7 @@ fn format_bedrock_error(status: u16, body: &str) -> String {
     }
 }
 
-/// Build AwsCredentials from CORA-config's BedrockConfig
+/// Build AwsCredentials from cora-config's BedrockConfig
 pub fn credentials_from_config(bc: &BedrockConfig) -> AwsCredentials {
     if let (Some(key_id), Some(secret)) = (&bc.access_key_id, &bc.secret_access_key) {
         AwsCredentials::Explicit {

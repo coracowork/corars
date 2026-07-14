@@ -1,4 +1,4 @@
-//! Pre-message phase of the JSON stream protocol.
+﻿//! Pre-message phase of the JSON stream protocol.
 //!
 //! Before the first `Message` command arrives, the host is allowed to send
 //! any number of `AddMcpServer` commands to connect additional MCP servers

@@ -1,4 +1,4 @@
-//! Autocompact: watermark-triggered LLM summarization.
+﻿//! Autocompact: watermark-triggered LLM summarization.
 //!
 //! When the token watermark exceeds the configured threshold, this module
 //! calls the LLM to produce a structured summary of the conversation,
@@ -114,7 +114,7 @@ pub async fn autocompact(
             system: COMPACT_SYSTEM_PROMPT.to_string(),
             messages: conv_messages.clone(),
             tools: vec![],
-            max_tokens: COMPACT_MAX_OUTPUT_TOKENS,
+            max_tokens: Some(COMPACT_MAX_OUTPUT_TOKENS),
             thinking: Some(ThinkingConfig::Disabled),
             reasoning_effort: None,
         };

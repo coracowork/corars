@@ -1,4 +1,4 @@
-// Integration tests for the memory path system.
+﻿// Integration tests for the memory path system.
 //
 // These tests target the functional requirements from test-plan.md TC-2,
 // treating the public API as a black box.
@@ -23,10 +23,10 @@ fn tc_2_1_default_base_dir_uses_platform_config() {
     // Should return Some (platform provides a config dir in CI/test envs)
     assert!(base.is_some(), "memory_base_dir should return Some on this platform");
     let base = base.unwrap();
-    // Should end with "CORArs" (the brand, not "claude")
+    // Should end with "corars" (the brand, not "claude")
     assert!(
-        base.to_string_lossy().contains("CORArs"),
-        "base dir should use CORArs brand: {base:?}"
+        base.to_string_lossy().contains("corars"),
+        "base dir should use corars brand: {base:?}"
     );
 
     restore_env(saved);
@@ -290,7 +290,7 @@ fn entrypoint_name_constant_is_memory_md() {
 // -- Helpers ------------------------------------------------------------------
 
 fn env_key() -> &'static str {
-    "cora_MEMORY_DIR"
+    "CORARS_MEMORY_DIR"
 }
 
 fn restore_env(saved: Option<String>) {

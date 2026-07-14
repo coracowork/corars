@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+﻿use std::collections::HashMap;
 use std::future::Future;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Duration;
@@ -154,7 +154,7 @@ impl McpManager {
             protocol_version: "2025-03-26".to_string(),
             capabilities: ClientCapabilities { tools: Some(json!({})) },
             client_info: ClientInfo {
-                name: "CORArs".to_string(),
+                name: "corars".to_string(),
                 version: "0.3.0".to_string(),
             },
         };

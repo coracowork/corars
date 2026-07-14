@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+﻿use std::path::PathBuf;
 
 use crate::frontmatter::{parse_frontmatter, parse_skill_fields};
 use crate::loader::LoadedSkill;

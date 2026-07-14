@@ -1,4 +1,4 @@
-//! Integration tests for enhanced tool descriptions (TC-4.2-01 through TC-4.2-08).
+﻿//! Integration tests for enhanced tool descriptions (TC-4.2-01 through TC-4.2-08).
 //!
 //! These are black-box tests that verify each tool's description contains
 //! the key guidance information specified in the test plan.

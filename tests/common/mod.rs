@@ -1,4 +1,4 @@
-// Shared test utilities for integration tests.
+﻿// Shared test utilities for integration tests.
 #![allow(dead_code)]
 
 use std::sync::{Arc, Mutex};
@@ -7,16 +7,16 @@ use async_trait::async_trait;
 use serde_json::{Value, json};
 use tokio::sync::mpsc;
 
-use CORArs::confirm::ToolConfirmer;
-use CORArs::protocol::events::ToolCategory;
-use CORArs::config::{Config, ProviderType, ToolsConfig, SessionConfig};
-use CORArs::hooks::HooksConfig;
-use CORArs::mcp::config::McpConfig;
-use CORArs::provider::{LlmProvider, ProviderError};
-use CORArs::tools::Tool;
-use CORArs::types::llm::{LlmEvent, LlmRequest};
-use CORArs::types::message::{StopReason, TokenUsage};
-use CORArs::types::tool::ToolResult;
+use corars::confirm::ToolConfirmer;
+use corars::protocol::events::ToolCategory;
+use corars::config::{Config, ProviderType, ToolsConfig, SessionConfig};
+use corars::hooks::HooksConfig;
+use corars::mcp::config::McpConfig;
+use corars::provider::{LlmProvider, ProviderError};
+use corars::tools::Tool;
+use corars::types::llm::{LlmEvent, LlmRequest};
+use corars::types::message::{StopReason, TokenUsage};
+use corars::types::tool::ToolResult;
 
 // ---------------------------------------------------------------------------
 // MockLlmProvider — deterministic LLM for engine / spawn tests
@@ -242,24 +242,24 @@ pub fn test_config() -> Config {
         api_key: "test-key".to_string(),
         base_url: "http://localhost:0".to_string(),
         model: "test-model".to_string(),
-        max_tokens: 4096,
+        max_tokens: Some(4096),
         max_turns: Some(10),
         system_prompt: Some("You are a test assistant.".to_string()),
         thinking: None,
         prompt_caching: false,
-        compat: CORArs::provider::compat::ProviderCompat::anthropic_defaults(),
+        compat: corars::provider::compat::ProviderCompat::anthropic_defaults(),
         tools: ToolsConfig {
             auto_approve: true,
             allow_list: vec![],
-            skills: CORArs::config::SkillsPermissionConfig::default(),
+            skills: corars::config::SkillsPermissionConfig::default(),
         },
         session: SessionConfig {
             enabled: false,
-            directory: "/tmp/CORArs-test-sessions".to_string(),
+            directory: "/tmp/corars-test-sessions".to_string(),
             max_sessions: 5,
         },
-        compact: CORArs::config::CompactConfig::default(),
-        plan: CORArs::config::PlanConfig::default(),
+        compact: corars::config::CompactConfig::default(),
+        plan: corars::config::PlanConfig::default(),
         hooks: HooksConfig::default(),
         bedrock: None,
         vertex: None,

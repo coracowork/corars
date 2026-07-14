@@ -1,4 +1,4 @@
-#![allow(dead_code, unused_macros, unused_imports)]
+﻿#![allow(dead_code, unused_macros, unused_imports)]
 /// Acceptance tests for evolution features (Phase 6).
 ///
 /// These tests validate end-to-end behavior of each evolution feature
@@ -10,7 +10,7 @@
 ///   AWS_PROFILE + CLAUDE_CODE_USE_BEDROCK=1 — runs Bedrock provider tests
 ///
 /// Run manually:
-///   OPENAI_API_KEY=sk-... cargo nextest run -p CORA-agent --profile e2e --test acceptance
+///   OPENAI_API_KEY=sk-... cargo nextest run -p cora-agent --profile e2e --test acceptance
 #[macro_use]
 mod helpers;
 mod compact_test;

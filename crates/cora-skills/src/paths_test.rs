@@ -1,4 +1,4 @@
-use super::*;
+﻿use super::*;
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -19,20 +19,20 @@ mod tests {
     // --- user_skills_dir ---
 
     #[test]
-    fn test_user_skills_dir_contains_cora_skills() {
+    fn test_user_skills_dir_contains_corars_skills() {
         if let Some(dir) = user_skills_dir() {
             let s = dir.to_string_lossy();
-            assert!(s.contains("CORArs"), "expected 'CORArs' in path: {s}");
+            assert!(s.contains("corars"), "expected 'corars' in path: {s}");
             assert!(s.ends_with("skills"), "expected path to end with 'skills': {s}");
         }
         // If app_config_dir() returns None (rare), that's acceptable.
     }
 
     #[test]
-    fn test_user_commands_dir_contains_cora_commands() {
+    fn test_user_commands_dir_contains_corars_commands() {
         if let Some(dir) = user_commands_dir() {
             let s = dir.to_string_lossy();
-            assert!(s.contains("CORArs"));
+            assert!(s.contains("corars"));
             assert!(s.ends_with("commands"));
         }
     }
@@ -79,10 +79,10 @@ mod tests {
         fs::create_dir(root.join(".git")).unwrap();
 
         // Create skills dirs at root and nested level
-        make_dir(root, ".CORArs/skills");
+        make_dir(root, ".corars/skills");
         let nested = root.join("sub").join("project");
         fs::create_dir_all(&nested).unwrap();
-        make_dir(&nested, ".CORArs/skills");
+        make_dir(&nested, ".corars/skills");
 
         let dirs = project_skills_dirs(&nested);
         // Should find both (deepest first)
@@ -96,7 +96,7 @@ mod tests {
     fn test_project_skills_dirs_skips_missing() {
         let tmp = TempDir::new().unwrap();
         fs::create_dir(tmp.path().join(".git")).unwrap();
-        // No .CORArs/skills/ anywhere
+        // No .corars/skills/ anywhere
         let dirs = project_skills_dirs(tmp.path());
         assert!(dirs.is_empty());
     }
@@ -106,7 +106,7 @@ mod tests {
     #[test]
     fn test_additional_skills_dirs_existing() {
         let tmp = TempDir::new().unwrap();
-        make_dir(tmp.path(), ".CORArs/skills");
+        make_dir(tmp.path(), ".corars/skills");
         let result = additional_skills_dirs(&[tmp.path().to_path_buf()]);
         assert_eq!(result.len(), 1);
     }
@@ -114,7 +114,7 @@ mod tests {
     #[test]
     fn test_additional_skills_dirs_missing_silently_skipped() {
         let tmp = TempDir::new().unwrap();
-        // No .CORArs/skills/ under tmp
+        // No .corars/skills/ under tmp
         let result = additional_skills_dirs(&[tmp.path().to_path_buf()]);
         assert!(result.is_empty());
     }
@@ -200,7 +200,7 @@ mod supplemental_tests {
         if let Some(dir) = user_skills_dir() {
             let s = dir.to_string_lossy();
             assert!(s.ends_with("skills"), "path should end with 'skills': {s}");
-            assert!(s.contains("CORArs"), "path should contain 'CORArs': {s}");
+            assert!(s.contains("corars"), "path should contain 'corars': {s}");
         }
     }
 
@@ -209,7 +209,7 @@ mod supplemental_tests {
         if let Some(dir) = user_commands_dir() {
             let s = dir.to_string_lossy();
             assert!(s.ends_with("commands"), "path should end with 'commands': {s}");
-            assert!(s.contains("CORArs"), "path should contain 'CORArs': {s}");
+            assert!(s.contains("corars"), "path should contain 'corars': {s}");
         }
     }
 
@@ -221,9 +221,9 @@ mod supplemental_tests {
     fn tc_4_2_project_skills_dirs_nonexistent_subdir_not_returned() {
         let tmp = TempDir::new().unwrap();
         fs::create_dir(tmp.path().join(".git")).unwrap();
-        // No .CORArs/skills/ created
+        // No .corars/skills/ created
         let dirs = project_skills_dirs(tmp.path());
-        assert!(dirs.is_empty(), "should be empty when .CORArs/skills/ doesn't exist");
+        assert!(dirs.is_empty(), "should be empty when .corars/skills/ doesn't exist");
     }
 
     #[test]
@@ -231,11 +231,11 @@ mod supplemental_tests {
         let tmp = TempDir::new().unwrap();
         let root = tmp.path();
         fs::create_dir(root.join(".git")).unwrap();
-        make_dir(root, ".CORArs/skills");
+        make_dir(root, ".corars/skills");
 
         let inner = root.join("sub");
         fs::create_dir_all(&inner).unwrap();
-        make_dir(&inner, ".CORArs/skills");
+        make_dir(&inner, ".corars/skills");
 
         let dirs = project_skills_dirs(&inner);
         assert_eq!(dirs.len(), 2);
@@ -251,19 +251,19 @@ mod supplemental_tests {
     fn tc_4_4_project_skills_dirs_stops_at_git_root() {
         let tmp = TempDir::new().unwrap();
         let grandparent = tmp.path();
-        // .CORArs/skills in grandparent (above git root) — should NOT be collected
-        make_dir(grandparent, ".CORArs/skills");
+        // .corars/skills in grandparent (above git root) — should NOT be collected
+        make_dir(grandparent, ".corars/skills");
 
         let repo = grandparent.join("repo");
         fs::create_dir_all(&repo).unwrap();
         fs::create_dir(repo.join(".git")).unwrap();
-        make_dir(&repo, ".CORArs/skills");
+        make_dir(&repo, ".corars/skills");
 
         let sub = repo.join("sub");
         fs::create_dir_all(&sub).unwrap();
 
         let dirs = project_skills_dirs(&sub);
-        // Only repo's .CORArs/skills should be included
+        // Only repo's .corars/skills should be included
         assert!(
             dirs.iter().all(|d| d.starts_with(&repo)),
             "should not include dirs above git root, got: {dirs:?}"
@@ -288,11 +288,11 @@ mod supplemental_tests {
         let tmp = TempDir::new().unwrap();
         let root = tmp.path();
         fs::create_dir(root.join(".git")).unwrap();
-        make_dir(root, ".CORArs/commands");
+        make_dir(root, ".corars/commands");
 
         let dirs = project_commands_dirs(root);
         assert_eq!(dirs.len(), 1);
-        assert!(dirs[0].ends_with(".CORArs/commands"));
+        assert!(dirs[0].ends_with(".corars/commands"));
     }
 
     // -----------------------------------------------------------------------
@@ -302,17 +302,17 @@ mod supplemental_tests {
     #[test]
     fn tc_6_1_additional_skills_dirs_with_existing_subdir() {
         let tmp = TempDir::new().unwrap();
-        make_dir(tmp.path(), ".CORArs/skills");
+        make_dir(tmp.path(), ".corars/skills");
 
         let result = additional_skills_dirs(&[tmp.path().to_path_buf()]);
         assert_eq!(result.len(), 1);
-        assert!(result[0].ends_with(".CORArs/skills"));
+        assert!(result[0].ends_with(".corars/skills"));
     }
 
     #[test]
     fn tc_6_2_additional_skills_dirs_no_subdir_skipped() {
         let tmp = TempDir::new().unwrap();
-        // No .CORArs/skills/ subdirectory
+        // No .corars/skills/ subdirectory
         let result = additional_skills_dirs(&[tmp.path().to_path_buf()]);
         assert!(result.is_empty());
     }
@@ -321,8 +321,8 @@ mod supplemental_tests {
     fn tc_6_4_additional_skills_dirs_multiple_add_dirs() {
         let tmp1 = TempDir::new().unwrap();
         let tmp2 = TempDir::new().unwrap();
-        make_dir(tmp1.path(), ".CORArs/skills");
-        make_dir(tmp2.path(), ".CORArs/skills");
+        make_dir(tmp1.path(), ".corars/skills");
+        make_dir(tmp2.path(), ".corars/skills");
 
         let result = additional_skills_dirs(&[tmp1.path().to_path_buf(), tmp2.path().to_path_buf()]);
         assert_eq!(result.len(), 2);

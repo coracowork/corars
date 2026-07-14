@@ -1,4 +1,4 @@
-use crate::types::SkillSource;
+﻿use crate::types::SkillSource;
 use cora_config::hooks::{HookDef, HooksConfig};
 
 /// A single hook command extracted from skill frontmatter.

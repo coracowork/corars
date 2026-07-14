@@ -1,4 +1,4 @@
-//! Integration tests for Spawn tool description (TC-4.2-07).
+﻿//! Integration tests for Spawn tool description (TC-4.2-07).
 //!
 //! Verifies the enhanced Spawn tool description contains capacity limits
 //! and usage guidance as specified in the test plan.
@@ -9,12 +9,18 @@ use std::sync::Arc;
 
 use cora_agent::spawn_tool::SpawnTool;
 use cora_agent::spawner::AgentSpawner;
+use cora_agent::tool_policy::ToolPolicy;
 use cora_tools::Tool;
 use common::{MockLlmProvider, test_config};
 
 fn make_spawn_tool() -> SpawnTool {
     let provider = Arc::new(MockLlmProvider::with_text_response("ok"));
-    let spawner = Arc::new(AgentSpawner::new(provider, test_config(), std::env::temp_dir()));
+    let spawner = Arc::new(AgentSpawner::new(
+        provider,
+        test_config(),
+        std::env::temp_dir(),
+        ToolPolicy::Unrestricted,
+    ));
     SpawnTool::new(spawner)
 }
 

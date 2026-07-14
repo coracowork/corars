@@ -1,4 +1,4 @@
-// Path resolution and directory management for the memory system.
+﻿// Path resolution and directory management for the memory system.
 //
 // Provides functions to compute memory directory locations, validate
 // paths for security, and ensure directories exist.
@@ -17,7 +17,7 @@ pub const ENTRYPOINT_NAME: &str = "MEMORY.md";
 const MAX_SANITIZED_LENGTH: usize = 200;
 
 /// Environment variable to override the memory base directory.
-const MEMORY_DIR_ENV: &str = "cora_MEMORY_DIR";
+const MEMORY_DIR_ENV: &str = "CORARS_MEMORY_DIR";
 
 // ---------------------------------------------------------------------------
 // Base directory resolution
@@ -26,8 +26,8 @@ const MEMORY_DIR_ENV: &str = "cora_MEMORY_DIR";
 /// Returns the base directory for memory storage.
 ///
 /// Resolution order:
-///   1. `cora_MEMORY_DIR` environment variable (explicit override)
-///   2. `app_config_dir()` from `CORA-config` (platform-aware default)
+///   1. `CORARS_MEMORY_DIR` environment variable (explicit override)
+///   2. `app_config_dir()` from `cora-config` (platform-aware default)
 ///
 /// Returns `None` only when both the env var is unset AND the platform
 /// cannot determine a config directory (e.g. no home directory).

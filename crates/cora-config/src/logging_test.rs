@@ -1,4 +1,4 @@
-use super::*;
+﻿use super::*;
 
 #[cfg(test)]
 mod tests {
@@ -17,12 +17,12 @@ mod tests {
         let toml_str = r#"
 enabled = true
 level = "debug"
-dir = "/tmp/CORArs-logs"
+dir = "/tmp/corars-logs"
 "#;
         let cfg: LoggingConfig = toml::from_str(toml_str).unwrap();
         assert_eq!(cfg.enabled, Some(true));
         assert_eq!(cfg.level.as_deref(), Some("debug"));
-        assert_eq!(cfg.dir.as_deref(), Some("/tmp/CORArs-logs"));
+        assert_eq!(cfg.dir.as_deref(), Some("/tmp/corars-logs"));
     }
 
     #[test]
@@ -119,9 +119,9 @@ dir = "/tmp/CORArs-logs"
     }
 
     #[test]
-    fn default_log_dir_contains_CORArs() {
+    fn default_log_dir_contains_corars() {
         let dir = default_log_dir();
         let s = dir.to_string_lossy();
-        assert!(s.contains("CORArs"), "expected 'CORArs' in path: {s}");
+        assert!(s.contains("corars"), "expected 'corars' in path: {s}");
     }
 }

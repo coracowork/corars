@@ -1,8 +1,8 @@
-# Advanced Features
+﻿# Advanced Features
 
 ## Sub-Agent Spawning
 
-The LLM can use the Spawn tool to create independent sub-agents that run tasks in parallel. Each sub-agent has its own conversation context and full tool set, but shares the parent agent's LLM provider (connection pool reuse).
+The LLM can use the Spawn tool to create independent sub-agents that run tasks in parallel. Each sub-agent has its own conversation context, inherits the parent agent's runtime tool policy, and shares the parent agent's LLM provider (connection pool reuse). Fork-mode overrides can further restrict inherited tools but cannot restore tools denied to the parent.
 
 ### Use Cases
 
@@ -21,6 +21,7 @@ The LLM can use the Spawn tool to create independent sub-agents that run tasks i
 ### Behavior
 
 - Sub-agents auto-approve all tool calls (no confirmation prompts)
+- Sub-agents cannot exceed the parent agent's runtime tool policy
 - Sub-agents do not save sessions
 - Sub-agents run silently (no stdout output)
 - All results are merged and returned to the parent agent
@@ -265,7 +266,7 @@ my-workspace/
         └── AGENTS.md  ← server-specific rules
 ```
 
-Running corars in `packages/server/` produces a system prompt containing both files, workspace first, then server.
+Running cora in `packages/server/` produces a system prompt containing both files, workspace first, then server.
 
 ---
 

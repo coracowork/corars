@@ -1,4 +1,4 @@
-// Acceptance tests for Plan Mode tool filtering and prompt injection (Task 6.4).
+﻿// Acceptance tests for Plan Mode tool filtering and prompt injection (Task 6.4).
 //
 // These tests are LOCAL (no LLM required) and verify that:
 // - Tool registry filtering produces the correct tool sets for normal vs plan mode

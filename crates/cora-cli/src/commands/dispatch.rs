@@ -1,4 +1,4 @@
-//! Top-level subcommand dispatch for the `CORA` CLI binary.
+﻿//! Top-level subcommand dispatch for the `cora` CLI binary.
 
 use super::{cmd_auth, cmd_config, cmd_session, cmd_skills};
 use crate::cli::Commands;

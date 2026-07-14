@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+﻿use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Duration;
@@ -221,8 +221,8 @@ fn should_ignore(event: &Event) -> bool {
 
     // Filter hidden files (editor swap/temp files, .DS_Store, etc.).
     // Only check the final path component (file name), not intermediate
-    // directory components — otherwise paths like `.CORArs/skills/SKILL.md`
-    // would be incorrectly filtered because `.CORArs` starts with `.`.
+    // directory components — otherwise paths like `.corars/skills/SKILL.md`
+    // would be incorrectly filtered because `.corars` starts with `.`.
     event.paths.iter().all(|p| {
         p.file_name()
             .map(|n| n.to_string_lossy().starts_with('.'))

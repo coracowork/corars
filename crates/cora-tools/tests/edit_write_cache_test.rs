@@ -1,4 +1,4 @@
-//! Integration tests for EditTool / WriteTool file-state cache integration
+﻿//! Integration tests for EditTool / WriteTool file-state cache integration
 //! (TC-5.4 and TC-5.4-W series).
 //!
 //! Black-box tests: exercise Edit/Write tools through their public API with

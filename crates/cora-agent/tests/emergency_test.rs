@@ -1,4 +1,4 @@
-//! Black-box integration tests for emergency truncation (TC-2.5-01 .. TC-2.5-04).
+﻿//! Black-box integration tests for emergency truncation (TC-2.5-01 .. TC-2.5-04).
 //!
 //! These tests treat `is_at_emergency_limit` as a public API and verify
 //! functional requirements from test-plan.md without relying on internal details.

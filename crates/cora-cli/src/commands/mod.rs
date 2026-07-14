@@ -1,4 +1,4 @@
-//! Subcommand implementations for the `CORA` CLI binary.
+﻿//! Subcommand implementations for the `cora` CLI binary.
 //!
 //! This file is a façade — module declarations and re-export only.
 //! All dispatch logic lives in `dispatch.rs`.

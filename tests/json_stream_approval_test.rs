@@ -1,17 +1,17 @@
-mod common;
+﻿mod common;
 
 use std::sync::Arc;
 
 use serde_json::json;
 
-use CORArs::engine::AgentEngine;
-use CORArs::output::OutputSink;
-use CORArs::output::terminal::TerminalSink;
-use CORArs::protocol::{ToolApprovalManager, ToolApprovalResult};
-use CORArs::protocol::writer::ProtocolWriter;
-use CORArs::tools::registry::ToolRegistry;
-use CORArs::types::llm::LlmEvent;
-use CORArs::types::message::{StopReason, TokenUsage};
+use corars::engine::AgentEngine;
+use corars::output::OutputSink;
+use corars::output::terminal::TerminalSink;
+use corars::protocol::{ToolApprovalManager, ToolApprovalResult};
+use corars::protocol::writer::ProtocolWriter;
+use corars::tools::registry::ToolRegistry;
+use corars::types::llm::LlmEvent;
+use corars::types::message::{StopReason, TokenUsage};
 
 use common::{ExecMockTool, MockLlmProvider, test_config};
 

@@ -1,4 +1,4 @@
-//! Black-box integration tests for compact types (TC-2.2-04 through TC-2.2-06).
+﻿//! Black-box integration tests for compact types (TC-2.2-04 through TC-2.2-06).
 //!
 //! These test Message.timestamp serialization and CompactMetadata roundtrip
 //! from a consumer's perspective.

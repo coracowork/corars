@@ -1,4 +1,4 @@
-//! Emergency truncation: the last safety net before a context overflow.
+﻿//! Emergency truncation: the last safety net before a context overflow.
 //!
 //! When `last_input_tokens` is within `emergency_buffer` of the full
 //! `context_window`, the engine should block the next API call and ask

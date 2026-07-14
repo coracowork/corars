@@ -1,4 +1,4 @@
-use super::*;
+﻿use super::*;
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -260,7 +260,7 @@ mod tests {
     fn test_format_global_and_project() {
         let files = vec![
             AgentsMdFile {
-                path: PathBuf::from("/home/user/.config/CORArs/AGENTS.md"),
+                path: PathBuf::from("/home/user/.config/corars/AGENTS.md"),
                 content: "Global rules".to_string(),
                 is_global: true,
             },

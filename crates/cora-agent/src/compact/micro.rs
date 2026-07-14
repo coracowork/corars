@@ -1,4 +1,4 @@
-//! Microcompact: clear old tool result content without any LLM call.
+﻿//! Microcompact: clear old tool result content without any LLM call.
 //!
 //! This is the lightest compaction level.  It walks the conversation,
 //! identifies tool results from compactable tools, and replaces the

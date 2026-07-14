@@ -1,4 +1,4 @@
-//! End-to-end integration tests for Plan Mode (task 3.6).
+﻿//! End-to-end integration tests for Plan Mode (task 3.6).
 //!
 //! Tests are numbered to match the test-plan.md identifiers (TC-3.6-E2E-*).
 

@@ -1,4 +1,4 @@
-// OAuth 2.0 Device Authorization Flow for Claude.ai subscriber accounts.
+﻿// OAuth 2.0 Device Authorization Flow for Claude.ai subscriber accounts.
 
 use std::path::PathBuf;
 
@@ -69,7 +69,7 @@ fn default_token_url() -> String {
 }
 
 fn default_client_id() -> String {
-    "CORArs".to_string()
+    "corars".to_string()
 }
 
 pub struct OAuthManager {
@@ -81,7 +81,7 @@ pub struct OAuthManager {
 impl OAuthManager {
     pub fn new(config: AuthConfig) -> Self {
         let credentials_path = crate::config::app_config_dir()
-            .unwrap_or_else(|| PathBuf::from("CORArs"))
+            .unwrap_or_else(|| PathBuf::from("corars"))
             .join("auth.json");
 
         Self {
@@ -197,7 +197,7 @@ impl OAuthManager {
             return Ok(new_creds.access_token);
         }
 
-        anyhow::bail!("Token expired and no refresh token available. Run 'CORArs auth login'")
+        anyhow::bail!("Token expired and no refresh token available. Run 'corars auth login'")
     }
 
     /// Refresh the access token
@@ -254,7 +254,7 @@ impl OAuthManager {
 
     fn load_credentials(&self) -> anyhow::Result<OAuthCredentials> {
         let json = std::fs::read_to_string(&self.credentials_path)
-            .map_err(|_| anyhow::anyhow!("No saved credentials. Run 'CORArs auth login'"))?;
+            .map_err(|_| anyhow::anyhow!("No saved credentials. Run 'corars auth login'"))?;
         let creds: OAuthCredentials = serde_json::from_str(&json)?;
         Ok(creds)
     }

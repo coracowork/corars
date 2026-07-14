@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+﻿use serde::{Deserialize, Serialize};
 
 /// Configuration for Plan Mode.
 ///
@@ -32,7 +32,7 @@ fn default_true() -> bool {
 }
 
 fn default_plan_directory() -> String {
-    ".CORArs/plans".to_string()
+    ".corars/plans".to_string()
 }
 
 #[cfg(test)]

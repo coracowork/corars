@@ -1,4 +1,4 @@
-//! Shared protocol I/O context threaded through the JSON stream main loop.
+﻿//! Shared protocol I/O context threaded through the JSON stream main loop.
 //!
 //! `dispatch::handle` and `message::handle` both need the same cluster of
 //! protocol plumbing (output sink, writer, approval manager, protocol sink,

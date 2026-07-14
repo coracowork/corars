@@ -1,19 +1,19 @@
-use std::path::{Path, PathBuf};
+﻿use std::path::{Path, PathBuf};
 
 use cora_config::config::app_config_dir;
 
 // ---------------------------------------------------------------------------
-// User-level directories (<config_dir>/CORArs/)
+// User-level directories (<config_dir>/corars/)
 // ---------------------------------------------------------------------------
 
-/// Return the user-level skills directory: `<config_dir>/CORArs/skills/`
+/// Return the user-level skills directory: `<config_dir>/corars/skills/`
 ///
 /// Returns `None` if the platform config directory cannot be determined.
 pub fn user_skills_dir() -> Option<PathBuf> {
     app_config_dir().map(|d| d.join("skills"))
 }
 
-/// Return the user-level legacy commands directory: `<config_dir>/CORArs/commands/`
+/// Return the user-level legacy commands directory: `<config_dir>/corars/commands/`
 pub fn user_commands_dir() -> Option<PathBuf> {
     app_config_dir().map(|d| d.join("commands"))
 }
@@ -22,7 +22,7 @@ pub fn user_commands_dir() -> Option<PathBuf> {
 // Project-level directories (walk up from cwd)
 // ---------------------------------------------------------------------------
 
-/// Find all project-level `.CORArs/skills/` directories by walking up from
+/// Find all project-level `.corars/skills/` directories by walking up from
 /// `cwd` to the nearest git root (or home directory), returning deepest-first.
 ///
 /// Deepest-first means the most-specific project directory wins in the
@@ -31,19 +31,19 @@ pub fn project_skills_dirs(cwd: &Path) -> Vec<PathBuf> {
     walk_up_dirs(cwd, "skills")
 }
 
-/// Find all project-level `.CORArs/commands/` directories (legacy), same walk.
+/// Find all project-level `.corars/commands/` directories (legacy), same walk.
 pub fn project_commands_dirs(cwd: &Path) -> Vec<PathBuf> {
     walk_up_dirs(cwd, "commands")
 }
 
 /// Resolve additional skill directories from `--add-dir` paths.
 ///
-/// Each path in `add_dirs` is checked for a `.CORArs/skills/` subdirectory.
+/// Each path in `add_dirs` is checked for a `.corars/skills/` subdirectory.
 /// Only directories that exist are included.
 pub fn additional_skills_dirs(add_dirs: &[PathBuf]) -> Vec<PathBuf> {
     add_dirs
         .iter()
-        .map(|d| d.join(".CORArs").join("skills"))
+        .map(|d| d.join(".corars").join("skills"))
         .filter(|p| p.is_dir())
         .collect()
 }
@@ -73,14 +73,14 @@ pub fn find_git_root(start: &Path) -> Option<PathBuf> {
 // ---------------------------------------------------------------------------
 
 /// Walk up from `cwd` to the git root (or home directory), collecting all
-/// `.CORArs/<subdir>/` directories that exist. Returns deepest-first.
+/// `.corars/<subdir>/` directories that exist. Returns deepest-first.
 fn walk_up_dirs(cwd: &Path, subdir: &str) -> Vec<PathBuf> {
     let stop_at = stop_boundary(cwd);
     let mut dirs = Vec::new();
     let mut current = cwd.to_path_buf();
 
     loop {
-        let candidate = current.join(".CORArs").join(subdir);
+        let candidate = current.join(".corars").join(subdir);
         if candidate.is_dir() {
             dirs.push(candidate);
         }

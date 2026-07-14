@@ -1,4 +1,4 @@
-# corars
+﻿# corars
 
 A Rust-based LLM tool-use agent for the command line. It connects to LLM APIs, autonomously invokes local tools (file I/O, shell, search, etc.), and completes tasks end-to-end.
 

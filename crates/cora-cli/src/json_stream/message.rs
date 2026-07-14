@@ -1,4 +1,4 @@
-//! Handling of a single `Message` command in the JSON stream protocol.
+﻿//! Handling of a single `Message` command in the JSON stream protocol.
 //!
 //! While the engine is running a message, the host may still send control
 //! commands (tool approve/deny, mode/config updates, stop, ping) over the

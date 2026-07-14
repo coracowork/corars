@@ -1,4 +1,4 @@
-// Integration tests for memory system prompt construction (TC-6).
+﻿// Integration tests for memory system prompt construction (TC-6).
 //
 // These are black-box tests that exercise the public API of the prompt
 // module against the functional requirements in test-plan.md.
@@ -193,7 +193,7 @@ fn tc_6_5_no_bb_brand_in_type_descriptions() {
 }
 
 // ---------------------------------------------------------------------------
-// TC-6.6: Paths use CORArs brand, not hardcoded platform paths
+// TC-6.6: Paths use corars brand, not hardcoded platform paths
 // ---------------------------------------------------------------------------
 
 #[test]
@@ -203,7 +203,7 @@ fn tc_6_6_no_hardcoded_platform_paths() {
 
     // Should not contain hardcoded Unix-specific config paths
     assert!(
-        !joined.contains("~/.config/CORArs"),
+        !joined.contains("~/.config/corars"),
         "should not hardcode platform-specific config path"
     );
 

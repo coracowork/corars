@@ -1,4 +1,4 @@
-// End-to-end integration tests for the memory system (TC-8).
+﻿// End-to-end integration tests for the memory system (TC-8).
 //
 // These tests exercise the full memory lifecycle across multiple modules,
 // verifying that all components work together correctly.

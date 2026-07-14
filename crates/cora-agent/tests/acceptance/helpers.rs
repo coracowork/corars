@@ -1,4 +1,4 @@
-// Shared helpers for acceptance tests: provider detection and config builders.
+﻿// Shared helpers for acceptance tests: provider detection and config builders.
 
 use cora_config::compat::ProviderCompat;
 use cora_config::config::{BedrockConfig, Config, ProviderType, SessionConfig, ToolsConfig};
@@ -64,9 +64,9 @@ pub fn openai_config(api_key: &str) -> Config {
         provider: ProviderType::OpenAI,
         provider_label: "openai".to_string(),
         api_key: api_key.to_string(),
-        base_url: "https://api.openai.com".to_string(),
+        base_url: "https://api.openai.com/v1".to_string(),
         model: "gpt-4o-mini".to_string(),
-        max_tokens: 256,
+        max_tokens: Some(256),
         max_turns: Some(3),
         max_tool_call_malformed_turns: Some(3),
         max_tool_call_failure_turns: Some(3),
@@ -81,7 +81,7 @@ pub fn openai_config(api_key: &str) -> Config {
         },
         session: SessionConfig {
             enabled: false,
-            directory: "/tmp/CORArs-acceptance".to_string(),
+            directory: "/tmp/corars-acceptance".to_string(),
             max_sessions: 1,
         },
         compact: cora_config::compact::CompactConfig::default(),
@@ -104,7 +104,7 @@ pub fn bedrock_config() -> Config {
         api_key: String::new(), // Bedrock uses AWS credentials, not API key
         base_url: String::new(),
         model: "us.anthropic.claude-haiku-4-20250514-v1:0".to_string(),
-        max_tokens: 256,
+        max_tokens: Some(256),
         max_turns: Some(3),
         max_tool_call_malformed_turns: Some(3),
         max_tool_call_failure_turns: Some(3),
@@ -119,7 +119,7 @@ pub fn bedrock_config() -> Config {
         },
         session: SessionConfig {
             enabled: false,
-            directory: "/tmp/CORArs-acceptance".to_string(),
+            directory: "/tmp/corars-acceptance".to_string(),
             max_sessions: 1,
         },
         compact: cora_config::compact::CompactConfig::default(),

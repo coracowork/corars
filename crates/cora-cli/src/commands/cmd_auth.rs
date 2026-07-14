@@ -1,4 +1,4 @@
-use cora_config::auth::{AuthConfig, OAuthManager};
+﻿use cora_config::auth::{AuthConfig, OAuthManager};
 
 use crate::cli::AuthAction;
 
@@ -7,7 +7,7 @@ pub(crate) async fn run(action: AuthAction) -> anyhow::Result<()> {
     match action {
         AuthAction::Login => {
             oauth.login().await?;
-            eprintln!("Login successful! You can now use CORArs without --api-key.");
+            eprintln!("Login successful! You can now use corars without --api-key.");
             Ok(())
         }
         AuthAction::Logout => oauth.logout(),

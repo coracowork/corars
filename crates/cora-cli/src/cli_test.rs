@@ -1,4 +1,4 @@
-use clap::{CommandFactory, Parser};
+﻿use clap::{CommandFactory, Parser};
 
 use super::{Cli, Commands, ConfigAction};
 
@@ -9,14 +9,14 @@ fn cli_definition_is_valid() {
 
 #[test]
 fn no_subcommand_parses_prompt_as_trailing_args() {
-    let cli = Cli::try_parse_from(["CORArs", "write", "a", "function"]).unwrap();
+    let cli = Cli::try_parse_from(["corars", "write", "a", "function"]).unwrap();
     assert!(cli.command.is_none());
     assert_eq!(cli.prompt, vec!["write", "a", "function"]);
 }
 
 #[test]
 fn config_init_parses_to_config_action() {
-    let cli = Cli::try_parse_from(["CORArs", "config", "init"]).unwrap();
+    let cli = Cli::try_parse_from(["corars", "config", "init"]).unwrap();
     assert!(matches!(
         cli.command,
         Some(Commands::Config {
@@ -26,11 +26,20 @@ fn config_init_parses_to_config_action() {
 }
 
 #[test]
+fn thinking_flags_parse() {
+    let cli = Cli::try_parse_from(["corars", "--thinking", "enabled", "--thinking-budget", "16000", "hello"]).unwrap();
+
+    assert_eq!(cli.thinking.as_deref(), Some("enabled"));
+    assert_eq!(cli.thinking_budget, Some(16_000));
+    assert_eq!(cli.prompt, vec!["hello"]);
+}
+
+#[test]
 fn deleted_flags_are_rejected() {
-    assert!(Cli::try_parse_from(["CORArs", "--config-path"]).is_err());
-    assert!(Cli::try_parse_from(["CORArs", "--login"]).is_err());
-    assert!(Cli::try_parse_from(["CORArs", "--list-sessions"]).is_err());
-    assert!(Cli::try_parse_from(["CORArs", "--skills-path"]).is_err());
-    assert!(Cli::try_parse_from(["CORArs", "--init-config"]).is_err());
-    assert!(Cli::try_parse_from(["CORArs", "--logout"]).is_err());
+    assert!(Cli::try_parse_from(["corars", "--config-path"]).is_err());
+    assert!(Cli::try_parse_from(["corars", "--login"]).is_err());
+    assert!(Cli::try_parse_from(["corars", "--list-sessions"]).is_err());
+    assert!(Cli::try_parse_from(["corars", "--skills-path"]).is_err());
+    assert!(Cli::try_parse_from(["corars", "--init-config"]).is_err());
+    assert!(Cli::try_parse_from(["corars", "--logout"]).is_err());
 }

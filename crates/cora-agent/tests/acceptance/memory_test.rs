@@ -1,4 +1,4 @@
-// Acceptance tests for the memory system end-to-end.
+﻿// Acceptance tests for the memory system end-to-end.
 //
 // These tests verify that the memory system's file I/O, index management,
 // and prompt building work together correctly. No LLM API calls are needed.

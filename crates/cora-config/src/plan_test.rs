@@ -1,4 +1,4 @@
-use super::*;
+﻿use super::*;
 
 #[cfg(test)]
 mod tests {
@@ -8,7 +8,7 @@ mod tests {
     fn default_values_match_spec() {
         let cfg = PlanConfig::default();
         assert!(cfg.enabled);
-        assert_eq!(cfg.plan_directory, ".CORArs/plans");
+        assert_eq!(cfg.plan_directory, ".corars/plans");
     }
 
     #[test]
@@ -29,14 +29,14 @@ enabled = false
 "#;
         let cfg: PlanConfig = toml::from_str(toml_str).unwrap();
         assert!(!cfg.enabled);
-        assert_eq!(cfg.plan_directory, ".CORArs/plans");
+        assert_eq!(cfg.plan_directory, ".corars/plans");
     }
 
     #[test]
     fn toml_empty_uses_all_defaults() {
         let cfg: PlanConfig = toml::from_str("").unwrap();
         assert!(cfg.enabled);
-        assert_eq!(cfg.plan_directory, ".CORArs/plans");
+        assert_eq!(cfg.plan_directory, ".corars/plans");
     }
 
     #[test]

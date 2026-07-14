@@ -1,4 +1,4 @@
-use super::*;
+﻿use super::*;
 
 #[cfg(test)]
 mod tests {
@@ -46,12 +46,12 @@ mod tests {
     async fn execute_injects_runtime_env() {
         let tool = ExecCommandTool::new_with_env(
             std::env::temp_dir(),
-            vec![("cora_RUNTIME_ENV_TEST".to_string(), "exec-env-value".to_string())],
+            vec![("CORA_RUNTIME_ENV_TEST".to_string(), "exec-env-value".to_string())],
         );
         #[cfg(windows)]
-        let input = json!({"cmd": "Write-Output $env:cora_RUNTIME_ENV_TEST", "shell": "powershell"});
+        let input = json!({"cmd": "Write-Output $env:CORA_RUNTIME_ENV_TEST", "shell": "powershell"});
         #[cfg(not(windows))]
-        let input = json!({"cmd": "printf '%s' \"$cora_RUNTIME_ENV_TEST\"", "shell": "sh"});
+        let input = json!({"cmd": "printf '%s' \"$CORA_RUNTIME_ENV_TEST\"", "shell": "sh"});
 
         let result = tool.execute(input).await;
 

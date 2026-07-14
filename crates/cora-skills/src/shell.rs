@@ -1,4 +1,4 @@
-use futures::future::join_all;
+﻿use futures::future::join_all;
 use regex::Regex;
 use std::path::Path;
 use std::sync::OnceLock;
