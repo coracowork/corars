@@ -22,6 +22,7 @@ cora-tools.workspace    = true
 cora-mcp.workspace      = true
 cora-protocol.workspace = true
 cora-skills.workspace   = true
+cora-types.workspace    = true
 
 tokio.workspace              = true
 anyhow.workspace             = true

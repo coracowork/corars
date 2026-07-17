@@ -16,6 +16,7 @@ mod tests_set_config {
     use cora_providers::provider::LlmProvider;
     use cora_tools::registry::ToolRegistry;
     use cora_types::llm::{LlmEvent, LlmRequest};
+    use cora_types::message::ImageInputCapability;
 
     use super::{CompactLevel, ProviderCompat};
     use crate::confirm::ToolConfirmer;
@@ -89,7 +90,7 @@ mod tests_set_config {
     #[test]
     fn set_config_changes_model() {
         let mut engine = make_engine("old-model");
-        let changes = engine.apply_config_update(Some("new-model".into()), None, None, None, None);
+        let changes = engine.apply_config_update(Some("new-model".into()), None, None, None, None, None);
         assert_eq!(engine.model, "new-model");
         assert_eq!(changes.len(), 1);
         assert!(changes[0].contains("old-model"));
@@ -99,7 +100,7 @@ mod tests_set_config {
     #[test]
     fn set_config_none_model_no_change() {
         let mut engine = make_engine("current");
-        let changes = engine.apply_config_update(None, None, None, None, None);
+        let changes = engine.apply_config_update(None, None, None, None, None, None);
         assert_eq!(engine.model, "current");
         assert!(changes.is_empty());
     }
@@ -107,14 +108,14 @@ mod tests_set_config {
     #[test]
     fn set_config_same_model_still_reports_change() {
         let mut engine = make_engine("same");
-        let changes = engine.apply_config_update(Some("same".into()), None, None, None, None);
+        let changes = engine.apply_config_update(Some("same".into()), None, None, None, None, None);
         assert_eq!(changes.len(), 1);
     }
 
     #[test]
     fn set_config_empty_string_model_accepted() {
         let mut engine = make_engine("real-model");
-        engine.apply_config_update(Some(String::new()), None, None, None, None);
+        engine.apply_config_update(Some(String::new()), None, None, None, None, None);
         assert_eq!(engine.model, "");
     }
 
@@ -122,9 +123,41 @@ mod tests_set_config {
     fn set_config_model_does_not_affect_other_state() {
         let mut engine = make_engine("m");
         engine.reasoning_effort = Some("high".into());
-        engine.apply_config_update(Some("new-m".into()), None, None, None, None);
+        engine.apply_config_update(Some("new-m".into()), None, None, None, None, None);
         assert_eq!(engine.model, "new-m");
         assert_eq!(engine.reasoning_effort.as_deref(), Some("high"));
+    }
+
+    #[test]
+    fn set_config_model_change_resets_stale_image_capability() {
+        let compat = ProviderCompat {
+            image_input: Some(ImageInputCapability::Supported),
+            ..Default::default()
+        };
+        let mut engine = make_engine_with_compat("vision-model", compat);
+
+        let changes = engine.apply_config_update(Some("text-model".into()), None, None, None, None, None);
+
+        assert_eq!(engine.compat.image_input(), ImageInputCapability::Unknown);
+        assert!(changes.iter().any(|change| change.contains("image input")));
+    }
+
+    #[test]
+    fn set_config_applies_host_resolved_image_capability_with_model() {
+        let mut engine = make_engine("old-model");
+
+        let changes = engine.apply_config_update(
+            Some("vision-model".into()),
+            Some(ImageInputCapability::Supported),
+            None,
+            None,
+            None,
+            None,
+        );
+
+        assert_eq!(engine.model, "vision-model");
+        assert_eq!(engine.compat.image_input(), ImageInputCapability::Supported);
+        assert!(changes.iter().any(|change| change.contains("image input")));
     }
 
     // --- Cycle 2: Effort config tests ---
@@ -133,7 +166,7 @@ mod tests_set_config {
     fn set_config_changes_effort() {
         let mut engine = make_engine_with_compat("m", ProviderCompat::openai_defaults());
         assert!(engine.reasoning_effort.is_none());
-        let changes = engine.apply_config_update(None, None, None, Some("high".into()), None);
+        let changes = engine.apply_config_update(None, None, None, None, Some("high".into()), None);
         assert_eq!(engine.reasoning_effort.as_deref(), Some("high"));
         assert_eq!(changes.len(), 1);
         assert!(changes[0].contains("high"));
@@ -143,7 +176,7 @@ mod tests_set_config {
     fn set_config_clears_effort_with_empty_string() {
         let mut engine = make_engine("m");
         engine.reasoning_effort = Some("high".into());
-        let changes = engine.apply_config_update(None, None, None, Some(String::new()), None);
+        let changes = engine.apply_config_update(None, None, None, None, Some(String::new()), None);
         assert!(engine.reasoning_effort.is_none());
         assert_eq!(changes.len(), 1);
     }
@@ -153,7 +186,7 @@ mod tests_set_config {
     #[test]
     fn set_config_enables_thinking() {
         let mut engine = make_engine("m");
-        let changes = engine.apply_config_update(None, Some("enabled".into()), Some(16000), None, None);
+        let changes = engine.apply_config_update(None, None, Some("enabled".into()), Some(16000), None, None);
         match &engine.thinking {
             Some(cora_types::llm::ThinkingConfig::Enabled { budget_tokens }) => {
                 assert_eq!(*budget_tokens, 16000);
@@ -167,7 +200,7 @@ mod tests_set_config {
     fn set_config_disables_thinking() {
         let mut engine = make_engine("m");
         engine.thinking = Some(cora_types::llm::ThinkingConfig::Enabled { budget_tokens: 8000 });
-        let changes = engine.apply_config_update(None, Some("disabled".into()), None, None, None);
+        let changes = engine.apply_config_update(None, None, Some("disabled".into()), None, None, None);
         match &engine.thinking {
             Some(cora_types::llm::ThinkingConfig::Disabled) => {}
             other => panic!("expected Disabled, got: {other:?}"),
@@ -178,7 +211,7 @@ mod tests_set_config {
     #[test]
     fn set_config_thinking_enabled_default_budget() {
         let mut engine = make_engine("m");
-        let changes = engine.apply_config_update(None, Some("enabled".into()), None, None, None);
+        let changes = engine.apply_config_update(None, None, Some("enabled".into()), None, None, None);
         match &engine.thinking {
             Some(cora_types::llm::ThinkingConfig::Enabled { budget_tokens }) => {
                 assert!(*budget_tokens > 0);
@@ -192,7 +225,7 @@ mod tests_set_config {
     fn set_config_invalid_thinking_ignored() {
         let mut engine = make_engine("m");
         engine.thinking = Some(cora_types::llm::ThinkingConfig::Enabled { budget_tokens: 8000 });
-        let changes = engine.apply_config_update(None, Some("invalid_value".into()), None, None, None);
+        let changes = engine.apply_config_update(None, None, Some("invalid_value".into()), None, None, None);
         match &engine.thinking {
             Some(cora_types::llm::ThinkingConfig::Enabled { budget_tokens }) => {
                 assert_eq!(*budget_tokens, 8000);
@@ -218,6 +251,7 @@ mod tests_set_config {
         let mut engine = make_engine_with_compat("old-model", compat);
         let changes = engine.apply_config_update(
             Some("new-model".into()),
+            None,
             Some("enabled".into()),
             Some(12000),
             Some("low".into()),
@@ -240,7 +274,7 @@ mod tests_set_config {
     fn set_config_thinking_budget_only_updates_existing_enabled() {
         let mut engine = make_engine("m");
         engine.thinking = Some(cora_types::llm::ThinkingConfig::Enabled { budget_tokens: 5000 });
-        let changes = engine.apply_config_update(None, None, Some(20000), None, None);
+        let changes = engine.apply_config_update(None, None, None, Some(20000), None, None);
         match &engine.thinking {
             Some(cora_types::llm::ThinkingConfig::Enabled { budget_tokens }) => {
                 assert_eq!(*budget_tokens, 20000);
@@ -254,7 +288,7 @@ mod tests_set_config {
     fn set_config_thinking_budget_ignored_when_disabled() {
         let mut engine = make_engine("m");
         engine.thinking = Some(cora_types::llm::ThinkingConfig::Disabled);
-        let changes = engine.apply_config_update(None, None, Some(20000), None, None);
+        let changes = engine.apply_config_update(None, None, None, Some(20000), None, None);
         match &engine.thinking {
             Some(cora_types::llm::ThinkingConfig::Disabled) => {}
             other => panic!("expected Disabled unchanged, got: {other:?}"),
@@ -273,7 +307,7 @@ mod tests_set_config {
         };
         let mut engine = make_engine_with_compat("m", compat);
 
-        let changes = engine.apply_config_update(None, Some("enabled".into()), Some(16000), None, None);
+        let changes = engine.apply_config_update(None, None, Some("enabled".into()), Some(16000), None, None);
 
         match &engine.thinking {
             Some(cora_types::llm::ThinkingConfig::Enabled { budget_tokens }) => {
@@ -296,7 +330,7 @@ mod tests_set_config {
         };
         for value in ["low", "medium", "high", "max"] {
             let mut engine = make_engine_with_compat("m", compat.clone());
-            engine.apply_config_update(None, None, None, Some(value.to_string()), None);
+            engine.apply_config_update(None, None, None, None, Some(value.to_string()), None);
             assert_eq!(
                 engine.reasoning_effort.as_deref(),
                 Some(value),
@@ -310,7 +344,7 @@ mod tests_set_config {
     #[test]
     fn set_config_thinking_applies_when_capability_is_false() {
         let mut engine = make_engine_with_compat("m", ProviderCompat::openai_defaults());
-        let changes = engine.apply_config_update(None, Some("enabled".into()), None, None, None);
+        let changes = engine.apply_config_update(None, None, Some("enabled".into()), None, None, None);
         assert_eq!(changes, vec!["thinking: enabled (budget: 10000)"]);
         assert!(matches!(
             engine.thinking,
@@ -321,7 +355,7 @@ mod tests_set_config {
     #[test]
     fn set_config_effort_rejected_when_unsupported() {
         let mut engine = make_engine("m"); // anthropic defaults: supports_effort = false
-        let changes = engine.apply_config_update(None, None, None, Some("high".into()), None);
+        let changes = engine.apply_config_update(None, None, None, None, Some("high".into()), None);
         assert!(changes.iter().any(|c| c.contains("not supported")));
         assert!(engine.reasoning_effort.is_none());
     }
@@ -329,7 +363,7 @@ mod tests_set_config {
     #[test]
     fn set_config_effort_rejected_invalid_level() {
         let mut engine = make_engine_with_compat("m", ProviderCompat::openai_defaults());
-        let changes = engine.apply_config_update(None, None, None, Some("max".into()), None);
+        let changes = engine.apply_config_update(None, None, None, None, Some("max".into()), None);
         assert!(changes.iter().any(|c| c.contains("invalid")));
         assert!(engine.reasoning_effort.is_none());
     }
@@ -338,7 +372,7 @@ mod tests_set_config {
     fn set_config_effort_clear_always_works() {
         let mut engine = make_engine("m"); // anthropic defaults: supports_effort = false
         engine.reasoning_effort = Some("high".into());
-        let changes = engine.apply_config_update(None, None, None, Some(String::new()), None);
+        let changes = engine.apply_config_update(None, None, None, None, Some(String::new()), None);
         assert!(engine.reasoning_effort.is_none());
         assert!(changes.iter().any(|c| c.contains("cleared")));
     }
@@ -551,7 +585,7 @@ mod tests_compact {
     use cora_providers::provider::LlmProvider;
     use cora_tools::registry::ToolRegistry;
     use cora_types::llm::{LlmEvent, LlmRequest};
-    use cora_types::message::{ContentBlock, Message, Role, TokenUsage};
+    use cora_types::message::{ContentBlock, ImageInputCapability, ImageUrl, Message, Role, TokenUsage};
     use serde_json::json;
 
     use super::{CompactLevel, ProviderCompat};
@@ -608,6 +642,19 @@ mod tests_compact {
         async fn stream(&self, _: &LlmRequest) -> Result<tokio::sync::mpsc::Receiver<LlmEvent>, ProviderError> {
             let (_tx, rx) = tokio::sync::mpsc::channel(1);
             Ok(rx)
+        }
+    }
+
+    #[derive(Default)]
+    struct RecordingRejectingProvider {
+        requests: Mutex<Vec<LlmRequest>>,
+    }
+
+    #[async_trait::async_trait]
+    impl LlmProvider for RecordingRejectingProvider {
+        async fn stream(&self, request: &LlmRequest) -> Result<tokio::sync::mpsc::Receiver<LlmEvent>, ProviderError> {
+            self.requests.lock().unwrap().push(request.clone());
+            Err(ProviderError::Connection("intentional test failure".to_owned()))
         }
     }
 
@@ -926,6 +973,53 @@ mod tests_compact {
         assert_eq!(engine.compact_state.last_input_tokens, 0);
     }
 
+    #[tokio::test]
+    async fn autocompact_projects_images_without_mutating_failed_history() {
+        let config = CompactConfig {
+            context_window: 100,
+            emergency_buffer: 10,
+            autocompact_threshold_pct: Some(50),
+            ..Default::default()
+        };
+        let mut state = CompactState::new();
+        state.last_input_tokens = 60;
+        let messages = vec![Message::new(
+            Role::User,
+            vec![
+                ContentBlock::Text {
+                    text: "Attachment path: /tmp/image.png".to_owned(),
+                },
+                ContentBlock::Image {
+                    image_url: ImageUrl {
+                        url: "data:image/png;base64,abcd".to_owned(),
+                    },
+                },
+            ],
+        )];
+        let provider = Arc::new(RecordingRejectingProvider::default());
+        let mut engine = make_compact_engine(config, state, messages);
+        engine.provider = provider.clone();
+        engine.compat.image_input = Some(ImageInputCapability::Unsupported);
+
+        engine.run_compaction().await.unwrap();
+
+        let requests = provider.requests.lock().unwrap();
+        assert_eq!(requests.len(), 1);
+        assert!(
+            requests[0]
+                .messages
+                .iter()
+                .flat_map(|message| &message.content)
+                .all(|block| !matches!(block, ContentBlock::Image { .. }))
+        );
+        assert!(
+            engine.messages[0]
+                .content
+                .iter()
+                .any(|block| matches!(block, ContentBlock::Image { .. }))
+        );
+    }
+
     // -- Circuit broken prevents autocompact, emergency still fires --
 
     #[tokio::test]
@@ -1167,16 +1261,20 @@ mod tests_plan_mode {
 mod tests_handle_command {
     use std::sync::{Arc, Mutex};
 
+    use cora_config::compact::CompactConfig;
     use cora_providers::error::ProviderError;
     use cora_providers::provider::LlmProvider;
     use cora_tools::registry::ToolRegistry;
     use cora_types::llm::{LlmEvent, LlmRequest};
-    use cora_types::message::{ContentBlock, Message, Role};
+    use cora_types::message::{ContentBlock, ImageInputCapability, ImageUrl, Message, Role, StopReason, TokenUsage};
+    use tokio::sync::mpsc::{Receiver, channel};
 
-    use super::{CompactLevel, ProviderCompat};
+    use super::{AgentEngine, AgentError, CacheBreakDetector, CompactLevel, ProviderCompat};
+    use crate::commands::default_registry;
     use crate::compact::state::CompactState;
     use crate::confirm::ToolConfirmer;
     use crate::output::OutputSink;
+    use crate::turn::TurnKind;
 
     struct NullOutput;
     impl OutputSink for NullOutput {
@@ -1193,14 +1291,14 @@ mod tests_handle_command {
     struct NullProvider;
     #[async_trait::async_trait]
     impl LlmProvider for NullProvider {
-        async fn stream(&self, _: &LlmRequest) -> Result<tokio::sync::mpsc::Receiver<LlmEvent>, ProviderError> {
-            let (_tx, rx) = tokio::sync::mpsc::channel(1);
+        async fn stream(&self, _: &LlmRequest) -> Result<Receiver<LlmEvent>, ProviderError> {
+            let (_tx, rx) = channel(1);
             Ok(rx)
         }
     }
 
-    fn make_engine() -> super::AgentEngine {
-        super::AgentEngine {
+    fn make_engine() -> AgentEngine {
+        AgentEngine {
             provider: Arc::new(NullProvider),
             model: "test-model".to_string(),
             max_tokens: Some(4096),
@@ -1224,14 +1322,14 @@ mod tests_handle_command {
             output: Arc::new(NullOutput),
             approval_manager: None,
             protocol_writer: None,
-            compact_config: cora_config::compact::CompactConfig::default(),
+            compact_config: CompactConfig::default(),
             compact_state: CompactState::new(),
             compact_level: CompactLevel::default(),
             toon_enabled: false,
             plan_state: Default::default(),
             plan_active_flag: None,
-            cache_detector: super::CacheBreakDetector::new(),
-            commands: crate::commands::default_registry(),
+            cache_detector: CacheBreakDetector::new(),
+            commands: default_registry(),
         }
     }
 
@@ -1239,14 +1337,14 @@ mod tests_handle_command {
     async fn handle_command_quit() {
         let mut engine = make_engine();
         let err = engine.handle_command("/quit").await.unwrap_err();
-        assert!(matches!(err, super::AgentError::UserAborted));
+        assert!(matches!(err, AgentError::UserAborted));
     }
 
     #[tokio::test]
     async fn handle_command_exit_alias() {
         let mut engine = make_engine();
         let err = engine.handle_command("/exit").await.unwrap_err();
-        assert!(matches!(err, super::AgentError::UserAborted));
+        assert!(matches!(err, AgentError::UserAborted));
     }
 
     #[tokio::test]
@@ -1304,7 +1402,7 @@ mod tests_handle_command {
     async fn run_intercepts_quit_returns_user_aborted() {
         let mut engine = make_engine();
         let err = engine.run("/quit", "msg-1").await.unwrap_err();
-        assert!(matches!(err, super::AgentError::UserAborted));
+        assert!(matches!(err, AgentError::UserAborted));
     }
 
     #[test]
@@ -1317,6 +1415,182 @@ mod tests_handle_command {
         assert!(names.contains(&"compact"));
         assert!(names.contains(&"clear"));
         assert!(names.contains(&"quit"));
+    }
+
+    // --- run() text-only behavior ---
+
+    struct SingleResponseProvider;
+    #[async_trait::async_trait]
+    impl LlmProvider for SingleResponseProvider {
+        async fn stream(&self, _: &LlmRequest) -> Result<Receiver<LlmEvent>, ProviderError> {
+            let (tx, rx) = channel(2);
+            let _ = tx.send(LlmEvent::TextDelta("hello".to_string())).await;
+            let _ = tx
+                .send(LlmEvent::Done {
+                    stop_reason: StopReason::EndTurn,
+                    usage: TokenUsage::default(),
+                })
+                .await;
+            Ok(rx)
+        }
+    }
+
+    fn make_engine_with_provider(provider: Arc<dyn LlmProvider>) -> AgentEngine {
+        let mut engine = make_engine();
+        engine.provider = provider;
+        engine.max_turns_per_run = Some(1);
+        engine
+    }
+
+    #[tokio::test]
+    async fn run_treats_cora_files_marker_as_plain_text() {
+        let mut engine = make_engine_with_provider(Arc::new(SingleResponseProvider));
+        let input = "discuss [[CORA_FILES]] and file.txt";
+        let _ = engine.run(input, "msg-1").await;
+
+        let user_msg = engine
+            .messages
+            .iter()
+            .find(|m| m.role == Role::User)
+            .expect("user message");
+        assert_eq!(user_msg.content.len(), 1);
+        match &user_msg.content[0] {
+            ContentBlock::Text { text } => assert_eq!(text, input),
+            _ => panic!("expected plain text block, got {:?}", user_msg.content[0]),
+        }
+    }
+
+    #[tokio::test]
+    async fn run_with_blocks_accepts_image_blocks() {
+        let mut engine = make_engine_with_provider(Arc::new(SingleResponseProvider));
+        engine.compat.image_input = Some(ImageInputCapability::Supported);
+        let blocks = vec![
+            ContentBlock::Text {
+                text: "look at this".to_string(),
+            },
+            ContentBlock::Image {
+                image_url: ImageUrl {
+                    url: "data:image/png;base64,abcd".to_string(),
+                },
+            },
+        ];
+        let _ = engine.run_with_blocks(blocks.clone(), "msg-2").await;
+
+        let user_msg = engine
+            .messages
+            .iter()
+            .find(|m| m.role == Role::User)
+            .expect("user message");
+        assert_eq!(user_msg.content.len(), 2);
+        assert!(matches!(user_msg.content[0], ContentBlock::Text { .. }));
+        assert!(matches!(user_msg.content[1], ContentBlock::Image { .. }));
+    }
+
+    #[tokio::test]
+    async fn run_with_blocks_keeps_unsupported_image_in_history() {
+        let mut engine = make_engine_with_provider(Arc::new(SingleResponseProvider));
+        engine.compat.image_input = Some(ImageInputCapability::Unsupported);
+        let blocks = vec![ContentBlock::Image {
+            image_url: ImageUrl {
+                url: "data:image/png;base64,abcd".to_owned(),
+            },
+        }];
+
+        engine.run_with_blocks(blocks, "msg-3").await.unwrap();
+
+        assert!(engine.messages.iter().any(|message| {
+            message
+                .content
+                .iter()
+                .any(|block| matches!(block, ContentBlock::Image { .. }))
+        }));
+    }
+
+    #[test]
+    fn build_request_omits_invalid_image_without_mutating_history() {
+        let mut engine = make_engine();
+        engine.compat.image_input = Some(ImageInputCapability::Supported);
+        engine.messages.push(Message::new(
+            Role::User,
+            vec![ContentBlock::Image {
+                image_url: ImageUrl {
+                    url: "data:image/png;base64,!!!".to_owned(),
+                },
+            }],
+        ));
+
+        let request = engine.build_request(TurnKind::Normal);
+
+        assert!(matches!(request.messages[0].content[0], ContentBlock::Text { .. }));
+        assert!(matches!(engine.messages[0].content[0], ContentBlock::Image { .. }));
+    }
+
+    #[test]
+    fn model_switch_projects_historical_snapshot_for_current_capability() {
+        let mut engine = make_engine();
+        engine.compat.image_input = Some(ImageInputCapability::Supported);
+        engine.messages.push(Message::new(
+            Role::User,
+            vec![
+                ContentBlock::Text {
+                    text: "Attachment path: /tmp/image.png".to_owned(),
+                },
+                ContentBlock::Image {
+                    image_url: ImageUrl {
+                        url: "data:image/png;base64,abcd".to_owned(),
+                    },
+                },
+            ],
+        ));
+        engine.model = "text-only-model".to_owned();
+        engine.compat.image_input = Some(ImageInputCapability::Unsupported);
+
+        let request = engine.build_request(TurnKind::Normal);
+
+        assert_eq!(request.model, "text-only-model");
+        assert!(
+            request.messages[0]
+                .content
+                .iter()
+                .all(|block| !matches!(block, ContentBlock::Image { .. }))
+        );
+        assert!(
+            request.messages[0]
+                .content
+                .iter()
+                .any(|block| matches!(block, ContentBlock::Text { text } if text.contains("/tmp/image.png")))
+        );
+        assert!(
+            request.messages[0]
+                .content
+                .iter()
+                .any(|block| matches!(block, ContentBlock::Text { text } if text.contains("does not support vision")))
+        );
+        assert_eq!(engine.messages.len(), 1);
+        assert!(
+            engine.messages[0]
+                .content
+                .iter()
+                .any(|block| matches!(block, ContentBlock::Image { .. }))
+        );
+    }
+
+    #[test]
+    fn unknown_capability_uses_text_only_request_projection() {
+        let mut engine = make_engine();
+        engine.messages.push(Message::new(
+            Role::User,
+            vec![ContentBlock::Image {
+                image_url: ImageUrl {
+                    url: "data:image/png;base64,abcd".to_owned(),
+                },
+            }],
+        ));
+
+        let request = engine.build_request(TurnKind::Normal);
+
+        assert!(matches!(request.messages[0].content[0], ContentBlock::Text { .. }));
+        assert!(matches!(engine.messages[0].content[0], ContentBlock::Image { .. }));
     }
 }
 
@@ -1532,9 +1806,11 @@ mod tests_loop_helpers {
     fn turn_kind_finalization_has_control_prompt_and_disables_tools() {
         assert!(TurnKind::Normal.control_prompt().is_none());
         assert!(!TurnKind::Normal.disable_tools());
+        assert_eq!(TurnKind::Normal.diagnostic_phase(), "normal");
 
         let kind = TurnKind::Finalization(FinalizationReason::TurnBudget);
         assert!(kind.disable_tools());
+        assert_eq!(kind.diagnostic_phase(), "turn_budget_finalization");
         assert!(
             kind.control_prompt()
                 .expect("finalization must have a control prompt")
@@ -1544,20 +1820,22 @@ mod tests_loop_helpers {
 
     #[test]
     fn turn_kind_max_tokens_prompt_names_truncation() {
-        let prompt = TurnKind::Finalization(FinalizationReason::MaxTokens)
+        let kind = TurnKind::Finalization(FinalizationReason::MaxTokens);
+        let prompt = kind
             .control_prompt()
             .expect("max token continuation must have a prompt");
 
+        assert_eq!(kind.diagnostic_phase(), "max_tokens_finalization");
         assert!(prompt.contains("previous response was cut off"));
         assert!(prompt.contains("Finish the answer"));
     }
 
     #[test]
     fn turn_kind_empty_final_prompt_requests_visible_answer() {
-        let prompt = TurnKind::Finalization(FinalizationReason::EmptyFinal)
-            .control_prompt()
-            .expect("empty final nudge must have a prompt");
+        let kind = TurnKind::Finalization(FinalizationReason::EmptyFinal);
+        let prompt = kind.control_prompt().expect("empty final nudge must have a prompt");
 
+        assert_eq!(kind.diagnostic_phase(), "empty_final_retry");
         assert!(prompt.contains("visible answer text"));
         assert!(prompt.contains("Do not send reasoning only"));
     }
@@ -1617,7 +1895,7 @@ mod tests_tool_policy_enforcement {
     use cora_tools::Tool;
     use cora_tools::registry::ToolRegistry;
     use cora_types::llm::{LlmEvent, LlmRequest};
-    use cora_types::message::ContentBlock;
+    use cora_types::message::{ContentBlock, ImageInputCapability};
     use cora_types::tool::ToolResult;
     use async_trait::async_trait;
     use serde_json::{Value, json};
@@ -1655,6 +1933,7 @@ mod tests_tool_policy_enforcement {
     struct CountingTool {
         name: &'static str,
         executions: Arc<AtomicUsize>,
+        requires_image_input: bool,
     }
 
     #[async_trait]
@@ -1683,6 +1962,10 @@ mod tests_tool_policy_enforcement {
             }
         }
 
+        fn requires_image_input(&self) -> bool {
+            self.requires_image_input
+        }
+
         fn category(&self) -> ToolCategory {
             ToolCategory::Info
         }
@@ -1693,10 +1976,12 @@ mod tests_tool_policy_enforcement {
         tools.register(Box::new(CountingTool {
             name: "Read",
             executions: read_executions,
+            requires_image_input: false,
         }));
         tools.register(Box::new(CountingTool {
             name: "ExecCommand",
             executions: exec_executions,
+            requires_image_input: false,
         }));
 
         AgentEngine {
@@ -1751,6 +2036,26 @@ mod tests_tool_policy_enforcement {
         let tool_names: Vec<_> = request.tools.iter().map(|tool| tool.name.as_str()).collect();
 
         assert_eq!(tool_names, vec!["Read"]);
+    }
+
+    #[test]
+    fn build_request_only_advertises_image_tool_to_supported_models() {
+        let image_executions = Arc::new(AtomicUsize::new(0));
+        let mut engine = make_engine(Arc::new(AtomicUsize::new(0)), Arc::new(AtomicUsize::new(0)));
+        engine.tools.register(Box::new(CountingTool {
+            name: "ViewImage",
+            executions: image_executions,
+            requires_image_input: true,
+        }));
+        engine.tool_policy = ToolPolicy::allow_only(["Read", "ViewImage"]);
+        engine.compat.image_input = Some(ImageInputCapability::Unsupported);
+
+        let text_only_request = engine.build_request(TurnKind::Normal);
+        assert!(text_only_request.tools.iter().all(|tool| tool.name != "ViewImage"));
+
+        engine.compat.image_input = Some(ImageInputCapability::Supported);
+        let vision_request = engine.build_request(TurnKind::Normal);
+        assert!(vision_request.tools.iter().any(|tool| tool.name == "ViewImage"));
     }
 
     #[tokio::test]

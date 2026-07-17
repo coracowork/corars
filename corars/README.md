@@ -1,0 +1,150 @@
+﻿# corars
+
+A Rust-based LLM tool-use agent for the command line. It connects to LLM APIs, autonomously invokes local tools (file I/O, shell, search, etc.), and completes tasks end-to-end.
+
+## Features
+
+- **Multi-provider** — Anthropic, OpenAI (and compatibles like DeepSeek/Ollama/Gemini), AWS Bedrock, Google Vertex AI
+- **ProviderCompat layer** — Configuration-driven compatibility for provider quirks (no hardcoded conditionals)
+- **Reasoning model support** — OpenAI `o1`/`o3` reasoning models with `reasoning_effort` control
+- **7 built-in tools** — Read, Write, Edit, Bash, Grep, Glob, Spawn (sub-agents)
+- **MCP client** — Connect to any [Model Context Protocol](https://modelcontextprotocol.io/) server (stdio / SSE / streamable-http)
+- **Dynamic MCP injection** — Host clients can inject MCP servers at runtime via the [JSON stream protocol](docs/json-stream-protocol.md)
+- **Skills** — Named prompt snippets with variable substitution, shell expansion, conditional activation, and per-skill model/permission overrides (see [docs/skills.md](docs/skills.md))
+- **Hook system** — Event-driven automation on tool lifecycle (auto-format, lint, audit)
+- **Sub-agent spawning** — Parallel task execution via the Spawn tool
+- **Session persistence** — Save and resume conversation history
+- **Persistent memory** — Project-specific memory with auto-indexing across sessions (see [docs/advanced.md](docs/advanced.md#memory-system))
+- **Plan mode** — Read-only exploration mode for designing implementation plans before coding (see [docs/advanced.md](docs/advanced.md#plan-mode))
+- **Context compression** — Three-tier automatic compaction: microcompact, autocompact, emergency (see [docs/advanced.md](docs/advanced.md#context-compression))
+- **Output compaction** — Configurable output compression (off/safe/full) with TOON encoding (see [docs/advanced.md](docs/advanced.md#output-compaction))
+- **File state cache** — LRU cache with read deduplication and write tracking
+- **Prompt caching** — Anthropic cache_control for up to 90% cost reduction
+- **Profile inheritance** — Named profiles with `extends` for quick provider/model switching
+- **OAuth login** — Use Claude.ai subscription directly, no API key needed
+- **AGENTS.md injection** — Hierarchical loading of project instructions with @include support
+
+## Quick Start
+
+```bash
+# Build from source
+cargo build --release
+
+# Generate default config, then add your API key
+./target/release/corars config init
+# Edit the generated config (run `corars config path` to find it)
+
+# Single-shot mode
+corars "Read Cargo.toml and explain the dependencies"
+
+# Interactive REPL
+corars
+
+# Full CLI reference
+corars --help
+```
+
+## Runtime Limits
+
+`max_turns` is the broad model-turn limit per run. It is unset by default,
+so runs have no broad model-turn limit unless you configure one. Set it to
+`0` to explicitly disable the broad limit. `max_tool_call_malformed_turns`
+stops repeated same tool-call-malformed rounds earlier; it defaults to `3`.
+`max_tool_call_failure_turns` stops zero-text turns where every executable
+tool result failed; it also defaults to `3`. Set either guard to `0` to
+disable that breaker and rely on `max_turns` if a broad turn limit is
+configured.
+
+See [Core Concepts](docs/core-concepts.md) for the distinction between runs,
+turns, tool rounds, and tool calls.
+
+```toml
+[default]
+max_turns = 20  # optional broad model-turn limit
+max_tool_call_malformed_turns = 3
+max_tool_call_failure_turns = 3
+
+# Profile names are user-defined; this is not a built-in profile.
+[profiles.my-weak-provider]
+max_turns = 10
+max_tool_call_malformed_turns = 2
+max_tool_call_failure_turns = 2
+```
+
+CLI override:
+
+```bash
+corars --max-turns 10 "Run the task"
+corars --max-tool-call-malformed-turns 2 "Run the task"
+corars --max-tool-call-failure-turns 2 "Run the task"
+```
+
+## Architecture
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                      main.rs (CLI / REPL)                    │
+├──────────────────────────────────────────────────────────────┤
+│  Config          │  Engine (agent loop)  │  Session Manager  │
+│  (3-level merge) │  streaming + tools    │  save / resume    │
+├──────────────────┼───────────────────────┼───────────────────┤
+│  Providers       │  Tool Registry        │  Hook Executor    │
+│  ├ Anthropic     │  ├ Built-in (7)       │  ├ pre_tool_use   │
+│  ├ OpenAI        │  ├ MCP tools (N)      │  ├ post_tool_use  │
+│  ├ Bedrock       │  └ Plan Mode tools    │  └ stop           │
+│  └ Vertex AI     │                       │                   │
+│                  │  MCP Client           │  Memory System    │
+│  ProviderCompat  │  ├ Stdio transport    │  (per-project)    │
+│  (compat layer)  │  ├ SSE transport      │                   │
+│                  │  └ HTTP transport     │  Sub-Agent        │
+│  Compact Engine  │                       │  Spawner          │
+│  ├ Microcompact  │  File State Cache     │                   │
+│  ├ Autocompact   │  (LRU)                │  Output Compactor │
+│  └ Emergency     │                       │  (off/safe/full)  │
+└──────────────────┴───────────────────────┴───────────────────┘
+```
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Getting Started](docs/getting-started.md) | Installation, CLI reference, configuration, usage examples |
+| [Built-in Tools](docs/tools.md) | Detailed reference for all 7 tools |
+| [MCP Integration](docs/mcp.md) | Model Context Protocol client setup and usage |
+| [Providers & Auth](docs/providers.md) | Multi-provider config, profiles, Bedrock, Vertex, OAuth |
+| [Advanced Features](docs/advanced.md) | Sub-agents, hooks, prompt caching, VCR, AGENTS.md |
+| [Troubleshooting](docs/troubleshooting.md) | Common errors and solutions |
+| [JSON Stream Protocol](docs/json-stream-protocol.md) | Host integration protocol (`--json-stream` mode) |
+
+## Supported Providers
+
+| Provider | Auth | Notes |
+|----------|------|-------|
+| Anthropic | API Key / OAuth | Prompt caching, streaming, vision |
+| OpenAI | API Key | Reasoning models (`o1`/`o3`), compatible with DeepSeek, Qwen, Ollama, Gemini, vLLM |
+| AWS Bedrock | SigV4 | Regional endpoints, AWS credential chain, schema sanitization, actionable error hints |
+| Google Vertex AI | GCP OAuth2 / Service Account | Metadata server auto-detection |
+
+## ProviderCompat
+
+All provider-specific behaviors are driven by the `ProviderCompat` configuration layer — no hardcoded URL or model-name checks. Each provider type has sensible defaults; override any field via config:
+
+```toml
+[providers.my-openai.compat]
+max_tokens_field = "max_completion_tokens"   # Field name for max tokens
+merge_assistant_messages = true              # Merge consecutive assistant messages
+clean_orphan_tool_calls = true               # Remove tool_use without tool_result
+dedup_tool_results = true                    # Deduplicate same tool_call_id results
+ensure_alternation = false                   # Insert filler for user/assistant alternation
+merge_same_role = false                      # Merge consecutive same-role messages
+sanitize_schema = false                      # Bedrock-style schema sanitization
+strip_patterns = ["<think>", "</think>"]     # Strip text patterns from history
+auto_tool_id = false                         # Auto-generate missing tool IDs
+api_path = "/v1/chat/completions"            # Custom chat completions endpoint path
+```
+
+Provider defaults: **Anthropic/Vertex** — alternation, merge, auto tool ID; **Bedrock** — same + schema sanitization; **OpenAI** — assistant merge, orphan cleanup, dedup.
+
+## License
+
+Apache-2.0

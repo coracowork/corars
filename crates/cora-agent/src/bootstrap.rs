@@ -20,6 +20,7 @@ use cora_tools::grep::GrepTool;
 use cora_tools::read::ReadTool;
 use cora_tools::registry::ToolRegistry;
 use cora_tools::tool_search::ToolSearchTool;
+use cora_tools::view_image::ViewImageTool;
 use cora_tools::write::WriteTool;
 use anyhow::Result;
 use tracing::info;
@@ -209,6 +210,7 @@ impl AgentBootstrap {
         )));
         registry.register(Box::new(GrepTool::new(workspace_path.to_path_buf())));
         registry.register(Box::new(GlobTool::new(workspace_path.to_path_buf())));
+        registry.register(Box::new(ViewImageTool::new()));
 
         registry
     }
