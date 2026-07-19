@@ -116,7 +116,7 @@ jobs:
           TAG: ${{ inputs.tag_name }}
         run: |
           mkdir -p dist
-          ARCHIVE="CoraCore-${TAG}-${{ matrix.target }}.tar.gz"
+          ARCHIVE="CoraRS-${TAG}-${{ matrix.target }}.tar.gz"
           tar -C target/${{ matrix.target }}/release -czf "dist/${ARCHIVE}" ${{ matrix.binary_name }}
           echo "ARCHIVE=${ARCHIVE}" >> "$GITHUB_ENV"
 
@@ -127,7 +127,7 @@ jobs:
           TAG: ${{ inputs.tag_name }}
         run: |
           New-Item -ItemType Directory -Force -Path dist | Out-Null
-          $archive = "CoraCore-${env:TAG}-${{ matrix.target }}.zip"
+          $archive = "CoraRS-${env:TAG}-${{ matrix.target }}.zip"
           Compress-Archive -Path "target/${{ matrix.target }}/release/${{ matrix.binary_name }}" -DestinationPath "dist/${archive}" -Force
           "ARCHIVE=${archive}" | Out-File -FilePath $env:GITHUB_ENV -Append
 
@@ -155,7 +155,7 @@ jobs:
         shell: bash
         run: |
           cd artifacts
-          sha256sum CoraCore-* > cora-cowork-checksums.txt
+          sha256sum CoraRS-* > corars-checksums.txt
 
       - name: Upload release assets
         shell: bash
