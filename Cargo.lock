@@ -978,6 +978,7 @@ name = "cora-types"
 version = "0.2.6"
 dependencies = [
  "async-trait",
+ "base64",
  "chrono",
  "serde",
  "serde_json",

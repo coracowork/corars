@@ -36,6 +36,7 @@ cora-skills    = { path = "crates/cora-skills" }
 cora-memory    = { path = "crates/cora-memory" }
 cora-agent     = { path = "crates/cora-agent" }
 
+
 # Async runtime
 tokio   = { version = "1", features = ["full"] }
 futures = "0.3"

@@ -39,8 +39,8 @@ CHANGELOG_MD = PROJECT_ROOT / "CHANGELOG.md"
 TARGETS = {
     "linux-x64": "x86_64-unknown-linux-gnu",
     "linux-arm64": "aarch64-unknown-linux-gnu",
-    # "macos-x64": "x86_64-apple-darwin",
-    # "macos-arm64": "aarch64-apple-darwin",
+    "macos-x64": "x86_64-apple-darwin",
+    "macos-arm64": "aarch64-apple-darwin",
     "windows-x64": "x86_64-pc-windows-msvc",
     "windows-arm64": "aarch64-pc-windows-msvc",
 }
