@@ -1,4 +1,4 @@
-﻿use cora_types::{message::ContentBlock, skill_types::ContextModifier};
+use cora_types::{message::ContentBlock, skill_types::ContextModifier};
 
 pub(crate) const DEFAULT_MAX_TOOL_CALL_MALFORMED: usize = 3;
 pub(crate) const DEFAULT_MAX_TOOL_CALL_FAILURE: usize = 3;

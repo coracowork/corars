@@ -1,13 +1,13 @@
-﻿//! Black-box integration tests for the microcompact subsystem.
+//! Black-box integration tests for the microcompact subsystem.
 //!
 //! These tests correspond to TC-2.3-01 through TC-2.3-11 in the test plan.
 //! They treat `should_microcompact` and `microcompact` as opaque functions
 //! and validate observable behaviour only (inputs → outputs).
 
+use chrono::{Duration, Utc};
 use cora_agent::compact::micro::{CLEARED_TOOL_RESULT, MicrocompactResult, microcompact, should_microcompact};
 use cora_config::compact::CompactConfig;
 use cora_types::message::{ContentBlock, Message, Role};
-use chrono::{Duration, Utc};
 use serde_json::json;
 
 // ── Helpers ─────────────────────────────────────────────────────────────────

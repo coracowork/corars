@@ -1,4 +1,4 @@
-﻿//! Black-box integration tests for engine compaction integration (TC-2.6-*).
+//! Black-box integration tests for engine compaction integration (TC-2.6-*).
 //!
 //! These tests exercise the full `AgentEngine::run()` loop and verify
 //! that the compaction pipeline (microcompact → autocompact → emergency)

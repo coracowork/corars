@@ -1,4 +1,4 @@
-﻿use super::{
+use super::{
     AgentEngine, AgentError, CacheBreakDetector, CompactLevel, CompactState, ProviderCompat, build_assistant_content,
     merge_tool_results, tool_call_malformed_fingerprint,
 };
@@ -1319,6 +1319,7 @@ mod tests_handle_command {
     use std::sync::atomic::{AtomicUsize, Ordering};
     use std::sync::{Arc, Mutex};
 
+    use async_trait::async_trait;
     use cora_config::compact::CompactConfig;
     use cora_protocol::events::ToolCategory;
     use cora_providers::error::ProviderError;
@@ -1328,7 +1329,6 @@ mod tests_handle_command {
     use cora_types::llm::{LlmEvent, LlmRequest};
     use cora_types::message::{ContentBlock, ImageInputCapability, ImageUrl, Message, Role, StopReason, TokenUsage};
     use cora_types::tool::ToolResult;
-    use async_trait::async_trait;
     use serde_json::{Value, json};
     use tokio::sync::mpsc::{Receiver, channel};
 
@@ -2254,6 +2254,7 @@ mod tests_tool_policy_enforcement {
     use std::sync::atomic::{AtomicUsize, Ordering};
     use std::sync::{Arc, Mutex};
 
+    use async_trait::async_trait;
     use cora_protocol::events::ToolCategory;
     use cora_providers::error::ProviderError;
     use cora_providers::provider::LlmProvider;
@@ -2262,7 +2263,6 @@ mod tests_tool_policy_enforcement {
     use cora_types::llm::{LlmEvent, LlmRequest};
     use cora_types::message::{ContentBlock, ImageInputCapability};
     use cora_types::tool::ToolResult;
-    use async_trait::async_trait;
     use serde_json::{Value, json};
 
     use super::{AgentEngine, CacheBreakDetector, CompactLevel, CompactState, ProviderCompat};

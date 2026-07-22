@@ -1,4 +1,4 @@
-﻿use cora_types::message::{ContentBlock, ImageUrl};
+use cora_types::message::{ContentBlock, ImageUrl};
 
 const CHARS_PER_TOKEN_TEXT: usize = 4;
 

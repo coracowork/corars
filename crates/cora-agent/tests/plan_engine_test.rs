@@ -1,15 +1,15 @@
-﻿//! Integration tests for Plan Mode engine integration (task 3.5).
+//! Integration tests for Plan Mode engine integration (task 3.5).
 //!
 //! Tests are numbered to match the test-plan.md identifiers (TC-3.5-*).
 
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
+use async_trait::async_trait;
 use cora_agent::plan::tools::{EnterPlanModeTool, ExitPlanModeTool};
 use cora_protocol::events::ToolCategory;
 use cora_tools::Tool;
 use cora_tools::registry::ToolRegistry;
-use async_trait::async_trait;
 use serde_json::json;
 
 // ---------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-﻿use super::*;
+use super::*;
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -7,10 +7,10 @@
 #[cfg(test)]
 mod tests {
     use super::*;
+    use async_trait::async_trait;
     use cora_mcp::manager::McpManager;
     use cora_mcp::protocol::{JsonRpcRequest, JsonRpcResponse};
     use cora_mcp::transport::{McpError, McpTransport};
-    use async_trait::async_trait;
     use std::sync::Mutex;
 
     // -----------------------------------------------------------------------

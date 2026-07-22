@@ -1,4 +1,4 @@
-﻿use std::io::Write;
+use std::io::Write;
 use std::sync::{Arc, Mutex};
 
 use tracing_subscriber::fmt::MakeWriter;

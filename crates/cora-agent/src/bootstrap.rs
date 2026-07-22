@@ -1,8 +1,9 @@
-﻿use std::collections::HashMap;
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::AtomicBool;
 use std::sync::{Arc, RwLock};
 
+use anyhow::Result;
 use cora_config::config::{Config, McpServerConfig};
 use cora_config::shell::{ResolvedShell, resolve_shell_config};
 use cora_mcp::manager::McpManager;
@@ -22,7 +23,6 @@ use cora_tools::registry::ToolRegistry;
 use cora_tools::tool_search::ToolSearchTool;
 use cora_tools::view_image::ViewImageTool;
 use cora_tools::write::WriteTool;
-use anyhow::Result;
 use tracing::info;
 
 use crate::context::{SystemPromptCache, build_system_prompt_with_shell_and_tool_policy};

@@ -1,4 +1,4 @@
-﻿//! Microcompact: clear old tool result content without any LLM call.
+//! Microcompact: clear old tool result content without any LLM call.
 //!
 //! This is the lightest compaction level.  It walks the conversation,
 //! identifies tool results from compactable tools, and replaces the
@@ -6,9 +6,9 @@
 
 use std::collections::{HashMap, HashSet};
 
+use chrono::Utc;
 use cora_config::compact::CompactConfig;
 use cora_types::message::{ContentBlock, Message, Role};
-use chrono::Utc;
 
 /// Placeholder that replaces cleared tool result content.
 pub const CLEARED_TOOL_RESULT: &str = "[Tool result cleared]";

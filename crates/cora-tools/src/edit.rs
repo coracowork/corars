@@ -1,4 +1,4 @@
-﻿use std::borrow::Cow;
+use std::borrow::Cow;
 use std::path::Path;
 use std::sync::{Arc, RwLock};
 

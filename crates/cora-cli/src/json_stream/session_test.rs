@@ -1,4 +1,4 @@
-﻿use super::content_with_attachment_paths;
+use super::content_with_attachment_paths;
 
 #[test]
 fn appends_protocol_file_paths_to_model_input() {

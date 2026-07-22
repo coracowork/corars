@@ -1,7 +1,8 @@
-﻿mod common;
+mod common;
 
 use std::sync::{Arc, Mutex};
 
+use async_trait::async_trait;
 use cora_agent::engine::AgentEngine;
 use cora_agent::error::AgentError;
 use cora_agent::output::OutputSink;
@@ -11,7 +12,6 @@ use cora_providers::{LlmProvider, ProviderError};
 use cora_tools::registry::ToolRegistry;
 use cora_types::llm::{LlmEvent, LlmRequest};
 use cora_types::message::{ContentBlock, Message, Role, StopReason, TokenUsage};
-use async_trait::async_trait;
 use serde_json::{Value, json};
 use tempfile::tempdir;
 use tokio::sync::mpsc;

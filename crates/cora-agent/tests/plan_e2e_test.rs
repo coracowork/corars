@@ -1,17 +1,17 @@
-﻿//! End-to-end integration tests for Plan Mode (task 3.6).
+//! End-to-end integration tests for Plan Mode (task 3.6).
 //!
 //! Tests are numbered to match the test-plan.md identifiers (TC-3.6-E2E-*).
 
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 
+use async_trait::async_trait;
 use cora_agent::plan::prompt::plan_mode_instructions;
 use cora_agent::plan::tools::{EnterPlanModeTool, ExitPlanModeTool};
 use cora_protocol::events::ToolCategory;
 use cora_tools::Tool;
 use cora_tools::registry::ToolRegistry;
 use cora_types::skill_types::PlanModeTransition;
-use async_trait::async_trait;
 use serde_json::json;
 
 // ---------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-﻿use std::mem::replace;
+use std::mem::replace;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
@@ -25,6 +25,8 @@ use crate::tool_call::{
 };
 use crate::tool_policy::ToolPolicy;
 use crate::turn::{FinalizationReason, ToolLoopWarning, TurnGuardAction, TurnGuards, TurnKind, TurnOutcome};
+use anyhow::{Error as AnyhowError, Result as AnyhowResult};
+use chrono::Utc;
 use cora_compact::CompactLevel;
 use cora_config::compact::CompactConfig;
 use cora_config::compat::ProviderCompat;
@@ -38,8 +40,6 @@ use cora_tools::registry::ToolRegistry;
 use cora_types::llm::{LlmEvent, LlmRequest, ThinkingConfig};
 use cora_types::message::{ContentBlock, ImageInputCapability, Message, Role, StopReason, TokenUsage};
 use cora_types::skill_types::{ContextModifier, PlanModeTransition, effort_to_string};
-use anyhow::{Error as AnyhowError, Result as AnyhowResult};
-use chrono::Utc;
 use serde_json::to_string;
 use tokio::sync::mpsc::Receiver;
 use tracing::{Instrument, debug, error, info, info_span, warn};

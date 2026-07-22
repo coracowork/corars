@@ -1,4 +1,4 @@
-﻿use cora_protocol::events::{Capabilities, ProtocolEvent};
+use cora_protocol::events::{Capabilities, ProtocolEvent};
 use cora_types::message::ImageInputCapability;
 
 #[test]

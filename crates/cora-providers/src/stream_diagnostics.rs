@@ -1,4 +1,4 @@
-﻿use std::time::Duration;
+use std::time::Duration;
 
 use cora_types::llm::LlmEvent;
 use reqwest::header::HeaderMap;

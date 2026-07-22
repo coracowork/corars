@@ -1,4 +1,4 @@
-﻿//! Top-level `ProtocolCommand` dispatch for the JSON stream main loop.
+//! Top-level `ProtocolCommand` dispatch for the JSON stream main loop.
 //!
 //! Handles every command except `Message` (which needs the inner
 //! select-loop machinery in `message.rs`) and the `AddMcpServer` pre-message

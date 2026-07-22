@@ -1,4 +1,4 @@
-﻿use std::sync::Arc;
+use std::sync::Arc;
 
 use cora_config::compat::ProviderCompat;
 use cora_protocol::events::{Capabilities, ErrorInfo, ProtocolEvent, Usage};

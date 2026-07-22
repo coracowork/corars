@@ -1,11 +1,11 @@
-﻿use super::*;
+use super::*;
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use cora_types::message::{ContentBlock, ImageUrl, Message, Role};
     use base64::Engine;
     use base64::engine::general_purpose::STANDARD;
+    use cora_types::message::{ContentBlock, ImageUrl, Message, Role};
 
     fn no_compat() -> ProviderCompat {
         ProviderCompat::default()

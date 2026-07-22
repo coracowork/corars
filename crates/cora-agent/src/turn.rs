@@ -1,4 +1,4 @@
-﻿use crate::error::AgentError;
+use crate::error::AgentError;
 use crate::stream::StreamOutcome;
 use crate::tool_call::{
     DEFAULT_MAX_ALL_ERROR_TOOL_ROUNDS, DEFAULT_MAX_TOOL_CALL_CYCLE_REPETITIONS, ToolCallAllErrorRoundTracker,

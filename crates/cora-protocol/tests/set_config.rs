@@ -1,4 +1,4 @@
-﻿use cora_protocol::commands::ProtocolCommand;
+use cora_protocol::commands::ProtocolCommand;
 use cora_types::message::ImageInputCapability;
 
 #[test]

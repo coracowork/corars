@@ -1,15 +1,15 @@
-﻿use super::*;
+use super::*;
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    use base64::Engine;
+    use base64::engine::general_purpose::STANDARD;
     use cora_config::compat::{MessageCompat, ToolCompat};
     use cora_config::schema::legalize_json_schema;
     use cora_types::message::ImageUrl;
     use cora_types::tool::ToolDef;
-    use base64::Engine;
-    use base64::engine::general_purpose::STANDARD;
     use serde_json::json;
 
     /// Compat with merge but no alternation — matches pre-compat behavior

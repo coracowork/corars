@@ -1,4 +1,4 @@
-﻿//! Autocompact: context-threshold-triggered LLM summarization.
+//! Autocompact: context-threshold-triggered LLM summarization.
 //!
 //! When the best-known context size exceeds the configured threshold, this module
 //! calls the LLM to produce a structured summary of the conversation,

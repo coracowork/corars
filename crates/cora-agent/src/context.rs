@@ -1,4 +1,4 @@
-﻿use std::collections::HashMap;
+use std::collections::HashMap;
 use std::path::Path;
 
 use cora_config::shell::{ResolvedShell, default_shell, render_shell_prompt};

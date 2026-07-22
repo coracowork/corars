@@ -1,4 +1,4 @@
-﻿// Core agent infrastructure: engine, session, orchestration, output sinks.
+// Core agent infrastructure: engine, session, orchestration, output sinks.
 
 pub mod agents_md;
 pub mod bootstrap;

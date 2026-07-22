@@ -1,4 +1,4 @@
-﻿// Acceptance tests for Plan Mode tool filtering and prompt injection (Task 6.4).
+// Acceptance tests for Plan Mode tool filtering and prompt injection (Task 6.4).
 //
 // These tests are LOCAL (no LLM required) and verify that:
 // - Tool registry filtering produces the correct tool sets for normal vs plan mode
@@ -7,13 +7,13 @@
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
+use async_trait::async_trait;
 use cora_agent::context::{SystemPromptCache, build_system_prompt};
 use cora_agent::plan::tools::{EnterPlanModeTool, ExitPlanModeTool};
 use cora_protocol::events::ToolCategory;
 use cora_tools::Tool;
 use cora_tools::registry::ToolRegistry;
 use cora_types::tool::ToolResult;
-use async_trait::async_trait;
 use serde_json::{Value, json};
 
 // ---------------------------------------------------------------------------
