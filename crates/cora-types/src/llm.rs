@@ -42,6 +42,8 @@ pub enum LlmEvent {
     ThinkingSignature(String),
     /// Response complete
     Done { stop_reason: StopReason, usage: TokenUsage },
+    /// Opaque provider output item that must be replayed on later requests.
+    ProviderItem { provider: String, item: Value },
     /// Error from the API
     Error(String),
 }
