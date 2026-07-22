@@ -161,6 +161,7 @@ pub fn build_messages(messages: &[Message], compat: &ProviderCompat) -> Vec<Valu
                         }
                     }));
                 }
+                ContentBlock::ProviderItem { .. } => {}
             }
         }
 
@@ -305,9 +306,13 @@ pub fn parse_sse_data(event_type: &str, data: &str, state: &mut StreamState) -> 
     match event_type {
         "message_start" => {
             if let Some(usage) = json.get("message").and_then(|m| m.get("usage")) {
-                state.input_tokens = usage["input_tokens"].as_u64().unwrap_or(0);
                 state.cache_creation_tokens = usage["cache_creation_input_tokens"].as_u64().unwrap_or(0);
                 state.cache_read_tokens = usage["cache_read_input_tokens"].as_u64().unwrap_or(0);
+                state.input_tokens = usage["input_tokens"]
+                    .as_u64()
+                    .unwrap_or(0)
+                    .saturating_add(state.cache_creation_tokens)
+                    .saturating_add(state.cache_read_tokens);
             }
         }
 

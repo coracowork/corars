@@ -1,6 +1,6 @@
 ﻿use super::{
-    AgentEngine, AgentError, CacheBreakDetector, CompactLevel, CompactState, ProviderCompat, merge_tool_results,
-    tool_call_malformed_fingerprint,
+    AgentEngine, AgentError, CacheBreakDetector, CompactLevel, CompactState, ProviderCompat, build_assistant_content,
+    merge_tool_results, tool_call_malformed_fingerprint,
 };
 
 // ---------------------------------------------------------------------------
@@ -589,6 +589,7 @@ mod tests_compact {
     use serde_json::json;
 
     use super::{CompactLevel, ProviderCompat};
+    use crate::compact::auto::should_autocompact;
     use crate::compact::state::CompactState;
     use crate::confirm::ToolConfirmer;
     use crate::output::OutputSink;
@@ -781,6 +782,7 @@ mod tests_compact {
             matches!(&last.content[1], ContentBlock::ToolResult { tool_use_id, content, is_error }
                 if tool_use_id == "call_bash" && content == "Tool execution canceled by user" && *is_error)
         );
+        assert_eq!(engine.compact_state.last_input_tokens, 14);
 
         let emitted = output.tool_results.lock().unwrap();
         assert_eq!(emitted.len(), 2);
@@ -839,6 +841,61 @@ mod tests_compact {
                 .any(|msg| msg == "Cache full miss: TtlExpiry"),
             "full cache misses should remain visible as diagnostics"
         );
+    }
+
+    #[test]
+    fn provider_turn_total_replaces_previous_context_estimate() {
+        let mut state = CompactState::new();
+        state.last_input_tokens = 100_000;
+        let mut engine = make_compact_engine(CompactConfig::default(), state, vec![]);
+
+        engine.record_turn_usage(&TokenUsage {
+            input_tokens: 693,
+            output_tokens: 102,
+            cache_read_tokens: 512,
+            ..Default::default()
+        });
+
+        assert_eq!(engine.compact_state.last_input_tokens, 795);
+    }
+
+    #[test]
+    fn all_tool_results_are_added_before_the_next_threshold_check() {
+        let config = CompactConfig {
+            context_window: 1_000,
+            autocompact_threshold_pct: Some(60),
+            ..Default::default()
+        };
+        let mut engine = make_compact_engine(config, CompactState::new(), vec![]);
+        engine.record_turn_usage(&TokenUsage {
+            input_tokens: 500,
+            output_tokens: 50,
+            ..Default::default()
+        });
+        assert!(!should_autocompact(
+            engine.compact_state.last_input_tokens,
+            &engine.compact_config
+        ));
+
+        let tool_results = vec![
+            ContentBlock::ToolResult {
+                tool_use_id: "call-1".into(),
+                content: "a".repeat(200),
+                is_error: false,
+            },
+            ContentBlock::ToolResult {
+                tool_use_id: "call-2".into(),
+                content: "b".repeat(200),
+                is_error: false,
+            },
+        ];
+        engine.record_tool_context_estimate(&tool_results, &[]);
+
+        assert_eq!(engine.compact_state.last_input_tokens, 650);
+        assert!(should_autocompact(
+            engine.compact_state.last_input_tokens,
+            &engine.compact_config
+        ));
     }
 
     // -- Emergency check fires when at limit --
@@ -966,7 +1023,7 @@ mod tests_compact {
     #[tokio::test]
     async fn first_turn_zero_tokens_no_compaction() {
         let config = CompactConfig::default();
-        let state = CompactState::new(); // last_input_tokens = 0
+        let state = CompactState::new(); // context_tokens = 0
 
         let mut engine = make_compact_engine(config, state, vec![]);
         assert!(engine.run_compaction().await.is_ok());
@@ -1259,14 +1316,20 @@ mod tests_plan_mode {
 
 #[cfg(test)]
 mod tests_handle_command {
+    use std::sync::atomic::{AtomicUsize, Ordering};
     use std::sync::{Arc, Mutex};
 
     use cora_config::compact::CompactConfig;
+    use cora_protocol::events::ToolCategory;
     use cora_providers::error::ProviderError;
     use cora_providers::provider::LlmProvider;
+    use cora_tools::Tool;
     use cora_tools::registry::ToolRegistry;
     use cora_types::llm::{LlmEvent, LlmRequest};
     use cora_types::message::{ContentBlock, ImageInputCapability, ImageUrl, Message, Role, StopReason, TokenUsage};
+    use cora_types::tool::ToolResult;
+    use async_trait::async_trait;
+    use serde_json::{Value, json};
     use tokio::sync::mpsc::{Receiver, channel};
 
     use super::{AgentEngine, AgentError, CacheBreakDetector, CompactLevel, ProviderCompat};
@@ -1420,7 +1483,7 @@ mod tests_handle_command {
     // --- run() text-only behavior ---
 
     struct SingleResponseProvider;
-    #[async_trait::async_trait]
+    #[async_trait]
     impl LlmProvider for SingleResponseProvider {
         async fn stream(&self, _: &LlmRequest) -> Result<Receiver<LlmEvent>, ProviderError> {
             let (tx, rx) = channel(2);
@@ -1432,6 +1495,134 @@ mod tests_handle_command {
                 })
                 .await;
             Ok(rx)
+        }
+    }
+
+    #[derive(Default)]
+    struct RetryingToolProvider {
+        requests: Mutex<Vec<LlmRequest>>,
+    }
+
+    #[async_trait]
+    impl LlmProvider for RetryingToolProvider {
+        async fn stream(&self, request: &LlmRequest) -> Result<Receiver<LlmEvent>, ProviderError> {
+            let request_index = {
+                let mut requests = self.requests.lock().unwrap();
+                let request_index = requests.len();
+                requests.push(request.clone());
+                request_index
+            };
+            let (tx, rx) = channel(5);
+
+            if request_index < 3 {
+                let _ = tx.send(LlmEvent::TextDelta("I will retry".to_string())).await;
+                let _ = tx
+                    .send(LlmEvent::ToolUse {
+                        id: format!("failed-call-{request_index}"),
+                        name: "FailingTool".to_string(),
+                        input: json!({ "resource": "same" }),
+                        extra: None,
+                    })
+                    .await;
+                let _ = tx
+                    .send(LlmEvent::ToolUse {
+                        id: format!("successful-call-{request_index}"),
+                        name: "SuccessfulTool".to_string(),
+                        input: json!({ "resource": request_index }),
+                        extra: None,
+                    })
+                    .await;
+                let _ = tx
+                    .send(LlmEvent::Done {
+                        stop_reason: StopReason::ToolUse,
+                        usage: TokenUsage::default(),
+                    })
+                    .await;
+            } else {
+                let _ = tx
+                    .send(LlmEvent::TextDelta(
+                        "The tool is blocked; please resolve its error before retrying.".to_string(),
+                    ))
+                    .await;
+                let _ = tx
+                    .send(LlmEvent::Done {
+                        stop_reason: StopReason::EndTurn,
+                        usage: TokenUsage::default(),
+                    })
+                    .await;
+            }
+
+            Ok(rx)
+        }
+    }
+
+    struct FailingTool {
+        executions: Arc<AtomicUsize>,
+    }
+
+    #[async_trait]
+    impl Tool for FailingTool {
+        fn name(&self) -> &str {
+            "FailingTool"
+        }
+
+        fn description(&self) -> &str {
+            "always fails for loop-guard testing"
+        }
+
+        fn input_schema(&self) -> Value {
+            json!({ "type": "object" })
+        }
+
+        fn is_concurrency_safe(&self, _: &Value) -> bool {
+            true
+        }
+
+        async fn execute(&self, _: Value) -> ToolResult {
+            self.executions.fetch_add(1, Ordering::SeqCst);
+            ToolResult {
+                content: "resource remains unavailable".to_string(),
+                is_error: true,
+            }
+        }
+
+        fn category(&self) -> ToolCategory {
+            ToolCategory::Info
+        }
+    }
+
+    struct SuccessfulTool {
+        executions: Arc<AtomicUsize>,
+    }
+
+    #[async_trait]
+    impl Tool for SuccessfulTool {
+        fn name(&self) -> &str {
+            "SuccessfulTool"
+        }
+
+        fn description(&self) -> &str {
+            "always succeeds for loop-guard testing"
+        }
+
+        fn input_schema(&self) -> Value {
+            json!({ "type": "object" })
+        }
+
+        fn is_concurrency_safe(&self, _: &Value) -> bool {
+            true
+        }
+
+        async fn execute(&self, _: Value) -> ToolResult {
+            self.executions.fetch_add(1, Ordering::SeqCst);
+            ToolResult {
+                content: "progress recorded".to_string(),
+                is_error: false,
+            }
+        }
+
+        fn category(&self) -> ToolCategory {
+            ToolCategory::Info
         }
     }
 
@@ -1458,6 +1649,52 @@ mod tests_handle_command {
             ContentBlock::Text { text } => assert_eq!(text, input),
             _ => panic!("expected plain text block, got {:?}", user_msg.content[0]),
         }
+    }
+
+    #[tokio::test]
+    async fn visible_retry_text_and_successful_tools_do_not_reset_repeated_failure() {
+        let provider = Arc::new(RetryingToolProvider::default());
+        let failed_executions = Arc::new(AtomicUsize::new(0));
+        let successful_executions = Arc::new(AtomicUsize::new(0));
+        let mut engine = make_engine_with_provider(provider.clone());
+        engine.max_turns_per_run = Some(10);
+        engine.tools.register(Box::new(FailingTool {
+            executions: failed_executions.clone(),
+        }));
+        engine.tools.register(Box::new(SuccessfulTool {
+            executions: successful_executions.clone(),
+        }));
+
+        let result = engine.run("finish the task", "msg-tool-loop").await.unwrap();
+
+        assert_eq!(failed_executions.load(Ordering::SeqCst), 3);
+        assert_eq!(successful_executions.load(Ordering::SeqCst), 3);
+        assert_eq!(result.stop_reason, StopReason::EndTurn);
+        assert_eq!(result.turns, 3);
+        assert!(result.text.contains("tool is blocked"));
+
+        let requests = provider.requests.lock().unwrap();
+        assert_eq!(requests.len(), 4);
+        assert!(requests[..3].iter().all(|request| !request.tools.is_empty()));
+        assert!(requests[3].tools.is_empty());
+        assert!(requests[2].messages.iter().any(|message| {
+            message.content.iter().any(|block| {
+                matches!(
+                    block,
+                    ContentBlock::ToolResult { content, is_error: true, .. }
+                        if content.contains("same tool call has failed 2/3 times")
+                )
+            })
+        }));
+        assert!(requests[3].messages.iter().any(|message| {
+            message.content.iter().any(|block| {
+                matches!(
+                    block,
+                    ContentBlock::ToolResult { content, is_error: true, .. }
+                        if content.contains("resource remains unavailable")
+                )
+            })
+        }));
     }
 
     #[tokio::test]
@@ -1603,13 +1840,13 @@ mod tests_loop_helpers {
     use cora_types::message::{ContentBlock, StopReason, TokenUsage};
     use serde_json::json;
 
-    use super::{AgentError, merge_tool_results, tool_call_malformed_fingerprint};
+    use super::{AgentError, build_assistant_content, merge_tool_results, tool_call_malformed_fingerprint};
     use crate::stream::StreamOutcome;
     use crate::tool_call::{
-        DEFAULT_MAX_TOOL_CALL_FAILURE, ToolCallFailureFingerprint, ToolCallMalformedReason,
-        tool_call_failure_fingerprint,
+        DEFAULT_MAX_ALL_ERROR_TOOL_ROUNDS, DEFAULT_MAX_TOOL_CALL_FAILURE, ToolCallFailureFingerprint,
+        ToolCallMalformedReason, tool_call_failure_fingerprint,
     };
-    use crate::turn::{FinalizationReason, TurnGuardAction, TurnGuards, TurnKind, TurnOutcome};
+    use crate::turn::{FinalizationReason, ToolLoopWarning, TurnGuardAction, TurnGuards, TurnKind, TurnOutcome};
 
     fn tool_use(id: &str, name: &str) -> ContentBlock {
         tool_use_with_input(id, name, json!({}))
@@ -1728,19 +1965,19 @@ mod tests_loop_helpers {
     }
 
     #[test]
-    fn after_tool_round_trips_consecutive_tool_call_failure_breaker() {
+    fn after_tool_round_warns_then_finalizes_repeated_exact_failure() {
         let mut guards = TurnGuards::new(Some(100), 3, DEFAULT_MAX_TOOL_CALL_FAILURE);
-        // First N-1 tool-call-failure rounds: no stop yet.
-        for _ in 0..DEFAULT_MAX_TOOL_CALL_FAILURE - 1 {
-            assert!(matches!(
-                guards.after_tool_round(None, failed_exec_fingerprint()),
-                TurnGuardAction::Continue
-            ));
-        }
-        // The Nth consecutive tool-call-failure round trips the breaker.
         assert!(matches!(
-            guards.after_tool_round(None, failed_exec_fingerprint()),
-            TurnGuardAction::Stop(AgentError::ToolCallFailures { .. })
+            guards.after_tool_round(None, failed_exec_fingerprint(), true),
+            TurnGuardAction::Continue
+        ));
+        assert!(matches!(
+            guards.after_tool_round(None, failed_exec_fingerprint(), true),
+            TurnGuardAction::Warn(ToolLoopWarning::ExactFailure { count: 2, limit: 3 })
+        ));
+        assert!(matches!(
+            guards.after_tool_round(None, failed_exec_fingerprint(), true),
+            TurnGuardAction::Finalize(FinalizationReason::ToolFailure)
         ));
     }
 
@@ -1748,24 +1985,46 @@ mod tests_loop_helpers {
     fn after_tool_round_resets_tool_call_failure_streak_on_success() {
         let mut guards = TurnGuards::new(Some(100), 3, DEFAULT_MAX_TOOL_CALL_FAILURE);
         assert!(matches!(
-            guards.after_tool_round(None, failed_exec_fingerprint()),
+            guards.after_tool_round(None, failed_exec_fingerprint(), true),
             TurnGuardAction::Continue
         ));
         // A non-error tool round resets the streak.
-        assert!(matches!(guards.after_tool_round(None, None), TurnGuardAction::Continue));
+        assert!(matches!(
+            guards.after_tool_round(None, None, false),
+            TurnGuardAction::Continue
+        ));
         assert_eq!(guards.tool_call_failure_count(), 0);
+        assert_eq!(guards.all_error_tool_round_count(), 0);
         // So a single subsequent tool-call-failure round must not trip the breaker.
         assert!(matches!(
-            guards.after_tool_round(None, failed_exec_fingerprint()),
+            guards.after_tool_round(None, failed_exec_fingerprint(), true),
             TurnGuardAction::Continue
         ));
     }
 
     #[test]
-    fn after_tool_round_does_not_trip_failure_breaker_for_different_tool_inputs() {
+    fn after_tool_round_tracks_repeated_failure_across_mixed_success_rounds() {
         let mut guards = TurnGuards::new(Some(100), 3, DEFAULT_MAX_TOOL_CALL_FAILURE);
 
-        for index in 0..DEFAULT_MAX_TOOL_CALL_FAILURE {
+        assert!(matches!(
+            guards.after_tool_round(None, failed_exec_fingerprint(), false),
+            TurnGuardAction::Continue
+        ));
+        assert!(matches!(
+            guards.after_tool_round(None, failed_exec_fingerprint(), false),
+            TurnGuardAction::Warn(ToolLoopWarning::ExactFailure { count: 2, limit: 3 })
+        ));
+        assert!(matches!(
+            guards.after_tool_round(None, failed_exec_fingerprint(), false),
+            TurnGuardAction::Finalize(FinalizationReason::ToolFailure)
+        ));
+    }
+
+    #[test]
+    fn after_tool_round_does_not_trip_exact_breaker_for_different_tool_inputs() {
+        let mut guards = TurnGuards::new(Some(100), 3, DEFAULT_MAX_TOOL_CALL_FAILURE);
+
+        for index in 0..2 {
             let fingerprint = tool_call_failure_fingerprint(&[tool_use_with_input(
                 &format!("call-{index}"),
                 "ExecCommand",
@@ -1773,7 +2032,7 @@ mod tests_loop_helpers {
             )]);
 
             assert!(matches!(
-                guards.after_tool_round(None, fingerprint),
+                guards.after_tool_round(None, fingerprint, true),
                 TurnGuardAction::Continue
             ));
             assert_eq!(guards.tool_call_failure_count(), 1);
@@ -1781,10 +2040,86 @@ mod tests_loop_helpers {
     }
 
     #[test]
+    fn after_tool_round_warns_then_finalizes_variable_all_error_rounds() {
+        let mut guards = TurnGuards::new(Some(100), 3, DEFAULT_MAX_TOOL_CALL_FAILURE);
+
+        for index in 1..=DEFAULT_MAX_ALL_ERROR_TOOL_ROUNDS {
+            let fingerprint = tool_call_failure_fingerprint(&[tool_use_with_input(
+                &format!("call-{index}"),
+                "ExecCommand",
+                json!({ "cmd": format!("unique-command-{index}") }),
+            )]);
+            let action = guards.after_tool_round(None, fingerprint, true);
+
+            match index {
+                3 => assert!(matches!(
+                    action,
+                    TurnGuardAction::Warn(ToolLoopWarning::AllErrorRounds { count: 3, limit: 8 })
+                )),
+                DEFAULT_MAX_ALL_ERROR_TOOL_ROUNDS => assert!(matches!(
+                    action,
+                    TurnGuardAction::Finalize(FinalizationReason::ToolFailure)
+                )),
+                _ => assert!(matches!(action, TurnGuardAction::Continue)),
+            }
+        }
+    }
+
+    #[test]
+    fn after_tool_round_warns_then_finalizes_alternating_cycle() {
+        let mut guards = TurnGuards::new(Some(100), 3, DEFAULT_MAX_TOOL_CALL_FAILURE);
+
+        for index in 0..6 {
+            let variant = index % 2;
+            let fingerprint = tool_call_failure_fingerprint(&[tool_use_with_input(
+                &format!("call-{index}"),
+                "ExecCommand",
+                json!({ "cmd": format!("command-{variant}") }),
+            )]);
+            let action = guards.after_tool_round(None, fingerprint, true);
+
+            match index {
+                2 => assert!(matches!(
+                    action,
+                    TurnGuardAction::Warn(ToolLoopWarning::AllErrorRounds { .. })
+                )),
+                3 => assert!(matches!(
+                    action,
+                    TurnGuardAction::Warn(ToolLoopWarning::Cycle {
+                        period: 2,
+                        repetitions: 2,
+                        limit: 3,
+                    })
+                )),
+                5 => assert!(matches!(
+                    action,
+                    TurnGuardAction::Finalize(FinalizationReason::ToolFailure)
+                )),
+                _ => assert!(matches!(action, TurnGuardAction::Continue)),
+            }
+        }
+    }
+
+    #[test]
+    fn zero_failure_limit_disables_all_tool_failure_guards() {
+        let mut guards = TurnGuards::new(Some(100), 3, 0);
+
+        for _ in 0..20 {
+            assert!(matches!(
+                guards.after_tool_round(None, failed_exec_fingerprint(), true),
+                TurnGuardAction::Continue
+            ));
+        }
+    }
+
+    #[test]
     fn after_tool_round_requests_finalize_when_budget_is_exhausted() {
         let mut guards = TurnGuards::new(Some(1), 3, DEFAULT_MAX_TOOL_CALL_FAILURE);
         guards.record_counted_turn();
-        assert!(matches!(guards.after_tool_round(None, None), TurnGuardAction::Finalize));
+        assert!(matches!(
+            guards.after_tool_round(None, None, false),
+            TurnGuardAction::Finalize(FinalizationReason::TurnBudget)
+        ));
     }
 
     #[test]
@@ -1797,7 +2132,7 @@ mod tests_loop_helpers {
         let fingerprint = tool_call_malformed_fingerprint(&calls, &reasons);
 
         assert!(matches!(
-            guards.after_tool_round(fingerprint, None),
+            guards.after_tool_round(fingerprint, None, false),
             TurnGuardAction::Stop(AgentError::ToolCallMalformed { count: 1, limit: 1 })
         ));
     }
@@ -1831,6 +2166,20 @@ mod tests_loop_helpers {
     }
 
     #[test]
+    fn turn_kind_tool_failure_prompt_explains_blocker_and_disables_tools() {
+        let kind = TurnKind::Finalization(FinalizationReason::ToolFailure);
+        let prompt = kind
+            .control_prompt()
+            .expect("tool failure finalization must have a prompt");
+
+        assert!(kind.disable_tools());
+        assert_eq!(kind.diagnostic_phase(), "tool_failure_finalization");
+        assert!(prompt.contains("Do not call any more tools"));
+        assert!(prompt.contains("concrete blocker"));
+        assert!(prompt.contains("Do not mention internal retry counters"));
+    }
+
+    #[test]
     fn turn_kind_empty_final_prompt_requests_visible_answer() {
         let kind = TurnKind::Finalization(FinalizationReason::EmptyFinal);
         let prompt = kind.control_prompt().expect("empty final nudge must have a prompt");
@@ -1845,6 +2194,7 @@ mod tests_loop_helpers {
             assistant_text: assistant_text.to_string(),
             thinking_text: String::new(),
             thinking_signature: None,
+            provider_items: Vec::new(),
             tool_calls,
             stop_reason,
             usage: TokenUsage::default(),
@@ -1860,6 +2210,21 @@ mod tests_loop_helpers {
         );
 
         assert!(matches!(TurnOutcome::from_stream(outcome), TurnOutcome::ToolRound(_)));
+    }
+
+    #[test]
+    fn assistant_content_keeps_provider_items_before_visible_content() {
+        let mut outcome = stream_outcome("Done", StopReason::ToolUse, vec![tool_use("call-1", "Read")]);
+        outcome.provider_items.push(ContentBlock::ProviderItem {
+            provider: "openai_responses".to_string(),
+            item: json!({"id": "rs_1", "type": "reasoning"}),
+        });
+
+        let content = build_assistant_content(&outcome);
+
+        assert!(matches!(content[0], ContentBlock::ProviderItem { .. }));
+        assert!(matches!(content[1], ContentBlock::Text { .. }));
+        assert!(matches!(content[2], ContentBlock::ToolUse { .. }));
     }
 
     #[test]
@@ -2065,7 +2430,7 @@ mod tests_tool_policy_enforcement {
         let mut engine = make_engine(Arc::clone(&read_executions), Arc::clone(&exec_executions));
         let calls = vec![tool_use("denied", "ExecCommand"), tool_use("allowed", "Read")];
 
-        let output = engine.execute_tool_round(&calls, "").await.unwrap();
+        let output = engine.execute_tool_round(&calls).await.unwrap();
 
         assert_eq!(exec_executions.load(Ordering::SeqCst), 0);
         assert_eq!(read_executions.load(Ordering::SeqCst), 1);
@@ -2077,5 +2442,7 @@ mod tests_tool_policy_enforcement {
             &output.tool_results[1],
             ContentBlock::ToolResult { is_error: false, .. }
         ));
+        assert!(!output.all_tool_results_error);
+        assert!(output.tool_call_failure_fingerprint.is_some());
     }
 }

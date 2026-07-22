@@ -7,7 +7,7 @@ use crate::cache_diagnostics::{CacheBreakDetector, CacheDiagnostic, CacheStats};
 use crate::commands::{CommandContext, CommandRegistry, CommandResult, SlashCommand, default_registry};
 use crate::compact::auto::{CompactError, autocompact, should_autocompact};
 use crate::compact::emergency::is_at_emergency_limit;
-use crate::compact::estimate::estimate_tokens_from_messages;
+use crate::compact::estimate::{estimate_tokens_from_tool_image, estimate_tokens_from_tool_result};
 use crate::compact::micro::{microcompact, should_microcompact};
 use crate::compact::state::CompactState;
 use crate::confirm::ToolConfirmer;
@@ -24,7 +24,7 @@ use crate::tool_call::{
     tool_call_malformed_reason,
 };
 use crate::tool_policy::ToolPolicy;
-use crate::turn::{FinalizationReason, TurnGuardAction, TurnGuards, TurnKind, TurnOutcome};
+use crate::turn::{FinalizationReason, ToolLoopWarning, TurnGuardAction, TurnGuards, TurnKind, TurnOutcome};
 use cora_compact::CompactLevel;
 use cora_config::compact::CompactConfig;
 use cora_config::compat::ProviderCompat;
@@ -113,7 +113,7 @@ pub struct AgentEngine {
     // Compaction and plan-mode state.
     /// Static compaction thresholds, flags, and sizing configuration.
     compact_config: CompactConfig,
-    /// Runtime compaction watermark and circuit-breaker state.
+    /// Runtime context-size and compaction circuit-breaker state.
     compact_state: CompactState,
     /// Active compaction strategy level.
     compact_level: CompactLevel,
@@ -425,11 +425,11 @@ impl AgentEngine {
             let outcome = self.run_turn(TurnKind::Normal).await?;
             guards.record_counted_turn();
 
-            let (assistant_text, tool_calls) = match TurnOutcome::from_stream(outcome) {
+            let tool_calls = match TurnOutcome::from_stream(outcome) {
                 TurnOutcome::ToolRound(outcome) => {
                     let assistant_content = build_assistant_content(&outcome);
                     self.messages.push(Message::now(Role::Assistant, assistant_content));
-                    (outcome.assistant_text, outcome.tool_calls)
+                    outcome.tool_calls
                 }
                 TurnOutcome::Final(outcome) => {
                     let assistant_content = build_assistant_content(&outcome);
@@ -476,17 +476,28 @@ impl AgentEngine {
 
             // need to execute tool calls before the next turn
             let ToolRoundOutput {
-                tool_results,
+                mut tool_results,
                 tool_modifiers,
                 follow_up_blocks,
                 tool_call_malformed_fingerprint,
                 tool_call_failure_fingerprint,
-            } = self.execute_tool_round(&tool_calls, &assistant_text).await?;
+                all_tool_results_error,
+            } = self.execute_tool_round(&tool_calls).await?;
 
             // Apply any context modifiers from skill executions before the next turn.
             self.apply_context_modifiers(&tool_modifiers);
 
+            let guard_action = guards.after_tool_round(
+                tool_call_malformed_fingerprint,
+                tool_call_failure_fingerprint,
+                all_tool_results_error,
+            );
+            if let TurnGuardAction::Warn(warning) = guard_action {
+                append_tool_loop_warning(&mut tool_results, warning);
+            }
+
             self.emit_tool_results(&tool_calls, &tool_results);
+            self.record_tool_context_estimate(&tool_results, &follow_up_blocks);
 
             self.messages.push(Message::now(Role::User, tool_results));
             if !follow_up_blocks.is_empty() {
@@ -496,16 +507,11 @@ impl AgentEngine {
             // Save session after each tool round.
             self.save_session();
 
-            match guards.after_tool_round(tool_call_malformed_fingerprint, tool_call_failure_fingerprint) {
-                TurnGuardAction::Continue => {}
-                TurnGuardAction::Finalize => {
+            match guard_action {
+                TurnGuardAction::Continue | TurnGuardAction::Warn(_) => {}
+                TurnGuardAction::Finalize(reason) => {
                     return self
-                        .finalize_once(
-                            FinalizationReason::TurnBudget,
-                            String::new(),
-                            guards.counted_turns(),
-                            StopReason::MaxTurns,
-                        )
+                        .finalize_once(reason, String::new(), guards.counted_turns(), StopReason::MaxTurns)
                         .await;
                 }
                 TurnGuardAction::Stop(err) => return Err(err),
@@ -574,16 +580,10 @@ impl AgentEngine {
     /// Malformed calls get synthetic error results; the rest are executed via
     /// the approval (JSON stream) or interactive (terminal) path. Results and
     /// skill modifiers are interleaved back into the original call order.
-    /// `assistant_text` is the visible text from the same turn, used only to
-    /// classify an all-error round for the consecutive-failure breaker.
     ///
     /// A `Quit` from tool execution is surfaced as `AgentError::UserAborted`
     /// after saving the session.
-    async fn execute_tool_round(
-        &mut self,
-        tool_calls: &[ContentBlock],
-        assistant_text: &str,
-    ) -> Result<ToolRoundOutput, AgentError> {
+    async fn execute_tool_round(&mut self, tool_calls: &[ContentBlock]) -> Result<ToolRoundOutput, AgentError> {
         let tool_call_malformed_reasons: Vec<_> = tool_calls
             .iter()
             .map(|call| {
@@ -676,14 +676,20 @@ impl AgentEngine {
             executable_modifiers,
         );
 
-        let tool_call_failure_fingerprint = (tool_call_malformed_fingerprint.is_none()
-            && assistant_text.trim().is_empty()
-            && !tool_results.is_empty()
+        let failed_tool_calls: Vec<_> = tool_calls
+            .iter()
+            .zip(&tool_call_malformed_reasons)
+            .zip(&tool_results)
+            .filter(|((_, malformed_reason), result)| {
+                malformed_reason.is_none() && matches!(result, ContentBlock::ToolResult { is_error: true, .. })
+            })
+            .map(|((call, _), _)| call.clone())
+            .collect();
+        let tool_call_failure_fingerprint = tool_call_failure_fingerprint(&failed_tool_calls);
+        let all_tool_results_error = tool_call_failure_fingerprint.is_some()
             && tool_results
                 .iter()
-                .all(|result| matches!(result, ContentBlock::ToolResult { is_error: true, .. })))
-        .then(|| tool_call_failure_fingerprint(tool_calls))
-        .flatten();
+                .all(|result| matches!(result, ContentBlock::ToolResult { is_error: true, .. }));
 
         Ok(ToolRoundOutput {
             tool_results,
@@ -691,6 +697,7 @@ impl AgentEngine {
             follow_up_blocks,
             tool_call_malformed_fingerprint,
             tool_call_failure_fingerprint,
+            all_tool_results_error,
         })
     }
 
@@ -746,7 +753,7 @@ impl AgentEngine {
         );
         async {
             // Run multi-level compaction before each API call.
-            // On the first model turn last_input_tokens is 0 so neither
+            // On the first model turn context_tokens is 0 so neither
             // autocompact nor emergency will fire.
             self.run_compaction().await?;
             let request = self.build_request(kind);
@@ -825,6 +832,7 @@ impl AgentEngine {
         let mut assistant_text = String::new();
         let mut thinking_text = String::new();
         let mut thinking_signature: Option<String> = None;
+        let mut provider_items: Vec<ContentBlock> = Vec::new();
         let mut tool_calls: Vec<ContentBlock> = Vec::new();
         let mut stop_reason = StopReason::EndTurn;
         let mut usage = TokenUsage::default();
@@ -861,6 +869,9 @@ impl AgentEngine {
                 LlmEvent::ThinkingSignature(signature) => {
                     thinking_signature = Some(signature);
                 }
+                LlmEvent::ProviderItem { provider, item } => {
+                    provider_items.push(ContentBlock::ProviderItem { provider, item });
+                }
                 LlmEvent::Done {
                     stop_reason: sr,
                     usage: u,
@@ -878,35 +889,22 @@ impl AgentEngine {
             assistant_text,
             thinking_text,
             thinking_signature,
+            provider_items,
             tool_calls,
             stop_reason,
             usage,
         })
     }
 
-    /// Fold one turn's token usage into the running totals and update the
-    /// compaction watermark and cache-break diagnostics.
+    /// Fold one turn's token usage into the running totals and replace the
+    /// best-known context size with the provider's exact turn total.
     fn record_turn_usage(&mut self, turn_usage: &TokenUsage) {
         self.total_usage.input_tokens += turn_usage.input_tokens;
         self.total_usage.output_tokens += turn_usage.output_tokens;
         self.total_usage.cache_creation_tokens += turn_usage.cache_creation_tokens;
         self.total_usage.cache_read_tokens += turn_usage.cache_read_tokens;
 
-        // Track per-turn input tokens for compaction watermark.
-        // Use max(provider_reported, local_estimate) as a safety net:
-        // some providers (e.g. DeepSeek with prefix caching) underreport
-        // prompt_tokens, causing compaction to never trigger.
-        let local_estimate = estimate_tokens_from_messages(&self.messages);
-        let effective_watermark = turn_usage.input_tokens.max(local_estimate);
-
-        if local_estimate > turn_usage.input_tokens && local_estimate.saturating_sub(turn_usage.input_tokens) > 10_000 {
-            self.output.emit_info(&format!(
-                "Token watermark override: provider={}, local_estimate={}, using={}",
-                turn_usage.input_tokens, local_estimate, effective_watermark
-            ));
-        }
-
-        self.compact_state.last_input_tokens = effective_watermark;
+        self.compact_state.last_input_tokens = turn_usage.input_tokens.saturating_add(turn_usage.output_tokens);
 
         // Cache break detection
         let cache_stats = CacheStats {
@@ -935,6 +933,28 @@ impl AgentEngine {
         }
     }
 
+    /// Add content produced after the provider usage snapshot. Every final
+    /// tool result is estimated once; tool-emitted images are counted because
+    /// they are also sent in the next provider request.
+    fn record_tool_context_estimate(&mut self, tool_results: &[ContentBlock], tool_images: &[ContentBlock]) {
+        let tool_result_tokens = tool_results.iter().fold(0_u64, |total, result| {
+            total.saturating_add(estimate_tokens_from_tool_result(result))
+        });
+        let tool_image_tokens = tool_images.iter().fold(0_u64, |total, image| {
+            total.saturating_add(estimate_tokens_from_tool_image(image))
+        });
+        let added_tokens = tool_result_tokens.saturating_add(tool_image_tokens);
+
+        self.compact_state.last_input_tokens = self.compact_state.last_input_tokens.saturating_add(added_tokens);
+        debug!(
+            target: "cora_agent",
+            tool_result_tokens,
+            tool_image_tokens,
+            context_tokens = self.compact_state.last_input_tokens,
+            "tool results added to context token estimate"
+        );
+    }
+
     /// Run the multi-level compaction pipeline before each API call.
     ///
     /// Execution order: microcompact → autocompact → emergency check.
@@ -956,7 +976,7 @@ impl AgentEngine {
         let mut compacted = false;
         let should_compact = should_autocompact(self.compact_state.last_input_tokens, &self.compact_config);
         if should_compact {
-            info!(target: "cora_agent", last_input_tokens = self.compact_state.last_input_tokens, "context compaction triggered");
+            info!(target: "cora_agent", context_tokens = self.compact_state.last_input_tokens, "context compaction triggered");
             let threshold = if let Some(pct) = self.compact_config.autocompact_threshold_pct {
                 let t = self.compact_config.context_window * pct as usize / 100;
                 self.output.emit_info(&format!(
@@ -1003,7 +1023,7 @@ impl AgentEngine {
         } else if should_compact {
             self.output.emit_info(&format!(
                 "Autocompact: skipped (circuit breaker tripped after {} consecutive failures, \
-                 last_input_tokens={})",
+                 context_tokens={})",
                 self.compact_state.consecutive_failures, self.compact_state.last_input_tokens
             ));
         } else if !self.compact_config.enabled {
@@ -1018,7 +1038,7 @@ impl AgentEngine {
             if self.compact_state.last_input_tokens as usize >= threshold {
                 self.output.emit_info(&format!(
                     "Autocompact: disabled (compact.enabled=false, \
-                     last_input_tokens={}, threshold={})",
+                     context_tokens={}, threshold={})",
                     self.compact_state.last_input_tokens, threshold
                 ));
             }
@@ -1329,7 +1349,7 @@ impl AgentEngine {
             return;
         }
 
-        let result_blocks = pending_results
+        let result_blocks: Vec<ContentBlock> = pending_results
             .into_iter()
             .map(|(tool_use_id, name)| {
                 info!(
@@ -1347,6 +1367,7 @@ impl AgentEngine {
             })
             .collect();
 
+        self.record_tool_context_estimate(&result_blocks, &[]);
         self.messages.push(Message::now(Role::User, result_blocks));
         self.save_session();
     }
@@ -1372,16 +1393,37 @@ struct ToolRoundOutput {
     /// `Some` only when every tool call in the round was malformed; feeds the
     /// tool-call-malformed breaker.
     tool_call_malformed_fingerprint: Option<ToolCallMalformedFingerprint>,
-    /// `Some` when this round produced executable (non-malformed) tool calls
-    /// with the same name+input pattern, all errored, and the model emitted no
-    /// visible text; feeds the consecutive-tool-call-failure breaker.
+    /// `Some` when at least one non-malformed tool call failed. The fingerprint
+    /// contains only failed calls, so successful sibling calls do not reset the
+    /// exact-call or cycle breakers.
     tool_call_failure_fingerprint: Option<ToolCallFailureFingerprint>,
+    /// Whether the round had a non-malformed call and every result was an error.
+    all_tool_results_error: bool,
+}
+
+fn append_tool_loop_warning(tool_results: &mut [ContentBlock], warning: ToolLoopWarning) {
+    let Some(content) = tool_results.iter_mut().rev().find_map(|result| {
+        let ContentBlock::ToolResult {
+            content,
+            is_error: true,
+            ..
+        } = result
+        else {
+            return None;
+        };
+        Some(content)
+    }) else {
+        return;
+    };
+
+    content.push_str("\n\n");
+    content.push_str(&warning.guidance());
 }
 
 /// Assemble the assistant message content blocks (thinking, text, tool calls)
 /// from a completed [`StreamOutcome`], preserving the canonical block order.
 fn build_assistant_content(outcome: &StreamOutcome) -> Vec<ContentBlock> {
-    let mut content: Vec<ContentBlock> = Vec::new();
+    let mut content = outcome.provider_items.clone();
     if !outcome.thinking_text.is_empty() || outcome.thinking_signature.is_some() {
         content.push(ContentBlock::Thinking {
             thinking: outcome.thinking_text.clone(),
