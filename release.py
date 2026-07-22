@@ -52,25 +52,31 @@ def find_project_root(start_path: Path = None) -> Path:
     if start_path is None:
         start_path = Path.cwd()
     
-    # Primeiro verifica se o diretório atual já é o projeto
+    # Verifica se o diretório atual já é o projeto
     if (start_path / "Cargo.toml").exists():
         return start_path
     
-    # Procura em diretórios comuns
-    search_paths = [
+    # Procura em diretórios comuns relativos ao script
+    script_dir = Path(__file__).parent.resolve()
+    candidates = [
+        script_dir / "..",                    # pasta acima do script
+        script_dir / "../..",                 # dois níveis acima
+        script_dir / "../corars",             # ao lado
         start_path / "corars",
         start_path / "../corars",
         start_path / "../../corars",
-        start_path / "../cora-rs",
-        start_path / "../CoraRS",
         start_path.parent / "corars",
         Path.home() / "dev/corars",
         Path.home() / "projects/corars",
     ]
     
-    for path in search_paths:
-        if path.exists() and (path / "Cargo.toml").exists():
-            return path.resolve()
+    for path in candidates:
+        try:
+            resolved = path.resolve()
+            if resolved.exists() and (resolved / "Cargo.toml").exists():
+                return resolved
+        except:
+            continue
     
     # Procura recursivamente (limitado a 3 níveis)
     for path in start_path.glob("**/Cargo.toml"):
@@ -275,7 +281,6 @@ def create_github_release(
         for p, t in TARGETS.items()
     )
     
-    # Corrigido: f-string com múltiplas linhas agora usa join para evitar erro de sintaxe
     body_lines = [
         f"## CoraRS {tag}",
         "",
@@ -436,7 +441,10 @@ Exemplos:
     if not (project_root / ".git").exists():
         print("❌ Nao e um repositorio Git. Inicializando...")
         run("git init", cwd=project_root)
-        run(f"git remote add origin https://github.com/{REPO_OWNER}/{REPO_NAME}.git", cwd=project_root)
+        # Tenta adicionar o remote se já não existir
+        remotes = run("git remote -v", capture=True, cwd=project_root).stdout
+        if "origin" not in remotes:
+            run(f"git remote add origin https://github.com/{REPO_OWNER}/{REPO_NAME}.git", cwd=project_root)
         print("✅ Git inicializado.")
 
     # ── Modo: upload de artefatos ──────────────────────────────────────
@@ -485,8 +493,10 @@ Exemplos:
 
     # ── Verificar estado do repo ────────────────────────────────────────
     print("\n─── Status do Repositorio ───")
+    # Tenta obter o branch atual
     branch = run("git branch --show-current", capture=True, cwd=project_root).stdout.strip()
     if not branch:
+        # Se não houver branch (repo vazio), tenta listar branches remotos ou usa default
         branch = DEFAULT_BRANCH
         print(f"  Branch:  {branch} (padrao)")
     else:
