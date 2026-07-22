@@ -58,13 +58,13 @@ jobs:
             target: aarch64-unknown-linux-gnu
             binary_name: corars
             use_cross: true
-          # ── macOS (disabled — uncomment when Apple Developer account is ready) ──
-          # - os: macos-latest
-          #   target: x86_64-apple-darwin
-          #   binary_name: corars
-          # - os: macos-latest
-          #   target: aarch64-apple-darwin
-          #   binary_name: corars
+          ── macOS (disabled — uncomment when Apple Developer account is ready) ──
+          - os: macos-latest
+             target: x86_64-apple-darwin
+             binary_name: corars
+           - os: macos-latest
+             target: aarch64-apple-darwin
+             binary_name: corars
           - os: windows-latest
             target: x86_64-pc-windows-msvc
             binary_name: corars.exe
