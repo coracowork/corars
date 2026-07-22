@@ -4,12 +4,11 @@ CoraRS Release Automation
 Automatiza: commit, version bump, tag, push e release no GitHub.
 
 Uso:
-    python release.py                    # menu interativo
-    python release.py 0.2.6              # versao direta
-    python release.py 0.2.6 --beta       # prerelease
-    python release.py 0.2.6 --dry-run    # mostra o que faria sem fazer
-    python release.py --upload ./dist    # upload de artefatos para ultima release
-    python release.py --path ../corars   # especificar caminho do projeto
+    python scripts/release.py                    # menu interativo
+    python scripts/release.py 0.2.6              # versao direta
+    python scripts/release.py 0.2.6 --beta       # prerelease
+    python scripts/release.py 0.2.6 --dry-run    # mostra o que faria sem fazer
+    python scripts/release.py --upload ./dist     # upload de artefatos para ultima release
 """
 
 import subprocess
@@ -27,12 +26,16 @@ except ImportError:
     subprocess.check_call([sys.executable, "-m", "pip", "install", "requests", "-q"])
     import requests
 
+
 # ── Config ──────────────────────────────────────────────────────────────────
 REPO_OWNER = "coracowork"
 REPO_NAME = "corars"
-DEFAULT_BRANCH = "main"
+PROJECT_ROOT = Path(__file__).parent.parent
+CARGO_TOML = PROJECT_ROOT / "D:/Download/Cora Cowork UI Desktop/corars-0.2.6/Cargo.toml"
+MANIFEST_JSON = PROJECT_ROOT / "D:/Download/Cora Cowork UI Desktop/corars-0.2.6/.release-please-manifest.json"
+CHANGELOG_MD = PROJECT_ROOT / "D:/Download/Cora Cowork UI Desktop/corars-0.2.6/CHANGELOG.md"
 
-# Build targets
+# Build targets (macOS disabled — uncomment when ready)
 TARGETS = {
     "linux-x64": "x86_64-unknown-linux-gnu",
     "linux-arm64": "aarch64-unknown-linux-gnu",
@@ -46,83 +49,12 @@ RUST_VERSION = "1.96.1"
 PACKAGE_NAME = "cora-cli"
 
 
-# ── Detecção do projeto ──────────────────────────────────────────────────
-def find_project_root(start_path: Path = None) -> Path:
-    """Procura a raiz do projeto (onde está Cargo.toml)."""
-    if start_path is None:
-        start_path = Path.cwd()
-    
-    # Verifica se o diretório atual já é o projeto
-    if (start_path / "Cargo.toml").exists():
-        return start_path
-    
-    # Procura em diretórios comuns relativos ao script
-    script_dir = Path(__file__).parent.resolve()
-    candidates = [
-        script_dir / "..",                    # pasta acima do script
-        script_dir / "../..",                 # dois níveis acima
-        script_dir / "../corars",             # ao lado
-        start_path / "corars",
-        start_path / "../corars",
-        start_path / "../../corars",
-        start_path.parent / "corars",
-        Path.home() / "dev/corars",
-        Path.home() / "projects/corars",
-    ]
-    
-    for path in candidates:
-        try:
-            resolved = path.resolve()
-            if resolved.exists() and (resolved / "Cargo.toml").exists():
-                return resolved
-        except:
-            continue
-    
-    # Procura recursivamente (limitado a 3 níveis)
-    for path in start_path.glob("**/Cargo.toml"):
-        if path.is_file():
-            content = path.read_text(encoding="utf-8")
-            if '[workspace]' in content and 'members' in content:
-                return path.parent
-            if 'name = "cora-cli"' in content or 'name = "corars"' in content:
-                return path.parent
-    
-    return None
-
-
-def clone_repo(target_dir: Path = None):
-    """Clona o repositório caso não exista."""
-    if target_dir is None:
-        target_dir = Path.cwd() / REPO_NAME
-    
-    if target_dir.exists():
-        print(f"✅ Repositório já existe em {target_dir}")
-        return target_dir
-    
-    print(f"📦 Clonando {REPO_OWNER}/{REPO_NAME}...")
-    repo_url = f"https://github.com/{REPO_OWNER}/{REPO_NAME}.git"
-    try:
-        subprocess.run(
-            f"git clone {repo_url} {target_dir}",
-            shell=True,
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-        print(f"✅ Clonado para {target_dir}")
-        return target_dir
-    except subprocess.CalledProcessError as e:
-        print(f"❌ Erro ao clonar: {e.stderr}")
-        sys.exit(1)
-
-
 # ── Helpers ─────────────────────────────────────────────────────────────────
 def run(cmd: str, check=True, capture=False, cwd=None) -> subprocess.CompletedProcess:
     """Executa comando no shell."""
-    cwd = str(cwd) if cwd else None
     result = subprocess.run(
         cmd, shell=True, capture_output=capture, text=True, encoding="utf-8",
-        cwd=cwd,
+        cwd=cwd or str(PROJECT_ROOT),
     )
     if check and result.returncode != 0:
         stderr = result.stderr.strip() if capture else ""
@@ -133,22 +65,19 @@ def run(cmd: str, check=True, capture=False, cwd=None) -> subprocess.CompletedPr
     return result
 
 
-def get_current_version(project_root: Path) -> str:
+def get_current_version() -> str:
     """Le a versao atual do Cargo.toml."""
-    cargo_toml = project_root / "Cargo.toml"
-    content = cargo_toml.read_text(encoding="utf-8")
+    content = CARGO_TOML.read_text(encoding="utf-8")
     match = re.search(r'version\s*=\s*"([^"]+)"', content)
     if match:
         return match.group(1)
     return "0.0.0"
 
 
-def set_version(project_root: Path, version: str):
+def set_version(version: str):
     """Atualiza versao em todos os arquivos relevantes."""
-    cargo_toml = project_root / "Cargo.toml"
-    
-    # 1. Cargo.toml
-    content = cargo_toml.read_text(encoding="utf-8")
+    # 1. Cargo.toml (workspace.package.version)
+    content = CARGO_TOML.read_text(encoding="utf-8")
     new_content = re.sub(
         r'(\[workspace\.package\]\s*\n.*?version\s*=\s*")[^"]+(")',
         rf'\g<1>{version}\2',
@@ -158,38 +87,23 @@ def set_version(project_root: Path, version: str):
     )
     if new_content == content:
         new_content = content.replace(
-            f'version = "{get_current_version(project_root)}"',
+            f'version = "{get_current_version()}"',
             f'version = "{version}"',
             1,
         )
-    cargo_toml.write_text(new_content, encoding="utf-8")
+    CARGO_TOML.write_text(new_content, encoding="utf-8")
     print(f"  Cargo.toml -> {version}")
 
-    # 2. .release-please-manifest.json (se existir)
-    manifest_file = project_root / ".release-please-manifest.json"
-    if manifest_file.exists():
-        manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
+    # 2. .release-please-manifest.json
+    if MANIFEST_JSON.exists():
+        manifest = json.loads(MANIFEST_JSON.read_text(encoding="utf-8"))
         manifest["."] = version
-        manifest_file.write_text(json.dumps(manifest) + "\n", encoding="utf-8")
+        MANIFEST_JSON.write_text(json.dumps(manifest) + "\n", encoding="utf-8")
         print(f"  .release-please-manifest.json -> {version}")
 
-    # 3. CHANGELOG.md (se existir)
-    changelog = project_root / "CHANGELOG.md"
-    if changelog.exists():
-        content = changelog.read_text(encoding="utf-8")
-        new_content = re.sub(
-            r'## \[(\d+\.\d+\.\d+)\]',
-            f'## [{version}]',
-            content,
-            count=1,
-        )
-        if new_content != content:
-            changelog.write_text(new_content, encoding="utf-8")
-            print(f"  CHANGELOG.md -> {version}")
-
-    # 4. Atualizar Cargo.lock
+    # 3. Atualizar Cargo.lock
     print("  Atualizando Cargo.lock...")
-    run("cargo update --workspace", check=False, cwd=project_root)
+    run("cargo update --workspace", check=False)
 
 
 def validate_version(v: str) -> bool:
@@ -220,13 +134,13 @@ def get_github_token() -> str:
     return token
 
 
-def git_has_changes(project_root: Path) -> bool:
-    result = run("git status --porcelain", check=False, capture=True, cwd=project_root)
+def git_has_changes() -> bool:
+    result = run("git status --porcelain", check=False, capture=True)
     return bool(result.stdout.strip())
 
 
-def get_changed_files(project_root: Path) -> list[str]:
-    result = run("git status --porcelain", check=False, capture=True, cwd=project_root)
+def get_changed_files() -> list[str]:
+    result = run("git status --porcelain", check=False, capture=True)
     files = []
     for line in result.stdout.strip().splitlines():
         if line.strip():
@@ -236,11 +150,11 @@ def get_changed_files(project_root: Path) -> list[str]:
     return files
 
 
-def tag_exists(project_root: Path, tag: str) -> bool:
-    result = run(f"git tag -l {tag}", check=False, capture=True, cwd=project_root)
+def tag_exists(tag: str) -> bool:
+    result = run(f"git tag -l {tag}", check=False, capture=True)
     if result.stdout.strip():
         return True
-    result = run(f"git ls-remote --tags origin {tag}", check=False, capture=True, cwd=project_root)
+    result = run(f"git ls-remote --tags origin {tag}", check=False, capture=True)
     return tag in result.stdout
 
 
@@ -280,36 +194,33 @@ def create_github_release(
         f"| `{t}` | {p} |"
         for p, t in TARGETS.items()
     )
-    
-    body_lines = [
-        f"## CoraRS {tag}",
-        "",
-        "Build automatico via CI/CD.",
-        "",
-        "### Plataformas suportadas",
-        "",
-        "| Target | Plataforma |",
-        "|--------|------------|",
-        targets_list,
-        "",
-        "### SHA256",
-        "Os checksums `.sha256` sao gerados automaticamente para cada artefato.",
-        "",
-        "### Instalacao",
-        "",
-        "**Linux / macOS:**",
-        "```bash",
-        f"tar xzf CoraRS-{tag}-<target>.tar.gz",
-        "chmod +x corars",
-        "sudo mv corars /usr/local/bin/",
-        "```",
-        "",
-        "**Windows:**",
-        "```powershell",
-        f"Expand-Archive CoraRS-{tag}-<target>.zip -DestinationPath .",
-        "```",
-    ]
-    body = "\n".join(body_lines)
+    body = f"""## CoraRS {tag}
+
+Build automatico via CI/CD.
+
+### Plataformas suportadas
+
+| Target | Plataforma |
+|--------|------------|
+{targets_list}
+
+### SHA256
+Os checksums `.sha256` sao gerados automaticamente para cada artefato.
+
+### Instalacao
+
+**Linux / macOS:**
+```bash
+tar xzf CoraRS-{tag}-<target>.tar.gz
+chmod +x corars
+sudo mv corars /usr/local/bin/
+```
+
+**Windows:**
+```powershell
+Expand-Archive CoraRS-{tag}-<target>.zip -DestinationPath .
+```
+"""
 
     payload = {
         "tag_name": tag,
@@ -335,6 +246,7 @@ def create_github_release(
     upload_url = data.get("upload_url", "")
     print(f"  Release criada: {release_url}")
 
+    # Upload de artefatos locais
     if files and upload_url:
         for filepath in files:
             if not Path(filepath).exists():
@@ -392,62 +304,28 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Exemplos:
-  python release.py                        # menu interativo
-  python release.py 0.2.6                  # versao especifica
-  python release.py 0.2.6 --beta           # prerelease
-  python release.py 0.2.6 --dry-run        # simular sem alterar
-  python release.py --upload ./dist        # upload artefatos para ultima release
-  python release.py --path ../corars       # especificar caminho do projeto
+  python scripts/release.py                  # menu interativo
+  python scripts/release.py 0.2.6            # versao especifica
+  python scripts/release.py 0.2.6 --beta     # prerelease
+  python scripts/release.py 0.2.6 --dry-run  # simular sem alterar
+  python scripts/release.py --upload ./dist   # upload artefatos para ultima release
         """,
     )
     parser.add_argument("version", nargs="?", help="Versao (ex: 0.2.6)")
     parser.add_argument("--beta", action="store_true", help="Marcar como prerelease")
     parser.add_argument("--dry-run", action="store_true", help="Simular sem alterar")
     parser.add_argument("--upload", metavar="DIR", help="Upload artefatos de DIR para ultima release")
-    parser.add_argument("--path", metavar="PATH", help="Caminho do projeto CoraRS")
-    parser.add_argument("--skip-checks", action="store_true", help="Pular verificacoes antes de commit")
+    parser.add_argument("--skip-checks", action="store_true", help="Pular lint/check antes de commit")
     parser.add_argument("--no-tag", action="store_true", help="Nao criar tag")
     parser.add_argument("--no-release", action="store_true", help="Nao criar release (so push + tag)")
     parser.add_argument("--force-tag", action="store_true", help="Deletar tag existente e recriar")
-    parser.add_argument("--clone", action="store_true", help="Clonar repositorio se nao existir")
     args = parser.parse_args()
 
     print("=" * 60)
     print("  CoraRS Release Automation")
     print("=" * 60)
 
-    # ── Encontrar o projeto ──────────────────────────────────────────────
-    project_root = None
-    if args.path:
-        project_root = Path(args.path).resolve()
-        if not (project_root / "Cargo.toml").exists():
-            print(f"❌ Cargo.toml nao encontrado em {project_root}")
-            sys.exit(1)
-    else:
-        project_root = find_project_root()
-        if project_root is None:
-            print("❌ Projeto CoraRS nao encontrado.")
-            if args.clone:
-                print("📦 Clonando repositorio...")
-                project_root = clone_repo(Path.cwd() / REPO_NAME)
-            else:
-                print("\n  Use --path para especificar o caminho ou --clone para clonar.")
-                print(f"  Exemplo: python release.py --path ../{REPO_NAME}")
-                sys.exit(1)
-
-    print(f"\n📁 Projeto encontrado: {project_root}")
-
-    # Verifica se é um repositório Git
-    if not (project_root / ".git").exists():
-        print("❌ Nao e um repositorio Git. Inicializando...")
-        run("git init", cwd=project_root)
-        # Tenta adicionar o remote se já não existir
-        remotes = run("git remote -v", capture=True, cwd=project_root).stdout
-        if "origin" not in remotes:
-            run(f"git remote add origin https://github.com/{REPO_OWNER}/{REPO_NAME}.git", cwd=project_root)
-        print("✅ Git inicializado.")
-
-    # ── Modo: upload de artefatos ──────────────────────────────────────
+    # Modo: upload de artefatos
     if args.upload:
         token = get_github_token()
         release_id = get_latest_release_id(token)
@@ -458,10 +336,10 @@ Exemplos:
         return
 
     # ── Definir versao ──────────────────────────────────────────────────
-    current = get_current_version(project_root)
+    current = get_current_version()
     print(f"\n  Versao atual: {current}")
     print(f"  Rust toolchain: {RUST_VERSION}")
-    print(f"  Binario: {PACKAGE_NAME}")
+    print(f"  Binario: corars")
 
     if args.version:
         new_version = args.version
@@ -493,22 +371,15 @@ Exemplos:
 
     # ── Verificar estado do repo ────────────────────────────────────────
     print("\n─── Status do Repositorio ───")
-    # Tenta obter o branch atual
-    branch = run("git branch --show-current", capture=True, cwd=project_root).stdout.strip()
-    if not branch:
-        # Se não houver branch (repo vazio), tenta listar branches remotos ou usa default
-        branch = DEFAULT_BRANCH
-        print(f"  Branch:  {branch} (padrao)")
-    else:
-        print(f"  Branch:  {branch}")
-
-    remote = run("git remote get-url origin", capture=True, cwd=project_root).stdout.strip()
+    branch = run("git branch --show-current", capture=True).stdout.strip()
+    remote = run("git remote get-url origin", capture=True).stdout.strip()
+    print(f"  Branch:  {branch}")
     print(f"  Remote:  {remote}")
 
-    has_changes = git_has_changes(project_root)
+    has_changes = git_has_changes()
     if has_changes:
         print(f"\n  Mudancas nao commitadas:")
-        for f in get_changed_files(project_root):
+        for f in get_changed_files():
             print(f"    {f}")
     else:
         print("  Working tree limpo.")
@@ -516,12 +387,8 @@ Exemplos:
     # ── Arquivos que serao atualizados ──────────────────────────────────
     print("\n─── Arquivos de Versao ───")
     print(f"  Cargo.toml:                          {current} -> {new_version}")
-    manifest_file = project_root / ".release-please-manifest.json"
-    if manifest_file.exists():
+    if MANIFEST_JSON.exists():
         print(f"  .release-please-manifest.json:       {current} -> {new_version}")
-    changelog_file = project_root / "CHANGELOG.md"
-    if changelog_file.exists():
-        print(f"  CHANGELOG.md:                        (atualizar cabecalho)")
     print(f"  Cargo.lock:                          (auto-update via cargo)")
 
     # ── Resumo e confirmacao ────────────────────────────────────────────
@@ -536,9 +403,9 @@ Exemplos:
     n += 1
     steps.append(f"{n}. git add . && git commit (chore(release): v{new_version})")
     if not args.no_tag:
-        if tag_exists(project_root, tag) and not args.force_tag:
+        if tag_exists(tag) and not args.force_tag:
             steps.append(f"  ! Tag {tag} ja existe! Use --force-tag para recriar.")
-        elif tag_exists(project_root, tag) and args.force_tag:
+        elif tag_exists(tag) and args.force_tag:
             n += 1
             steps.append(f"{n}. Deletar tag {tag} existente")
         n += 1
@@ -553,6 +420,8 @@ Exemplos:
         steps.append(f"{n}. Criar GitHub Release {tag}")
     n += 1
     steps.append(f"{n}. Actions CI compila para {len(TARGETS)} plataformas:")
+    for name, target in TARGETS.items():
+        steps.append(f"    - {name}: {target}")
 
     for s in steps:
         print(f"  {s}")
@@ -577,39 +446,39 @@ Exemplos:
     # 1. Checks
     if not args.skip_checks and has_changes:
         log_step("Lint + Format check...")
-        run("cargo fmt --all -- --check", check=False, cwd=project_root)
-        run("cargo clippy --workspace -- -D warnings", check=False, cwd=project_root)
+        run("cargo fmt --all -- --check", check=False)
+        run("cargo clippy --workspace -- -D warnings", check=False)
 
     # 2. Commit mudancas pendentes
     if has_changes:
         log_step("Commitando mudancas pendentes...")
-        run("git add .", cwd=project_root)
-        run('git commit -m "chore: pre-release updates"', cwd=project_root)
+        run("git add .")
+        run('git commit -m "chore: pre-release updates"')
 
     # 3. Atualizar versao
     log_step(f"Atualizando versao para {new_version}...")
-    set_version(project_root, new_version)
+    set_version(new_version)
 
     # 4. Commit versao
     log_step("Commitando versao...")
-    run("git add .", cwd=project_root)
-    run(f'git commit -m "chore(release): v{new_version}" --allow-empty', cwd=project_root)
+    run("git add .")
+    run(f'git commit -m "chore(release): v{new_version}" --allow-empty')
 
     # 5. Tag
     if not args.no_tag:
-        if tag_exists(project_root, tag) and args.force_tag:
+        if tag_exists(tag) and args.force_tag:
             log_step(f"Deletando tag {tag} existente...")
-            run(f"git tag -d {tag}", check=False, cwd=project_root)
-            run(f"git push origin :refs/tags/{tag}", check=False, cwd=project_root)
+            run(f"git tag -d {tag}", check=False)
+            run(f"git push origin :refs/tags/{tag}", check=False)
 
         log_step(f"Criando tag {tag}...")
-        run(f'git tag -a {tag} -m "Release {tag}"', cwd=project_root)
+        run(f'git tag -a {tag} -m "Release {tag}"')
 
     # 6. Push
     log_step(f"Push para origin/{branch}...")
-    run(f"git push origin {branch}", cwd=project_root)
+    run(f"git push origin {branch}")
     if not args.no_tag:
-        run(f"git push origin {tag}", cwd=project_root)
+        run(f"git push origin {tag}")
 
     # 7. Release
     release_url = None
@@ -620,7 +489,7 @@ Exemplos:
 
     # ── Resultado ───────────────────────────────────────────────────────
     print("\n" + "=" * 60)
-    print("  ✅ RELEASE CONCLUIDA!")
+    print("  RELEASE CONCLUIDA!")
     print("=" * 60)
     print(f"\n  Versao:  {new_version}")
     print(f"  Tag:     {tag}")
