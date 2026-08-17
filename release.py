@@ -31,9 +31,9 @@ except ImportError:
 REPO_OWNER = "coracowork"
 REPO_NAME = "corars"
 PROJECT_ROOT = Path(__file__).parent.parent
-CARGO_TOML = PROJECT_ROOT / "D:/Download/Cora Cowork UI Desktop/corars-0.2.6/Cargo.toml"
-MANIFEST_JSON = PROJECT_ROOT / "D:/Download/Cora Cowork UI Desktop/corars-0.2.6/.release-please-manifest.json"
-CHANGELOG_MD = PROJECT_ROOT / "D:/Download/Cora Cowork UI Desktop/corars-0.2.6/CHANGELOG.md"
+CARGO_TOML = PROJECT_ROOT / "corars-0.2.6/Cargo.toml"
+MANIFEST_JSON = PROJECT_ROOT / "corars-0.2.6/.release-please-manifest.json"
+CHANGELOG_MD = PROJECT_ROOT / "corars-0.2.6/corars-0.2.6/CHANGELOG.md"
 
 # Build targets (macOS disabled — uncomment when ready)
 TARGETS = {

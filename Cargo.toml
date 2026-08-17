@@ -12,12 +12,13 @@ members = [
     "crates/cora-skills",
     "crates/cora-memory",
     "crates/cora-agent",
+    "crates/cora-tui",
     "crates/cora-cli",
     "workspace-hack",
 ]
 
 [workspace.package]
-version = "0.2.6"
+version = "0.2.7"
 edition = "2024"
 license = "Apache-2.0"
 repository = "https://github.com/coracowork/corars"
@@ -35,7 +36,7 @@ cora-mcp       = { path = "crates/cora-mcp" }
 cora-skills    = { path = "crates/cora-skills" }
 cora-memory    = { path = "crates/cora-memory" }
 cora-agent     = { path = "crates/cora-agent" }
-
+cora-tui       = { path = "crates/cora-tui" }
 
 # Async runtime
 tokio   = { version = "1", features = ["full"] }
@@ -43,6 +44,7 @@ futures = "0.3"
 
 # HTTP client
 # HTTP client — use rustls to avoid native OpenSSL dep during cross-compilation
+http = "1"
 reqwest = { version = "0.12", features = ["json", "stream", "rustls-tls"], default-features = false }
 
 # Serialization
@@ -87,8 +89,10 @@ regex = "1"
 # File system change notification (for skill hot-reload)
 notify = "8"
 
-# Terminal color support
-crossterm = "0.29"
+# Terminal color and event support
+crossterm = { version = "0.29", features = ["event-stream"] }
+pulldown-cmark = { version = "0.13.4", default-features = false }
+ratatui = { version = "0.30.2", default-features = false, features = ["crossterm", "crossterm_0_29", "scrolling-regions"] }
 
 # TTY detection
 is-terminal = "0.4"

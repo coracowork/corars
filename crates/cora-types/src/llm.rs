@@ -40,10 +40,10 @@ pub enum LlmEvent {
     ThinkingDelta(String),
     /// Opaque provider signature for the current thinking block.
     ThinkingSignature(String),
+    /// Opaque provider output item that must be persisted and replayed.
+    ProviderItem { provider: String, item: Value },
     /// Response complete
     Done { stop_reason: StopReason, usage: TokenUsage },
-    /// Opaque provider output item that must be replayed on later requests.
-    ProviderItem { provider: String, item: Value },
     /// Error from the API
     Error(String),
 }

@@ -17,10 +17,12 @@ mod tests_set_config {
     use cora_tools::registry::ToolRegistry;
     use cora_types::llm::{LlmEvent, LlmRequest};
     use cora_types::message::ImageInputCapability;
+    use tempfile::tempdir;
 
     use super::{CompactLevel, ProviderCompat};
     use crate::confirm::ToolConfirmer;
     use crate::output::OutputSink;
+    use crate::session::SessionManager;
 
     struct NullOutput;
     impl OutputSink for NullOutput {
@@ -55,6 +57,8 @@ mod tests_set_config {
             messages: vec![],
             total_usage: Default::default(),
             msg_id: String::new(),
+            pending_turn_id: None,
+            current_turn_id: None,
             max_turns_per_run: Some(10),
             max_tool_call_malformed_turns: 3,
             max_tool_call_failure_turns: 3,
@@ -70,6 +74,8 @@ mod tests_set_config {
             protocol_writer: None,
             compact_config: cora_config::compact::CompactConfig::default(),
             compact_state: super::CompactState::new(),
+            context_state: Default::default(),
+            prompt_usage: Default::default(),
             compact_level: CompactLevel::default(),
             toon_enabled: false,
             plan_state: Default::default(),
@@ -95,6 +101,23 @@ mod tests_set_config {
         assert_eq!(changes.len(), 1);
         assert!(changes[0].contains("old-model"));
         assert!(changes[0].contains("new-model"));
+    }
+
+    #[test]
+    fn set_config_model_change_persists_session_metadata_immediately() {
+        let directory = tempdir().unwrap();
+        let manager = SessionManager::new(directory.path().to_path_buf(), 10);
+        let session = manager
+            .create("openai", "old-model", "/workspace", Some("model-switch"))
+            .unwrap();
+        let mut engine = make_engine("old-model");
+        engine.session_manager = Some(manager);
+        engine.current_session = Some(session);
+
+        engine.apply_config_update(Some("new-model".into()), None, None, None, None, None);
+
+        let manager = SessionManager::new(directory.path().to_path_buf(), 10);
+        assert_eq!(manager.load("model-switch").unwrap().model, "new-model");
     }
 
     #[test]
@@ -429,6 +452,8 @@ mod tests_phase6 {
             messages: vec![],
             total_usage: Default::default(),
             msg_id: String::new(),
+            pending_turn_id: None,
+            current_turn_id: None,
             max_turns_per_run: Some(10),
             max_tool_call_malformed_turns: 3,
             max_tool_call_failure_turns: 3,
@@ -444,6 +469,8 @@ mod tests_phase6 {
             protocol_writer: None,
             compact_config: cora_config::compact::CompactConfig::default(),
             compact_state: super::CompactState::new(),
+            context_state: Default::default(),
+            prompt_usage: Default::default(),
             compact_level: CompactLevel::default(),
             toon_enabled: false,
             plan_state: Default::default(),
@@ -578,21 +605,28 @@ mod tests_phase6 {
 
 #[cfg(test)]
 mod tests_compact {
+    use std::env;
     use std::sync::{Arc, Mutex};
 
     use cora_config::compact::CompactConfig;
+    use cora_config::config::{CliArgs, Config};
     use cora_providers::error::ProviderError;
     use cora_providers::provider::LlmProvider;
     use cora_tools::registry::ToolRegistry;
     use cora_types::llm::{LlmEvent, LlmRequest};
-    use cora_types::message::{ContentBlock, ImageInputCapability, ImageUrl, Message, Role, TokenUsage};
+    use cora_types::message::{ContentBlock, ImageInputCapability, ImageUrl, Message, Role, StopReason, TokenUsage};
+    use chrono::Utc;
     use serde_json::json;
+    use tempfile::tempdir;
+    use tokio::sync::mpsc;
 
     use super::{CompactLevel, ProviderCompat};
     use crate::compact::auto::should_autocompact;
     use crate::compact::state::CompactState;
     use crate::confirm::ToolConfirmer;
+    use crate::context_usage::{ContextState, ContextUsageSource};
     use crate::output::OutputSink;
+    use crate::session::{Session, SessionManager};
 
     struct NullOutput;
     impl OutputSink for NullOutput {
@@ -646,6 +680,27 @@ mod tests_compact {
         }
     }
 
+    struct SuccessfulProvider {
+        usage: TokenUsage,
+    }
+
+    #[async_trait::async_trait]
+    impl LlmProvider for SuccessfulProvider {
+        async fn stream(&self, _: &LlmRequest) -> Result<mpsc::Receiver<LlmEvent>, ProviderError> {
+            let (tx, rx) = mpsc::channel(4);
+            tx.send(LlmEvent::TextDelta("<summary>condensed context</summary>".into()))
+                .await
+                .unwrap();
+            tx.send(LlmEvent::Done {
+                stop_reason: StopReason::EndTurn,
+                usage: self.usage.clone(),
+            })
+            .await
+            .unwrap();
+            Ok(rx)
+        }
+    }
+
     #[derive(Default)]
     struct RecordingRejectingProvider {
         requests: Mutex<Vec<LlmRequest>>,
@@ -684,6 +739,8 @@ mod tests_compact {
             messages,
             total_usage: Default::default(),
             msg_id: String::new(),
+            pending_turn_id: None,
+            current_turn_id: None,
             max_turns_per_run: Some(10),
             max_tool_call_malformed_turns: 3,
             max_tool_call_failure_turns: 3,
@@ -699,6 +756,8 @@ mod tests_compact {
             protocol_writer: None,
             compact_config,
             compact_state,
+            context_state: Default::default(),
+            prompt_usage: Default::default(),
             compact_level: CompactLevel::default(),
             toon_enabled: false,
             plan_state: Default::default(),
@@ -706,6 +765,26 @@ mod tests_compact {
             cache_detector: super::CacheBreakDetector::new(),
             commands: crate::commands::default_registry(),
         }
+    }
+
+    fn test_config() -> Config {
+        Config::resolve(&CliArgs {
+            provider: Some("anthropic".to_string()),
+            api_key: Some("sk-test".to_string()),
+            base_url: None,
+            model: Some("test-model".to_string()),
+            max_tokens: Some(4096),
+            thinking: None,
+            thinking_budget: None,
+            max_turns: None,
+            max_tool_call_malformed_turns: None,
+            max_tool_call_failure_turns: None,
+            system_prompt: None,
+            profile: None,
+            auto_approve: true,
+            project_dir: None,
+        })
+        .unwrap()
     }
 
     fn tool_use_msg(id: &str, name: &str) -> Message {
@@ -857,6 +936,178 @@ mod tests_compact {
         });
 
         assert_eq!(engine.compact_state.last_input_tokens, 795);
+        assert_eq!(engine.context_state.context_usage, 795);
+        assert_eq!(engine.context_state.source, ContextUsageSource::ProviderExact);
+    }
+
+    #[test]
+    fn missing_provider_usage_does_not_reset_context_to_zero() {
+        let mut engine = make_compact_engine(CompactConfig::default(), CompactState::new(), vec![]);
+        engine.context_state.replace_with_local_estimate(1_234);
+        engine.sync_compact_watermark();
+
+        let has_provider_usage = engine.record_turn_usage(&TokenUsage::default());
+
+        assert!(!has_provider_usage);
+        assert_eq!(engine.context_state.context_usage, 1_234);
+        assert_eq!(engine.compact_state.last_input_tokens, 1_234);
+        assert_eq!(engine.context_state.source, ContextUsageSource::LocalProjected);
+    }
+
+    #[test]
+    fn resume_restores_persisted_context_watermark_and_counts() {
+        let mut context_state = ContextState::default();
+        context_state.replace_with_provider_usage(54_321);
+        context_state.compact_count = 2;
+        context_state.microcompact_count = 5;
+        let session = Session {
+            id: "resume-context".into(),
+            forked_from: None,
+            root_id: None,
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
+            provider: "anthropic".into(),
+            model: "test-model".into(),
+            cwd: "/tmp".into(),
+            total_usage: TokenUsage::default(),
+            context_state,
+            messages: Vec::new(),
+        };
+        let provider: Arc<dyn LlmProvider> = Arc::new(NullProvider);
+
+        let engine = super::AgentEngine::resume_with_provider(
+            provider,
+            test_config(),
+            ToolRegistry::new(),
+            Arc::new(NullOutput),
+            session,
+            env::temp_dir(),
+        );
+        let status = engine.context_status();
+
+        assert_eq!(status.context_usage, 54_321);
+        assert_eq!(status.compact_count, 2);
+        assert_eq!(status.microcompact_count, 5);
+        assert_eq!(status.source, ContextUsageSource::ProviderExact);
+        assert_eq!(engine.compact_state.last_input_tokens, 54_321);
+    }
+
+    #[tokio::test]
+    async fn user_message_and_local_projection_are_saved_before_provider_failure() {
+        let directory = tempdir().unwrap();
+        let mut config = test_config();
+        config.session.enabled = true;
+        config.session.directory = directory.path().display().to_string();
+        let provider: Arc<dyn LlmProvider> = Arc::new(RecordingRejectingProvider::default());
+        let mut engine = super::AgentEngine::new_with_provider(
+            provider,
+            config,
+            ToolRegistry::new(),
+            Arc::new(NullOutput),
+            directory.path().to_path_buf(),
+        );
+        engine
+            .init_session(
+                "anthropic",
+                &directory.path().display().to_string(),
+                Some("saved-before-call"),
+            )
+            .unwrap();
+
+        assert!(engine.run("hello before failure", "msg-1").await.is_err());
+
+        let manager = SessionManager::new(directory.path().to_path_buf(), 10);
+        let loaded = manager.load("saved-before-call").unwrap();
+        assert_eq!(loaded.messages.len(), 1);
+        assert!(loaded.context_state.context_usage > 0);
+        assert_eq!(loaded.context_state.source, ContextUsageSource::LocalProjected);
+    }
+
+    #[tokio::test]
+    async fn assistant_response_saves_exact_provider_context_usage() {
+        let directory = tempdir().unwrap();
+        let mut config = test_config();
+        config.session.enabled = true;
+        config.session.directory = directory.path().display().to_string();
+        let provider: Arc<dyn LlmProvider> = Arc::new(SuccessfulProvider {
+            usage: TokenUsage {
+                input_tokens: 100,
+                output_tokens: 20,
+                ..Default::default()
+            },
+        });
+        let mut engine = super::AgentEngine::new_with_provider(
+            provider,
+            config,
+            ToolRegistry::new(),
+            Arc::new(NullOutput),
+            directory.path().to_path_buf(),
+        );
+        engine
+            .init_session(
+                "anthropic",
+                &directory.path().display().to_string(),
+                Some("saved-after-response"),
+            )
+            .unwrap();
+
+        engine.run("hello", "msg-2").await.unwrap();
+
+        let manager = SessionManager::new(directory.path().to_path_buf(), 10);
+        let loaded = manager.load("saved-after-response").unwrap();
+        assert_eq!(loaded.messages.len(), 2);
+        assert_eq!(loaded.context_state.context_usage, 120);
+        assert_eq!(loaded.context_state.source, ContextUsageSource::ProviderExact);
+    }
+
+    #[tokio::test]
+    async fn run_stamps_one_turn_id_per_run_and_honors_host_supplied_id() {
+        let directory = tempdir().unwrap();
+        let mut config = test_config();
+        config.session.enabled = true;
+        config.session.directory = directory.path().display().to_string();
+        let provider: Arc<dyn LlmProvider> = Arc::new(SuccessfulProvider {
+            usage: TokenUsage::default(),
+        });
+        let mut engine = super::AgentEngine::new_with_provider(
+            provider,
+            config,
+            ToolRegistry::new(),
+            Arc::new(NullOutput),
+            directory.path().to_path_buf(),
+        );
+        engine
+            .init_session(
+                "anthropic",
+                &directory.path().display().to_string(),
+                Some("turn-stamps"),
+            )
+            .unwrap();
+
+        // Turn 1: engine mints its own id; user + assistant share it.
+        engine.run("first", "msg-1").await.unwrap();
+        let first_turn = engine.current_turn_id().expect("minted").to_owned();
+
+        // Turn 2: host-supplied id wins and is consumed exactly once.
+        engine.set_next_turn_id(Some("turn_host123".into()));
+        engine.run("second", "msg-2").await.unwrap();
+        assert_eq!(engine.current_turn_id(), Some("turn_host123"));
+
+        let manager = SessionManager::new(directory.path().to_path_buf(), 10);
+        let loaded = manager.load("turn-stamps").unwrap();
+        assert_eq!(loaded.messages.len(), 4);
+        let turn_ids: Vec<_> = loaded.messages.iter().map(|m| m.turn_id.as_deref()).collect();
+        assert_eq!(
+            turn_ids,
+            vec![
+                Some(first_turn.as_str()),
+                Some(first_turn.as_str()),
+                Some("turn_host123"),
+                Some("turn_host123"),
+            ],
+            "every message of a run carries that run's turn id"
+        );
+        assert_ne!(first_turn, "turn_host123");
     }
 
     #[test]
@@ -937,8 +1188,7 @@ mod tests_compact {
     // -- Microcompact runs when count trigger fires --
 
     #[tokio::test]
-    async fn microcompact_clears_old_results() {
-        // 12 tool results with keep_recent=3 (threshold=6) → should clear 9
+    async fn microcompact_is_disabled_by_default() {
         let mut messages = Vec::new();
         for i in 0..12 {
             let id = format!("t{i}");
@@ -951,8 +1201,42 @@ mod tests_compact {
             ..Default::default()
         };
         let state = CompactState::new();
+        let mut engine = make_compact_engine(config, state, messages);
+
+        engine.run_compaction().await.unwrap();
+
+        let cleared_count = engine
+            .messages
+            .iter()
+            .flat_map(|message| &message.content)
+            .filter(
+                |block| matches!(block, ContentBlock::ToolResult { content, .. } if content == "[Tool result cleared]"),
+            )
+            .count();
+        assert_eq!(cleared_count, 0);
+        assert_eq!(engine.context_state.microcompact_count, 0);
+    }
+
+    #[tokio::test]
+    async fn microcompact_clears_old_results() {
+        // 12 tool results with keep_recent=3 (threshold=6) → should clear 9
+        let mut messages = Vec::new();
+        for i in 0..12 {
+            let id = format!("t{i}");
+            messages.push(tool_use_msg(&id, "Read"));
+            messages.push(tool_result_msg(&id, &format!("data-{i}")));
+        }
+
+        let config = CompactConfig {
+            microcompact_enabled: true,
+            micro_keep_recent: 3,
+            ..Default::default()
+        };
+        let state = CompactState::new();
 
         let mut engine = make_compact_engine(config, state, messages);
+        engine.context_state.replace_with_provider_usage(1_000);
+        engine.sync_compact_watermark();
         engine.run_compaction().await.unwrap();
 
         // Last 3 tool results should be preserved
@@ -964,6 +1248,95 @@ mod tests_compact {
             .count();
 
         assert_eq!(cleared_count, 9);
+        assert_eq!(engine.context_state.microcompact_count, 1);
+        assert_eq!(engine.context_state.context_usage, 1_000);
+        assert_eq!(engine.compact_state.last_input_tokens, 1_000);
+        assert_eq!(engine.context_state.source, ContextUsageSource::LocalProjected);
+    }
+
+    #[tokio::test]
+    async fn microcompact_does_not_lower_the_emergency_watermark() {
+        let mut messages = Vec::new();
+        for i in 0..3 {
+            let id = format!("t{i}");
+            messages.push(tool_use_msg(&id, "Read"));
+            messages.push(tool_result_msg(&id, &"x".repeat(4_000)));
+        }
+
+        let config = CompactConfig {
+            context_window: 200_000,
+            emergency_buffer: 3_000,
+            max_failures: 3,
+            microcompact_enabled: true,
+            micro_keep_recent: 1,
+            ..Default::default()
+        };
+        let mut state = CompactState::new();
+        state.last_input_tokens = 198_000;
+        state.consecutive_failures = 3;
+
+        let mut engine = make_compact_engine(config, state, messages);
+        engine.context_state.replace_with_provider_usage(198_000);
+        engine.sync_compact_watermark();
+
+        let result = engine.run_compaction().await;
+
+        assert!(matches!(
+            result,
+            Err(super::AgentError::ContextTooLong {
+                input_tokens: 198_000,
+                limit: 197_000
+            })
+        ));
+        let cleared_count = engine
+            .messages
+            .iter()
+            .flat_map(|message| &message.content)
+            .filter(|block| {
+                matches!(
+                    block,
+                    ContentBlock::ToolResult { content, .. } if content == "[Tool result cleared]"
+                )
+            })
+            .count();
+        assert_eq!(cleared_count, 2);
+        assert_eq!(engine.context_state.microcompact_count, 1);
+        assert_eq!(engine.context_state.context_usage, 198_000);
+        assert_eq!(engine.compact_state.last_input_tokens, 198_000);
+        assert_eq!(engine.context_state.source, ContextUsageSource::LocalProjected);
+    }
+
+    #[tokio::test]
+    async fn successful_autocompact_updates_persisted_count_and_local_estimate() {
+        let config = CompactConfig {
+            context_window: 100,
+            autocompact_threshold_pct: Some(50),
+            emergency_buffer: 10,
+            ..Default::default()
+        };
+        let mut state = CompactState::new();
+        state.last_input_tokens = 60;
+        let messages = vec![
+            Message::new(Role::User, vec![ContentBlock::Text { text: "first".into() }]),
+            Message::new(Role::Assistant, vec![ContentBlock::Text { text: "second".into() }]),
+            Message::new(Role::User, vec![ContentBlock::Text { text: "third".into() }]),
+        ];
+        let mut engine = make_compact_engine(config, state, messages);
+        engine.provider = Arc::new(SuccessfulProvider {
+            usage: TokenUsage::default(),
+        });
+        engine.context_state.replace_with_provider_usage(60);
+        engine.sync_compact_watermark();
+
+        engine.run_compaction().await.unwrap();
+
+        assert_eq!(engine.context_state.compact_count, 1);
+        assert_eq!(engine.context_state.source, ContextUsageSource::LocalProjected);
+        assert_eq!(engine.messages.len(), 2);
+        assert_eq!(
+            engine.compact_state.last_input_tokens,
+            engine.context_state.context_usage
+        );
     }
 
     // -- Disabled config skips micro and auto but not emergency --
@@ -979,6 +1352,7 @@ mod tests_compact {
 
         let config = CompactConfig {
             enabled: false,
+            microcompact_enabled: true,
             micro_keep_recent: 3,
             ..Default::default()
         };
@@ -1154,6 +1528,8 @@ mod tests_plan_mode {
             messages: vec![],
             total_usage: Default::default(),
             msg_id: String::new(),
+            pending_turn_id: None,
+            current_turn_id: None,
             max_turns_per_run: Some(10),
             max_tool_call_malformed_turns: 3,
             max_tool_call_failure_turns: 3,
@@ -1169,6 +1545,8 @@ mod tests_plan_mode {
             protocol_writer: None,
             compact_config: cora_config::compact::CompactConfig::default(),
             compact_state: CompactState::new(),
+            context_state: Default::default(),
+            prompt_usage: Default::default(),
             compact_level: CompactLevel::default(),
             toon_enabled: false,
             plan_state: PlanState::default(),
@@ -1319,7 +1697,6 @@ mod tests_handle_command {
     use std::sync::atomic::{AtomicUsize, Ordering};
     use std::sync::{Arc, Mutex};
 
-    use async_trait::async_trait;
     use cora_config::compact::CompactConfig;
     use cora_protocol::events::ToolCategory;
     use cora_providers::error::ProviderError;
@@ -1329,6 +1706,7 @@ mod tests_handle_command {
     use cora_types::llm::{LlmEvent, LlmRequest};
     use cora_types::message::{ContentBlock, ImageInputCapability, ImageUrl, Message, Role, StopReason, TokenUsage};
     use cora_types::tool::ToolResult;
+    use async_trait::async_trait;
     use serde_json::{Value, json};
     use tokio::sync::mpsc::{Receiver, channel};
 
@@ -1372,6 +1750,8 @@ mod tests_handle_command {
             messages: vec![],
             total_usage: Default::default(),
             msg_id: String::new(),
+            pending_turn_id: None,
+            current_turn_id: None,
             max_turns_per_run: Some(10),
             max_tool_call_malformed_turns: 3,
             max_tool_call_failure_turns: 3,
@@ -1387,6 +1767,8 @@ mod tests_handle_command {
             protocol_writer: None,
             compact_config: CompactConfig::default(),
             compact_state: CompactState::new(),
+            context_state: Default::default(),
+            prompt_usage: Default::default(),
             compact_level: CompactLevel::default(),
             toon_enabled: false,
             plan_state: Default::default(),
@@ -1436,6 +1818,23 @@ mod tests_handle_command {
     }
 
     #[tokio::test]
+    async fn handle_context_command_is_read_only() {
+        let mut engine = make_engine();
+        engine.context_state.context_usage = 42_000;
+        let before = engine.context_state.clone();
+
+        let result = engine
+            .handle_command("/context all")
+            .await
+            .unwrap()
+            .expect("context command should be handled");
+
+        assert_eq!(result.turns, 0);
+        assert_eq!(engine.context_state, before);
+        assert!(engine.messages.is_empty());
+    }
+
+    #[tokio::test]
     async fn handle_command_with_args() {
         let mut engine = make_engine();
         let result = engine
@@ -1468,14 +1867,32 @@ mod tests_handle_command {
         assert!(matches!(err, AgentError::UserAborted));
     }
 
+    #[tokio::test]
+    async fn run_with_blocks_intercepts_single_text_context_command() {
+        let mut engine = make_engine();
+        let result = engine
+            .run_with_blocks(
+                vec![ContentBlock::Text {
+                    text: "/context".into(),
+                }],
+                "msg-context",
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(result.turns, 0);
+        assert!(engine.messages.is_empty());
+    }
+
     #[test]
     fn slash_command_list_returns_all() {
         let engine = make_engine();
         let list = engine.slash_command_list();
-        assert!(list.len() >= 4);
+        assert!(list.len() >= 5);
         let names: Vec<&str> = list.iter().map(|(n, _)| n.as_str()).collect();
         assert!(names.contains(&"help"));
         assert!(names.contains(&"compact"));
+        assert!(names.contains(&"context"));
         assert!(names.contains(&"clear"));
         assert!(names.contains(&"quit"));
     }
@@ -2254,7 +2671,6 @@ mod tests_tool_policy_enforcement {
     use std::sync::atomic::{AtomicUsize, Ordering};
     use std::sync::{Arc, Mutex};
 
-    use async_trait::async_trait;
     use cora_protocol::events::ToolCategory;
     use cora_providers::error::ProviderError;
     use cora_providers::provider::LlmProvider;
@@ -2263,6 +2679,7 @@ mod tests_tool_policy_enforcement {
     use cora_types::llm::{LlmEvent, LlmRequest};
     use cora_types::message::{ContentBlock, ImageInputCapability};
     use cora_types::tool::ToolResult;
+    use async_trait::async_trait;
     use serde_json::{Value, json};
 
     use super::{AgentEngine, CacheBreakDetector, CompactLevel, CompactState, ProviderCompat};
@@ -2359,6 +2776,8 @@ mod tests_tool_policy_enforcement {
             messages: Vec::new(),
             total_usage: Default::default(),
             msg_id: "test-message".to_string(),
+            pending_turn_id: None,
+            current_turn_id: None,
             max_tokens: Some(4096),
             max_turns_per_run: Some(10),
             max_tool_call_malformed_turns: 3,
@@ -2375,6 +2794,8 @@ mod tests_tool_policy_enforcement {
             protocol_writer: None,
             compact_config: Default::default(),
             compact_state: CompactState::new(),
+            context_state: Default::default(),
+            prompt_usage: Default::default(),
             compact_level: CompactLevel::default(),
             toon_enabled: false,
             plan_state: Default::default(),

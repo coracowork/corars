@@ -2,7 +2,8 @@
 
 use super::{CommandContext, CommandResult, SlashCommand};
 use crate::compact::auto;
-use cora_types::compact::CompactTrigger;
+use cora_types::compact::{CompactMetadata, CompactTrigger};
+use cora_types::message::ContentBlock;
 
 pub struct CompactCommand;
 
@@ -42,10 +43,10 @@ impl SlashCommand for CompactCommand {
 
                 if let Some(boundary) = ctx.messages.first_mut() {
                     for block in &mut boundary.content {
-                        if let cora_types::message::ContentBlock::Text { text } = block
+                        if let ContentBlock::Text { text } = block
                             && text.starts_with(auto::BOUNDARY_PREFIX)
                         {
-                            let metadata = cora_types::compact::CompactMetadata {
+                            let metadata = CompactMetadata {
                                 trigger: CompactTrigger::Manual,
                                 pre_compact_tokens: pre_tokens,
                                 messages_summarized: msgs_summarized,
@@ -64,6 +65,8 @@ impl SlashCommand for CompactCommand {
                     pre_tokens / 1000,
                     msgs_summarized
                 ));
+                ctx.context_state.record_compact();
+                return Ok(CommandResult::ContextChanged);
             }
             Err(e) => {
                 ctx.output.emit_error(&format!("Compact failed: {}", e));

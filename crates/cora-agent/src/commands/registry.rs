@@ -2,18 +2,30 @@
 
 use async_trait::async_trait;
 
-use super::{clear, compact, help, quit};
+use super::{clear, compact, context, help, quit};
 use crate::compact::state::CompactState;
+use crate::context_usage::{ContextState, PromptUsage};
 use crate::output::OutputSink;
 use cora_config::compact::CompactConfig;
 use cora_providers::LlmProvider;
 use cora_types::message::Message;
+use cora_types::tool::ToolDef;
+
+/// User-facing metadata for a registered slash command.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CommandSpec {
+    pub name: String,
+    pub aliases: Vec<String>,
+    pub description: String,
+}
 
 /// Result of executing a slash command.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CommandResult {
     /// Command handled, continue the REPL loop.
     Continue,
+    /// Command mutated context and the updated session must be persisted.
+    ContextChanged,
     /// Exit the REPL.
     Exit,
 }
@@ -27,6 +39,10 @@ pub struct CommandContext<'a> {
     pub model: &'a str,
     pub output: &'a dyn OutputSink,
     pub registry: &'a CommandRegistry,
+    pub(crate) context_state: &'a mut ContextState,
+    pub(crate) prompt_usage: &'a PromptUsage,
+    pub(crate) context_tools: &'a [ToolDef],
+    pub(crate) dynamic_system_tokens: u64,
 }
 
 /// A slash command that can be executed in the REPL.
@@ -67,6 +83,17 @@ impl CommandRegistry {
     pub fn all(&self) -> &[Box<dyn SlashCommand>] {
         &self.commands
     }
+
+    pub fn specs(&self) -> Vec<CommandSpec> {
+        self.commands
+            .iter()
+            .map(|command| CommandSpec {
+                name: command.name().to_string(),
+                aliases: command.aliases().iter().map(|alias| (*alias).to_string()).collect(),
+                description: command.description().to_string(),
+            })
+            .collect()
+    }
 }
 
 impl Default for CommandRegistry {
@@ -79,6 +106,7 @@ impl Default for CommandRegistry {
 pub fn default_registry() -> CommandRegistry {
     let mut registry = CommandRegistry::new();
     registry.register(Box::new(compact::CompactCommand));
+    registry.register(Box::new(context::ContextCommand));
     registry.register(Box::new(clear::ClearCommand));
     registry.register(Box::new(help::HelpCommand));
     registry.register(Box::new(quit::QuitCommand));

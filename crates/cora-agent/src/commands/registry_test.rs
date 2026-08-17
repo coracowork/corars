@@ -8,6 +8,7 @@ mod tests {
     fn registry_find_by_name() {
         let registry = default_registry();
         assert!(registry.find("compact").is_some());
+        assert!(registry.find("context").is_some());
         assert!(registry.find("clear").is_some());
         assert!(registry.find("help").is_some());
         assert!(registry.find("quit").is_some());
@@ -30,6 +31,14 @@ mod tests {
     #[test]
     fn registry_all_returns_all_commands() {
         let registry = default_registry();
-        assert_eq!(registry.all().len(), 4);
+        assert_eq!(registry.all().len(), 5);
+    }
+
+    #[test]
+    fn specs_include_aliases_for_interactive_discovery() {
+        let specs = default_registry().specs();
+        let quit = specs.iter().find(|spec| spec.name == "quit").unwrap();
+        assert_eq!(quit.aliases, ["exit"]);
+        assert_eq!(quit.description, "Exit the REPL");
     }
 }

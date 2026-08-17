@@ -1,1 +1,0 @@
-﻿// cora-cowork-team-prompts

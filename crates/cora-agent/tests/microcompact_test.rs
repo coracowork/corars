@@ -4,10 +4,10 @@
 //! They treat `should_microcompact` and `microcompact` as opaque functions
 //! and validate observable behaviour only (inputs → outputs).
 
-use chrono::{Duration, Utc};
 use cora_agent::compact::micro::{CLEARED_TOOL_RESULT, MicrocompactResult, microcompact, should_microcompact};
 use cora_config::compact::CompactConfig;
 use cora_types::message::{ContentBlock, Message, Role};
+use chrono::{Duration, Utc};
 use serde_json::json;
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -46,6 +46,7 @@ fn assistant_at(blocks: Vec<ContentBlock>, ts: chrono::DateTime<Utc>) -> Message
         role: Role::Assistant,
         content: blocks,
         timestamp: Some(ts),
+        turn_id: None,
     }
 }
 

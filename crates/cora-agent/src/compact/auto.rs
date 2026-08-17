@@ -8,7 +8,7 @@
 use cora_config::compact::CompactConfig;
 use cora_providers::{LlmProvider, ProviderError};
 use cora_types::compact::{CompactMetadata, CompactTrigger};
-use cora_types::llm::{LlmEvent, LlmRequest, ThinkingConfig};
+use cora_types::llm::{LlmEvent, LlmRequest};
 use cora_types::message::{ContentBlock, Message, Role, TokenUsage};
 use tokio::sync::mpsc;
 
@@ -115,7 +115,7 @@ pub async fn autocompact(
             messages: conv_messages.clone(),
             tools: vec![],
             max_tokens: Some(COMPACT_MAX_OUTPUT_TOKENS),
-            thinking: Some(ThinkingConfig::Disabled),
+            thinking: None,
             reasoning_effort: None,
         };
 

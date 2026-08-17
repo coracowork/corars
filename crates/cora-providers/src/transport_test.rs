@@ -4,7 +4,7 @@
 mod tests {
     use super::*;
 
-    use cora_config::compat::ProviderCompat;
+    use cora_config::compat::{OpenAiApiMode, ProviderCompat};
     use cora_types::llm::LlmRequest;
     use cora_types::message::{ContentBlock, Message, Role};
     use cora_types::tool::ToolDef;
@@ -54,11 +54,21 @@ mod tests {
         let transport = ProviderTransport::OpenAi(OpenAiTransport::new("test-key", "https://example.test"));
         let compat = ProviderCompat::openai_defaults();
 
-        assert_eq!(transport.wire_protocol(), WireProtocol::OpenAiChat);
+        assert_eq!(transport.wire_protocol(&compat), WireProtocol::OpenAiChat);
         assert_eq!(
             transport.decoder(&compat),
             StreamDecoder::OpenAiSseLine { auto_tool_id: true }
         );
+    }
+
+    #[test]
+    fn openai_transport_selects_responses_wire_and_decoder_when_configured() {
+        let transport = ProviderTransport::OpenAi(OpenAiTransport::new("test-key", "https://example.test"));
+        let mut compat = ProviderCompat::openai_defaults();
+        compat.transport.openai_api_mode = Some(OpenAiApiMode::Responses);
+
+        assert_eq!(transport.wire_protocol(&compat), WireProtocol::OpenAiResponses);
+        assert_eq!(transport.decoder(&compat), StreamDecoder::OpenAiResponsesSse);
     }
 
     #[test]
@@ -94,6 +104,23 @@ mod tests {
     }
 
     #[test]
+    fn openai_transport_uses_responses_path_when_configured() {
+        let transport = OpenAiTransport::new("test-key", "https://api.openai.com");
+        let mut compat = ProviderCompat::openai_defaults();
+        compat.transport.openai_api_mode = Some(OpenAiApiMode::Responses);
+
+        let request = transport
+            .build_projected_request(
+                json!({ "model": "gpt-5.6-sol" }),
+                &compat,
+                ResolvedToolWireShape::OpenAiFunction,
+            )
+            .expect("request projection should succeed");
+
+        assert_eq!(request.url, "https://api.openai.com/v1/responses");
+    }
+
+    #[test]
     fn openai_transport_custom_api_path_overrides_default_chat_path() {
         let transport = OpenAiTransport::new("test-key", "https://open.bigmodel.cn/api/paas/v4/");
         let mut compat = ProviderCompat::openai_defaults();
@@ -115,7 +142,7 @@ mod tests {
         let transport = ProviderTransport::Anthropic(AnthropicTransport::new("test-key", "https://example.test", true));
         let compat = ProviderCompat::anthropic_defaults();
 
-        assert_eq!(transport.wire_protocol(), WireProtocol::AnthropicMessages);
+        assert_eq!(transport.wire_protocol(&compat), WireProtocol::AnthropicMessages);
         assert_eq!(transport.decoder(&compat), StreamDecoder::AnthropicSseBlock);
     }
 
@@ -131,7 +158,7 @@ mod tests {
             .project_body(&request, &compat)
             .expect("request body projection should succeed");
 
-        assert_eq!(transport.wire_protocol(), WireProtocol::AnthropicMessages);
+        assert_eq!(transport.wire_protocol(&compat), WireProtocol::AnthropicMessages);
         assert_eq!(tool_wire_shape, ResolvedToolWireShape::AnthropicInputSchema);
         assert_eq!(body["anthropic_version"], "vertex-2023-10-16");
         assert_eq!(body["stream"], true);
@@ -160,7 +187,7 @@ mod tests {
             .project_body(&request, &compat)
             .expect("request body projection should succeed");
 
-        assert_eq!(transport.wire_protocol(), WireProtocol::AnthropicMessages);
+        assert_eq!(transport.wire_protocol(&compat), WireProtocol::AnthropicMessages);
         assert_eq!(transport.retry_policy(), RetryPolicy::new(0, false, false, true));
         assert_eq!(tool_wire_shape, ResolvedToolWireShape::AnthropicInputSchema);
         assert_eq!(body["anthropic_version"], "bedrock-2023-05-31");
@@ -186,6 +213,26 @@ mod tests {
         assert_eq!(body["messages"][1]["role"], "user");
         assert!(body["tools"][0].get("function").is_some());
         assert!(body["tools"][0].get("input_schema").is_none());
+    }
+
+    #[test]
+    fn openai_transport_projects_responses_body_shape_when_configured() {
+        let transport = ProviderTransport::OpenAi(OpenAiTransport::new("test-key", "https://example.test"));
+        let request = test_request(vec![test_tool()]);
+        let mut compat = ProviderCompat::openai_defaults();
+        compat.transport.openai_api_mode = Some(OpenAiApiMode::Responses);
+
+        let (body, tool_wire_shape) = transport
+            .project_body(&request, &compat)
+            .expect("request body projection should succeed");
+
+        assert_eq!(tool_wire_shape, ResolvedToolWireShape::OpenAiFunction);
+        assert_eq!(body["model"], "test-model");
+        assert_eq!(body["stream"], true);
+        assert!(body.get("messages").is_none());
+        assert_eq!(body["input"][0]["role"], "user");
+        assert_eq!(body["tools"][0]["type"], "function");
+        assert!(body["tools"][0].get("function").is_none());
     }
 
     #[tokio::test]
@@ -217,6 +264,199 @@ mod tests {
             }
             other => panic!("expected RateLimited, got {other:?}"),
         }
+    }
+
+    #[tokio::test]
+    async fn openai_transport_maps_successful_json_502_to_api_error() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/chat/completions"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+                "error": {
+                    "message": "Upstream error from Nvidia: ResourceExhausted: Worker local total request limit reached (33/32)",
+                    "code": 502
+                }
+            })))
+            .mount(&server)
+            .await;
+        let transport = ProviderTransport::OpenAi(OpenAiTransport::new("test-key", &server.uri()));
+        let compat = ProviderCompat::openai_defaults();
+        let (body, tool_wire_shape) = transport
+            .project_body(&test_request(vec![]), &compat)
+            .expect("request body projection should succeed");
+        let request = transport
+            .build_projected_request("test-model", body, &compat, tool_wire_shape)
+            .expect("projected request should build");
+
+        let error = transport
+            .send(request)
+            .await
+            .expect_err("embedded 502 should map to an API error");
+
+        assert!(matches!(
+            error,
+            ProviderError::Api { status: 502, message }
+                if message == "Upstream error from Nvidia: ResourceExhausted: Worker local total request limit reached (33/32)"
+        ));
+    }
+
+    #[tokio::test]
+    async fn openai_transport_maps_successful_json_429_to_rate_limited() {
+        let server = MockServer::start().await;
+        let response_body = json!({
+            "error": {
+                "message": "Too many requests",
+                "code": "429"
+            }
+        });
+        let response_body_text = response_body.to_string();
+        Mock::given(method("POST"))
+            .and(path("/chat/completions"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(&response_body))
+            .mount(&server)
+            .await;
+        let transport = ProviderTransport::OpenAi(OpenAiTransport::new("test-key", &server.uri()));
+        let compat = ProviderCompat::openai_defaults();
+        let (body, tool_wire_shape) = transport
+            .project_body(&test_request(vec![]), &compat)
+            .expect("request body projection should succeed");
+        let request = transport
+            .build_projected_request("test-model", body, &compat, tool_wire_shape)
+            .expect("projected request should build");
+
+        let error = transport
+            .send(request)
+            .await
+            .expect_err("embedded 429 should map to rate limited");
+
+        match error {
+            ProviderError::RateLimited { retry_after_ms, body } => {
+                assert_eq!(retry_after_ms, 5000);
+                assert_eq!(body.as_deref(), Some(response_body_text.as_str()));
+            }
+            other => panic!("expected RateLimited, got {other:?}"),
+        }
+    }
+
+    #[tokio::test]
+    async fn openai_transport_preserves_successful_json_response() {
+        let server = MockServer::start().await;
+        let response_body = json!({
+            "choices": [{
+                "message": {
+                    "role": "assistant",
+                    "content": "hello"
+                },
+                "finish_reason": "stop"
+            }]
+        });
+        Mock::given(method("POST"))
+            .and(path("/chat/completions"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(&response_body))
+            .mount(&server)
+            .await;
+        let transport = ProviderTransport::OpenAi(OpenAiTransport::new("test-key", &server.uri()));
+        let compat = ProviderCompat::openai_defaults();
+        let (body, tool_wire_shape) = transport
+            .project_body(&test_request(vec![]), &compat)
+            .expect("request body projection should succeed");
+        let request = transport
+            .build_projected_request("test-model", body, &compat, tool_wire_shape)
+            .expect("projected request should build");
+
+        let response = transport
+            .send(request)
+            .await
+            .expect("successful JSON should remain a successful response");
+
+        assert_eq!(
+            response
+                .json::<Value>()
+                .await
+                .expect("preserved response should remain valid JSON"),
+            response_body
+        );
+    }
+
+    #[tokio::test]
+    async fn openai_transport_preserves_successful_json_with_null_error_field() {
+        let server = MockServer::start().await;
+        let response_body = json!({
+            "error": null,
+            "choices": [{
+                "message": {
+                    "role": "assistant",
+                    "content": "hello"
+                },
+                "finish_reason": "stop"
+            }]
+        });
+        Mock::given(method("POST"))
+            .and(path("/chat/completions"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(&response_body))
+            .mount(&server)
+            .await;
+        let transport = ProviderTransport::OpenAi(OpenAiTransport::new("test-key", &server.uri()));
+        let compat = ProviderCompat::openai_defaults();
+        let (body, tool_wire_shape) = transport
+            .project_body(&test_request(vec![]), &compat)
+            .expect("request body projection should succeed");
+        let request = transport
+            .build_projected_request("test-model", body, &compat, tool_wire_shape)
+            .expect("projected request should build");
+
+        let response = transport
+            .send(request)
+            .await
+            .expect("a null error field must not fail a successful response");
+
+        assert_eq!(
+            response
+                .json::<Value>()
+                .await
+                .expect("preserved response should remain valid JSON"),
+            response_body
+        );
+    }
+
+    #[tokio::test]
+    async fn openai_transport_preserves_large_successful_json_response() {
+        let server = MockServer::start().await;
+        let response_body = json!({
+            "choices": [{
+                "message": {
+                    "role": "assistant",
+                    "content": "x".repeat(MAX_JSON_ERROR_INSPECTION_BYTES + 1)
+                },
+                "finish_reason": "stop"
+            }]
+        });
+        Mock::given(method("POST"))
+            .and(path("/chat/completions"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(&response_body))
+            .mount(&server)
+            .await;
+        let transport = ProviderTransport::OpenAi(OpenAiTransport::new("test-key", &server.uri()));
+        let compat = ProviderCompat::openai_defaults();
+        let (body, tool_wire_shape) = transport
+            .project_body(&test_request(vec![]), &compat)
+            .expect("request body projection should succeed");
+        let request = transport
+            .build_projected_request("test-model", body, &compat, tool_wire_shape)
+            .expect("projected request should build");
+
+        let response = transport
+            .send(request)
+            .await
+            .expect("large successful JSON should remain a successful response");
+
+        assert_eq!(
+            response
+                .json::<Value>()
+                .await
+                .expect("preserved response should remain valid JSON"),
+            response_body
+        );
     }
 
     #[tokio::test]
