@@ -91,6 +91,8 @@ jobs:
         shell: pwsh
         run: |
           cargo install cross --force
+          # Adiciona o diretório do cargo ao PATH para esta sessão
+          $env:PATH = "$env:USERPROFILE\.cargo\bin;$env:PATH"
           # Verifica instalação
           cargo cross --version
 
@@ -116,7 +118,9 @@ jobs:
         if: matrix.cross == true && runner.os == 'Windows'
         shell: pwsh
         run: |
-          # No Windows, usa cargo cross
+          # Adiciona o diretório do cargo ao PATH para esta sessão
+          $env:PATH = "$env:USERPROFILE\.cargo\bin;$env:PATH"
+          # Usa cargo cross (subcomando do cargo)
           cargo cross build --target ${{ matrix.target }} --release -p cora-cli
 
       - name: Package binary (Unix)
