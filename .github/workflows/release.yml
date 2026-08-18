@@ -90,11 +90,8 @@ jobs:
         if: matrix.cross == true && runner.os == 'Windows'
         shell: pwsh
         run: |
-          # Instala o cross
           cargo install cross --force
-          # Adiciona o diretório do cargo ao PATH
           echo "$env:USERPROFILE\.cargo\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
-          # Verifica instalação
           cross --version
 
       - name: Fix MSVC linker (remove Git's link.exe)
@@ -119,7 +116,6 @@ jobs:
         if: matrix.cross == true && runner.os == 'Windows'
         shell: pwsh
         run: |
-          # Usa cross diretamente (não como subcomando do cargo)
           cross build --target ${{ matrix.target }} --release -p cora-cli
 
       - name: Package binary (Unix)
@@ -157,6 +153,8 @@ jobs:
     needs:
       - prepare-release
       - build
+    permissions:
+      contents: write
     steps:
       - name: Download build artifacts
         uses: actions/download-artifact@v8
@@ -180,26 +178,41 @@ jobs:
         env:
           TAG: ${{ needs.prepare-release.outputs.tag_name }}
         run: |
-          cat > release_body.md << 'EOF'
+          cat > release_body.md << EOF
           ## CoraRS ${TAG}
 
           ### Plataformas suportadas
           | Target | Plataforma |
           |--------|------------|
-          | `x86_64-unknown-linux-gnu` | Linux x86_64 |
-          | `aarch64-unknown-linux-gnu` | Linux ARM64 |
-          | `x86_64-apple-darwin` | macOS x86_64 |
-          | `aarch64-apple-darwin` | macOS ARM64 |
-          | `x86_64-pc-windows-msvc` | Windows x86_64 |
-          | `aarch64-pc-windows-msvc` | Windows ARM64 |
+          | \`x86_64-unknown-linux-gnu\` | Linux x86_64 |
+          | \`aarch64-unknown-linux-gnu\` | Linux ARM64 |
+          | \`x86_64-apple-darwin\` | macOS x86_64 |
+          | \`aarch64-apple-darwin\` | macOS ARM64 |
+          | \`x86_64-pc-windows-msvc\` | Windows x86_64 |
+          | \`aarch64-pc-windows-msvc\` | Windows ARM64 |
 
           ### Checksums
-          Os arquivos `.sha256` estão disponíveis para cada artefato.
+          Os arquivos \`.sha256\` estão disponíveis para cada artefato.
 
           ### Instalação rápida
           **Linux/macOS:**
-          ```bash
+          \`\`\`bash
           tar xzf CoraRS-${TAG}-<target>.tar.gz
           chmod +x corars
           sudo mv corars /usr/local/bin/
+          \`\`\`
           EOF
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.prepare-release.outputs.tag_name }}
+          name: CoraRS ${{ needs.prepare-release.outputs.version }}
+          body_path: release_body.md
+          files: |
+            artifacts/*
+          draft: false
+          prerelease: false
+          generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
