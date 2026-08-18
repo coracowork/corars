@@ -82,20 +82,16 @@ jobs:
         with:
           target: ${{ matrix.target }}
 
-      - name: Install cross
-        if: matrix.cross == true
-        shell: bash
+      - name: Install cross (Unix)
+        if: matrix.cross == true && runner.os != 'Windows'
         run: cargo install cross --force
 
-      - name: Verify cross installation (Unix)
-        if: matrix.cross == true && runner.os != 'Windows'
-        shell: bash
-        run: cross --version
-
-      - name: Verify cross installation (Windows)
+      - name: Install cross (Windows)
         if: matrix.cross == true && runner.os == 'Windows'
         shell: pwsh
         run: |
+          cargo install cross --force
+          # Verifica instalação
           cargo cross --version
 
       - name: Fix MSVC linker (remove Git's link.exe)
@@ -108,7 +104,7 @@ jobs:
         with:
           shared-key: release-${{ matrix.target }}
 
-      - name: Build
+      - name: Build (native)
         if: matrix.cross != true
         run: cargo build --target ${{ matrix.target }} --release -p cora-cli
 
