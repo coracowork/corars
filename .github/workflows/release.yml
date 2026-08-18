@@ -70,7 +70,7 @@ jobs:
           - os: windows-latest
             target: aarch64-pc-windows-msvc
             binary_name: corars.exe
-            cross: true  # Mudado de xwin: true para cross: true
+            cross: true
 
     steps:
       - uses: actions/checkout@v7
@@ -82,16 +82,20 @@ jobs:
         with:
           target: ${{ matrix.target }}
 
-      - name: Install cross (Linux)
-        if: matrix.cross == true && runner.os == 'Linux'
+      - name: Install cross
+        if: matrix.cross == true
+        shell: bash
         run: cargo install cross --force
 
-      - name: Install cross (Windows)
+      - name: Verify cross installation (Unix)
+        if: matrix.cross == true && runner.os != 'Windows'
+        shell: bash
+        run: cross --version
+
+      - name: Verify cross installation (Windows)
         if: matrix.cross == true && runner.os == 'Windows'
         shell: pwsh
         run: |
-          cargo install cross --force
-          # Verifica instalação
           cargo cross --version
 
       - name: Fix MSVC linker (remove Git's link.exe)
@@ -108,9 +112,16 @@ jobs:
         if: matrix.cross != true
         run: cargo build --target ${{ matrix.target }} --release -p cora-cli
 
-      - name: Build with cross
-        if: matrix.cross == true
+      - name: Build with cross (Unix)
+        if: matrix.cross == true && runner.os != 'Windows'
         run: cross build --target ${{ matrix.target }} --release -p cora-cli
+
+      - name: Build with cross (Windows)
+        if: matrix.cross == true && runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          # No Windows, usa cargo cross
+          cargo cross build --target ${{ matrix.target }} --release -p cora-cli
 
       - name: Package binary (Unix)
         if: runner.os != 'Windows'
