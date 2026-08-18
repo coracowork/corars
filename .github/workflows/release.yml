@@ -108,9 +108,9 @@ jobs:
         if: matrix.cross == true
         run: cross build --target ${{ matrix.target }} --release -p cora-cli
 
-      - name: Build with cargo-xwin
+      - name: Build with cross (Windows ARM64)
         if: matrix.xwin == true
-        run: cargo xwin build --target ${{ matrix.target }} --release -p cora-cli
+        run: cross build --target ${{ matrix.target }} --release -p cora-cli
 
       - name: Package binary (Unix)
         if: runner.os != 'Windows'
