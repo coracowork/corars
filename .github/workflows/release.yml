@@ -1,4 +1,4 @@
-﻿name: Release
+name: Release
 
 on:
   push:
@@ -214,5 +214,6 @@ jobs:
           draft: false
           prerelease: false
           generate_release_notes: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.RELEASE_TOKEN }}  # ← MUDANÇA AQUI
+        # env:  # ← REMOVA ESTA SEÇÃO
+        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
