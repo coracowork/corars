@@ -76,14 +76,12 @@ jobs:
         with:
           ref: refs/tags/${{ inputs.tag_name }}
 
-      - name: Setup vx (installs Rust from vx.toml)
-        uses: loonghao/vx@v0.9.26
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
         with:
-          setup: 'true'
-          cache: 'true'
-
-      - name: Add cross-compile target
-        run: rustup target add ${{ matrix.target }}
+          toolchain: stable
+          target: ${{ matrix.target }}
+          override: true
 
       - name: Fix MSVC linker (remove Git's link.exe)
         if: runner.os == 'Windows'
@@ -105,7 +103,7 @@ jobs:
           if [[ "${{ matrix.use_cross }}" == "true" ]]; then
             cross build --release --target ${{ matrix.target }} -p cora-cli
           else
-            vx cargo build --release --target ${{ matrix.target }} -p cora-cli
+            cargo build --release --target ${{ matrix.target }} -p cora-cli
           fi
 
       - name: Package binary (Unix)
@@ -150,26 +148,41 @@ jobs:
           path: artifacts
           merge-multiple: true
 
-      - name: Generate checksums
+      - name: Generate per-file checksums
         shell: bash
         run: |
           cd artifacts
+          for f in CoraRS-*; do
+            if [[ -f "$f" ]]; then
+              sha256sum "$f" > "${f}.sha256"
+            fi
+          done
           sha256sum CoraRS-* > corars-checksums.txt
 
-      - name: Upload release assets
+      - name: Create release body
         shell: bash
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_TAG: ${{ inputs.tag_name }}
-          REPOSITORY: ${{ github.repository }}
+          TAG: ${{ inputs.tag_name }}
         run: |
-          release_url="https://github.com/${REPOSITORY}/releases/tag/${RELEASE_TAG}"
-          if gh release view "${RELEASE_TAG}" --repo "${REPOSITORY}" > /dev/null 2>&1; then
-            gh release upload "${RELEASE_TAG}" artifacts/* --repo "${REPOSITORY}" --clobber
-          else
-            gh release create "${RELEASE_TAG}" artifacts/* \
-              --repo "${REPOSITORY}" \
-              --title "${RELEASE_TAG}" \
-              --generate-notes
-          fi
-          echo "Uploaded assets to ${release_url}"
+          cat > release_body.md << 'EOF'
+          ## CoraRS ${TAG}
+
+          ### Plataformas suportadas
+          | Target | Plataforma |
+          |--------|------------|
+          | `x86_64-unknown-linux-gnu` | Linux x86_64 |
+          | `aarch64-unknown-linux-gnu` | Linux ARM64 |
+          | `x86_64-apple-darwin` | macOS x86_64 |
+          | `aarch64-apple-darwin` | macOS ARM64 |
+          | `x86_64-pc-windows-msvc` | Windows x86_64 |
+          | `aarch64-pc-windows-msvc` | Windows ARM64 |
+
+          ### Checksums
+          Os arquivos `.sha256` estão disponíveis para cada artefato.
+
+          ### Instalação rápida
+          **Linux/macOS:**
+          ```bash
+          tar xzf CoraRS-${TAG}-<target>.tar.gz
+          chmod +x corars
+          sudo mv corars /usr/local/bin/
