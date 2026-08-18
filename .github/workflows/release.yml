@@ -90,11 +90,12 @@ jobs:
         if: matrix.cross == true && runner.os == 'Windows'
         shell: pwsh
         run: |
+          # Instala o cross
           cargo install cross --force
-          # Adiciona o diretório do cargo ao PATH para esta sessão
-          $env:PATH = "$env:USERPROFILE\.cargo\bin;$env:PATH"
+          # Adiciona o diretório do cargo ao PATH
+          echo "$env:USERPROFILE\.cargo\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
           # Verifica instalação
-          cargo cross --version
+          cross --version
 
       - name: Fix MSVC linker (remove Git's link.exe)
         if: runner.os == 'Windows'
@@ -118,10 +119,8 @@ jobs:
         if: matrix.cross == true && runner.os == 'Windows'
         shell: pwsh
         run: |
-          # Adiciona o diretório do cargo ao PATH para esta sessão
-          $env:PATH = "$env:USERPROFILE\.cargo\bin;$env:PATH"
-          # Usa cargo cross (subcomando do cargo)
-          cargo cross build --target ${{ matrix.target }} --release -p cora-cli
+          # Usa cross diretamente (não como subcomando do cargo)
+          cross build --target ${{ matrix.target }} --release -p cora-cli
 
       - name: Package binary (Unix)
         if: runner.os != 'Windows'
@@ -203,3 +202,4 @@ jobs:
           tar xzf CoraRS-${TAG}-<target>.tar.gz
           chmod +x corars
           sudo mv corars /usr/local/bin/
+          EOF
